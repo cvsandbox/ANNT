@@ -1,0 +1,55 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="..\..\vectorization.cpp" />
+    <ClCompile Include="..\..\..\..\src\lib\Tools\XAvxVectorTools.cpp">
+      <Filter>ANNT\Tools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\lib\Tools\XCpu.cpp">
+      <Filter>ANNT\Tools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\lib\Tools\XSseVectorTools.cpp">
+      <Filter>ANNT\Tools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\lib\Tools\XVectorTools.cpp">
+      <Filter>ANNT\Tools</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="ANNT">
+      <UniqueIdentifier>{aa456ded-f522-43cf-8ed1-91da443081f8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ANNT\Tools">
+      <UniqueIdentifier>{4ed5c7b0-312c-47ce-838c-ca3055056f1d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ANNT\Types">
+      <UniqueIdentifier>{e446c0c8-a4e1-4873-892f-85f494c21617}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\..\src\lib\Config.hpp">
+      <Filter>ANNT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\lib\Types\Types.hpp">
+      <Filter>ANNT\Types</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\lib\Types\XAlignedAllocator.hpp">
+      <Filter>ANNT\Types</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\lib\Tools\IVectorTools.hpp">
+      <Filter>ANNT\Tools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\lib\Tools\XAvxVectorTools.hpp">
+      <Filter>ANNT\Tools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\lib\Tools\XCpu.hpp">
+      <Filter>ANNT\Tools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\lib\Tools\XSseVectorTools.hpp">
+      <Filter>ANNT\Tools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\lib\Tools\XVectorTools.hpp">
+      <Filter>ANNT\Tools</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
