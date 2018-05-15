@@ -18,29 +18,4 @@
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#pragma once
-#ifndef ANNT_TYPES_HPP
-#define ANNT_TYPES_HPP
-
-#include <limits>
-#include <vector>
-
-#include "../Config.hpp"
-#include "XAlignedAllocator.hpp"
-
-namespace ANNT {
-
-// Numeric type used for neural network's data/callculations
-// (weights, biases, errors, gradients, parameters, etc.)
-#ifdef ANNT_USE_DOUBLE
-typedef double float_t;
-#else
-typedef float  float_t;
-#endif
-
-// Vector type to use for network's input/output/error/gradient flow
-typedef std::vector<float_t, XAlignedAllocator<float_t, 32>> vector_t;
-
-} // namespace ANNT
-
-#endif // ANNT_TYPES_HPP
+#include "ANNT.hpp"

@@ -19,28 +19,27 @@
 */
 
 #pragma once
-#ifndef ANNT_TYPES_HPP
-#define ANNT_TYPES_HPP
+#ifndef ANNT_ICOST_FUNCTION_HPP
+#define ANNT_ICOST_FUNCTION_HPP
 
-#include <limits>
-#include <vector>
+#include "../../Types/Types.hpp"
 
-#include "../Config.hpp"
-#include "XAlignedAllocator.hpp"
+namespace ANNT { namespace Neuro { namespace Training {
 
-namespace ANNT {
+// Cost functions' interface for calculating cost and gradient
+// for a specified output/target pair
+class ICostFunction
+{
+public:
+    virtual ~ICostFunction( ) { }
 
-// Numeric type used for neural network's data/callculations
-// (weights, biases, errors, gradients, parameters, etc.)
-#ifdef ANNT_USE_DOUBLE
-typedef double float_t;
-#else
-typedef float  float_t;
-#endif
+    // Calculates cost value of the specified output vector
+    virtual float_t Cost( const vector_t& output, const vector_t& target ) const = 0;
 
-// Vector type to use for network's input/output/error/gradient flow
-typedef std::vector<float_t, XAlignedAllocator<float_t, 32>> vector_t;
+    // Calculates gradient for the specified output/target pair
+    virtual vector_t Gradient( const vector_t& output, const vector_t& target ) const = 0;
+};
 
-} // namespace ANNT
+} } } // namespace ANNT::Neuro::Training
 
-#endif // ANNT_TYPES_HPP
+#endif // ANNT_ICOST_FUNCTION_HPP
