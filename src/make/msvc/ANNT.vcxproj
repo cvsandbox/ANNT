@@ -18,6 +18,13 @@
     <ClInclude Include="..\..\lib\Neuro\CostFunctions\XBinaryCrossEntropyCost.hpp" />
     <ClInclude Include="..\..\lib\Neuro\CostFunctions\XCrossEntropyCost.hpp" />
     <ClInclude Include="..\..\lib\Neuro\CostFunctions\XMSECost.hpp" />
+    <ClInclude Include="..\..\lib\Neuro\Optimizers\INetworkOptimizer.hpp" />
+    <ClInclude Include="..\..\lib\Neuro\Optimizers\XAdagradOptimizer.hpp" />
+    <ClInclude Include="..\..\lib\Neuro\Optimizers\XAdamOptimizer.hpp" />
+    <ClInclude Include="..\..\lib\Neuro\Optimizers\XGradientDescentOptimizer.hpp" />
+    <ClInclude Include="..\..\lib\Neuro\Optimizers\XMomentumOptimizer.hpp" />
+    <ClInclude Include="..\..\lib\Neuro\Optimizers\XNesterovMomentumOptimizer.hpp" />
+    <ClInclude Include="..\..\lib\Neuro\Optimizers\XRMSpropOptimizer.hpp" />
     <ClInclude Include="..\..\lib\Types\Types.hpp" />
     <ClInclude Include="..\..\lib\Types\XAlignedAllocator.hpp" />
   </ItemGroup>

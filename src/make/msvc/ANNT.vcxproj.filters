@@ -13,6 +13,9 @@
     <Filter Include="Types">
       <UniqueIdentifier>{28f91c0e-d3ec-408a-98c7-01e6f0c6489a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Neuro\Optimizers">
+      <UniqueIdentifier>{d3c655db-dce7-4a14-ab1c-f0d91fcb1856}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\lib\Neuro\CostFunctions\ICostFunction.hpp">
@@ -37,6 +40,27 @@
     <ClInclude Include="..\..\ANNT.hpp" />
     <ClInclude Include="..\..\lib\Neuro\CostFunctions\XCrossEntropyCost.hpp">
       <Filter>Neuro\Cost Functions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\Neuro\Optimizers\INetworkOptimizer.hpp">
+      <Filter>Neuro\Optimizers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\Neuro\Optimizers\XAdagradOptimizer.hpp">
+      <Filter>Neuro\Optimizers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\Neuro\Optimizers\XAdamOptimizer.hpp">
+      <Filter>Neuro\Optimizers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\Neuro\Optimizers\XGradientDescentOptimizer.hpp">
+      <Filter>Neuro\Optimizers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\Neuro\Optimizers\XMomentumOptimizer.hpp">
+      <Filter>Neuro\Optimizers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\Neuro\Optimizers\XNesterovMomentumOptimizer.hpp">
+      <Filter>Neuro\Optimizers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\Neuro\Optimizers\XRMSpropOptimizer.hpp">
+      <Filter>Neuro\Optimizers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -24,3 +24,6 @@
 #include "Neuro/CostFunctions/XAbsoluteCost.hpp"
 #include "Neuro/CostFunctions/XCrossEntropyCost.hpp"
 #include "Neuro/CostFunctions/XBinaryCrossEntropyCost.hpp"
+
+#include "Neuro/Optimizers/XGradientDescentOptimizer.hpp"
+#include "Neuro/Optimizers/XMomentumOptimizer.hpp"
