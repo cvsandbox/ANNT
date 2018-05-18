@@ -2,3 +2,4 @@ build
 *.obj
 *.suo
 *.sdf
+*.opensdf

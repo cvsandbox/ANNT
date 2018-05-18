@@ -16,6 +16,12 @@
     <Filter Include="Neuro\Optimizers">
       <UniqueIdentifier>{d3c655db-dce7-4a14-ab1c-f0d91fcb1856}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Neuro\Layers">
+      <UniqueIdentifier>{5082de62-3abb-4a07-b4e9-7a26096fe126}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Neuro\Layers\Activations">
+      <UniqueIdentifier>{412e3dce-9c33-4083-b6e1-93fe13fa393a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\lib\Neuro\CostFunctions\ICostFunction.hpp">
@@ -61,6 +67,30 @@
     </ClInclude>
     <ClInclude Include="..\..\lib\Neuro\Optimizers\XRMSpropOptimizer.hpp">
       <Filter>Neuro\Optimizers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\Neuro\Layers\Activations\IActivationLayer.hpp">
+      <Filter>Neuro\Layers\Activations</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\Neuro\Layers\Activations\XEluActivation.hpp">
+      <Filter>Neuro\Layers\Activations</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\Neuro\Layers\Activations\XLeakyReLuActivation.hpp">
+      <Filter>Neuro\Layers\Activations</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\Neuro\Layers\Activations\XReLuActivation.hpp">
+      <Filter>Neuro\Layers\Activations</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\Neuro\Layers\Activations\XSigmoidActivation.hpp">
+      <Filter>Neuro\Layers\Activations</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\Neuro\Layers\Activations\XSoftMaxActivation.hpp">
+      <Filter>Neuro\Layers\Activations</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\Neuro\Layers\Activations\XTanhActivation.hpp">
+      <Filter>Neuro\Layers\Activations</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\Neuro\Layers\ILayer.hpp">
+      <Filter>Neuro\Layers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -20,6 +20,13 @@
 
 #include "Types/Types.hpp"
 
+#include "Neuro/Layers/Activations/XSigmoidActivation.hpp"
+#include "Neuro/Layers/Activations/XTanhActivation.hpp"
+#include "Neuro/Layers/Activations/XReLuActivation.hpp"
+#include "Neuro/Layers/Activations/XLeakyReLuActivation.hpp"
+#include "Neuro/Layers/Activations/XEluActivation.hpp"
+#include "Neuro/Layers/Activations/XSoftMaxActivation.hpp"
+
 #include "Neuro/CostFunctions/XMSECost.hpp"
 #include "Neuro/CostFunctions/XAbsoluteCost.hpp"
 #include "Neuro/CostFunctions/XCrossEntropyCost.hpp"
