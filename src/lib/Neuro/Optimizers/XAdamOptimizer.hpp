@@ -24,7 +24,7 @@
 
 #include "INetworkOptimizer.hpp"
 
-//
+// Implementation of Adam otimizer
 // http://ruder.io/optimizing-gradient-descent/index.html#adam
 //
 namespace ANNT { namespace Neuro { namespace Training {
@@ -39,8 +39,7 @@ private:
 public:
     XAdamOptimizer( float_t learningRate = float_t( 0.001 ) ) :
         INetworkOptimizer( learningRate ), mEpsilon( float_t( 1e-8 ) ),
-        mB1( float_t( 0.9 ) ), mB2( float_t( 0.999 ) ),
-        mB1t( float_t( 0.9 ) ), mB2t( float_t( 0.999 ) )
+        mB1( float_t( 0.9 ) ), mB2( float_t( 0.999 ) )
     {
     }
 
@@ -50,6 +49,7 @@ public:
         return 2;
     }
 
+    // Variables to keep b1^t and b2^t values
     virtual size_t LayerVariablesCount( ) const
     {
         return 3;
