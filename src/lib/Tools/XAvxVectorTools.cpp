@@ -134,6 +134,33 @@ public:
         return dotProduct;
     }
 
+    // Calculates maximum of the vector's elements and the specified value: dst[i] = max( src[i], alpha )
+    template <typename T> static inline void Max( const T* src, T alpha, T* dst, size_t size )
+    {
+        if ( IsAligned( src ) )
+        {
+            if ( IsAligned( dst ) )
+            {
+                Max<T, std::true_type, std::true_type>( src, alpha, dst, size );
+            }
+            else
+            {
+                Max<T, std::true_type, std::false_type>( src, alpha, dst, size );
+            }
+        }
+        else
+        {
+            if ( IsAligned( dst ) )
+            {
+                Max<T, std::false_type, std::true_type>( src, alpha, dst, size );
+            }
+            else
+            {
+                Max<T, std::false_type, std::false_type>( src, alpha, dst, size );
+            }
+        }
+    }
+
 private:
     // Unroll size for single/double precision numbers - number of those in AVX register
     template <typename T> static inline size_t UnrollSize( );
@@ -204,6 +231,16 @@ private:
 #else
         return _mm256_add_pd( _mm256_mul_pd( value1, value2 ), value3 );
 #endif
+    }
+
+    // Maximum of 8 single / 4 double precision numbers
+    static inline __m256 Max( const __m256& value1, const __m256& value2 )
+    {
+        return _mm256_max_ps( value1, value2 );
+    }
+    static inline __m256d Max( const __m256d& value1, const __m256d& value2 )
+    {
+        return _mm256_max_pd( value1, value2 );
     }
 
     // Add two vectors
@@ -405,6 +442,68 @@ private:
 
         return sum;
     }
+
+    // Maximum value of vector's elements and the specified alpha value
+    template <typename T, typename srcAligned, typename dstAligned> static void Max( const T* src, T alpha, T* dst, size_t size )
+    {
+        size_t blockSize        = UnrollSize<T>( );
+        size_t blockSize2       = blockSize * 2;
+        size_t blockSize3       = blockSize * 3;
+        size_t blockSize4       = blockSize * 4;
+        size_t blockIterations4 = size / blockSize4;
+        size_t blockIterations  = ( size - blockIterations4 * blockSize4 ) / blockSize;
+        size_t remainIterations = size - blockIterations4 * blockSize4 - blockIterations * blockSize;
+
+        AVX_START;
+
+        auto   alphaVec = Set1( alpha );
+
+        // large blocks of 4
+        for ( size_t i = 0; i < blockIterations4; i++ )
+        {
+            auto s0 = Load<srcAligned>(  src );
+            auto s1 = Load<srcAligned>( &src[blockSize ] );
+            auto s2 = Load<srcAligned>( &src[blockSize2] );
+            auto s3 = Load<srcAligned>( &src[blockSize3] );
+
+            s0 = Max( s0, alphaVec );
+            s1 = Max( s1, alphaVec );
+            s2 = Max( s2, alphaVec );
+            s3 = Max( s3, alphaVec );
+
+            Store<dstAligned>( s0,  dst );
+            Store<dstAligned>( s1, &dst[blockSize ] );
+            Store<dstAligned>( s2, &dst[blockSize2] );
+            Store<dstAligned>( s3, &dst[blockSize3] );
+
+            src += blockSize4;
+            dst += blockSize4;
+        }
+
+        // small blocks of 1
+        for ( size_t i = 0; i < blockIterations; i++ )
+        {
+            auto s = Load<srcAligned>( src );
+
+            s = Max( s, alphaVec );
+
+            Store<dstAligned>( s, dst );
+
+            src += blockSize;
+            dst += blockSize;
+        }
+
+        AVX_END;
+
+        // remainder for compiler to decide
+        for ( size_t i = 0; i < remainIterations; i++ )
+        {
+            *dst = ( *src > alpha ) ? *src : alpha;
+
+            src++;
+            dst++;
+        }
+    }
 };
 
 // Unroll size for single/double precision numbers - number of those in AVX register
@@ -533,6 +632,16 @@ float XAvxVectorTools::Dot( const float* vec1, const float* vec2, size_t size ) 
 double XAvxVectorTools::Dot( const double* vec1, const double* vec2, size_t size ) const
 {
     return AvxTools::Dot( vec1, vec2, size );
+}
+
+// Calculates maximum of the vector's elements and the specified value: dst[i] = max( src[i], alpha )
+void XAvxVectorTools::Max( const float* src, float alpha, float* dst, size_t size ) const
+{
+    AvxTools::Max( src, alpha, dst, size );
+}
+void XAvxVectorTools::Max( const double* src, double alpha, double* dst, size_t size ) const
+{
+    AvxTools::Max( src, alpha, dst, size );
 }
 
 } // namespace ANNT

@@ -56,6 +56,15 @@ public:
 
         return dotProduct;
     }
+
+    // Calculates maximum of the vector's elements and the specified value: dst[i] = max( src[i], alpha )
+    template <typename T> static inline void Max( const T* src, T alpha, T* dst, size_t size )
+    {
+        for ( size_t i = 0; i < size; i++ )
+        {
+            dst[i] = ( src[i] > alpha ) ? src[i] : alpha;
+        }
+    }
 };
 
 /* ============================================================================= */
@@ -94,6 +103,16 @@ float XVectorTools::Dot( const float* vec1, const float* vec2, size_t size ) con
 double XVectorTools::Dot( const double* vec1, const double* vec2, size_t size ) const
 {
     return VectorToolsImpl::Dot( vec1, vec2, size );
+}
+
+// Calculates maximum of the vector's elements and the specified value: dst[i] = max( src[i], alpha )
+void XVectorTools::Max( const float* src, float alpha, float* dst, size_t size ) const
+{
+    VectorToolsImpl::Max( src, alpha, dst, size );
+}
+void XVectorTools::Max( const double* src, double alpha, double* dst, size_t size ) const
+{
+    VectorToolsImpl::Max( src, alpha, dst, size );
 }
 
 } // namespace ANNT

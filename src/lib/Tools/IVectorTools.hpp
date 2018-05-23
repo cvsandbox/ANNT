@@ -46,6 +46,10 @@ public:
     // Dot product of two vectors: sum( vec1[i] * vec2[i] )
     virtual float  Dot( const float*  vec1, const float*  vec2, size_t size ) const = 0;
     virtual double Dot( const double* vec1, const double* vec2, size_t size ) const = 0;
+
+    // Calculates maximum of the vector's elements and the specified value: dst[i] = max( src[i], alpha )
+    virtual void Max( const float*  src, float  alpha, float*  dst, size_t size ) const = 0;
+    virtual void Max( const double* src, double alpha, double* dst, size_t size ) const = 0;
 };
 
 } // namespace ANNT

@@ -48,6 +48,7 @@ typedef vector<double, XAlignedAllocator<double, 32>> double_vec_t;
 template <typename vecType> float AddTest( const IVectorTools* vectorTools );
 template <typename vecType> float MulTest( const IVectorTools* vectorTools );
 template <typename vecType> float DotTest( const IVectorTools* vectorTools );
+template <typename vecType> float MaxTest( const IVectorTools* vectorTools );
 
 // Parse command line parameters to override defaults
 static void ParseCommandLine( int argc, char** argv )
@@ -118,12 +119,12 @@ int main( int argc, char** argv )
     bool  avxSupported = false;
     bool  sseSupported = false;
 
-    float avxAddS = 0, avxMulS = 0, avxDotS = 0;
-    float sseAddS = 0, sseMulS = 0, sseDotS = 0;
-    float defAddS = 0, defMulS = 0, defDotS = 0;
-    float avxAddD = 0, avxMulD = 0, avxDotD = 0;
-    float sseAddD = 0, sseMulD = 0, sseDotD = 0;
-    float defAddD = 0, defMulD = 0, defDotD = 0;
+    float avxAddS = 0, avxMulS = 0, avxDotS = 0, avxMaxS = 0;
+    float sseAddS = 0, sseMulS = 0, sseDotS = 0, sseMaxS = 0;
+    float defAddS = 0, defMulS = 0, defDotS = 0, defMaxS = 0;
+    float avxAddD = 0, avxMulD = 0, avxDotD = 0, avxMaxD = 0;
+    float sseAddD = 0, sseMulD = 0, sseDotD = 0, sseMaxD = 0;
+    float defAddD = 0, defMulD = 0, defDotD = 0, defMaxD = 0;
 
     ParseCommandLine( argc, argv );
 
@@ -159,6 +160,8 @@ int main( int argc, char** argv )
         avxMulS = MulTest<float_vec_t>( &avxVectorTools );
         printf( "\nAVX DOT\n" );
         avxDotS = DotTest<float_vec_t>( &avxVectorTools );
+        printf( "\nAVX MAX\n" );
+        avxMaxS = MaxTest<float_vec_t>( &avxVectorTools );
     }
 
     if ( sseSupported )
@@ -170,6 +173,8 @@ int main( int argc, char** argv )
         sseMulS = MulTest<float_vec_t>( &sseVectorTools );
         printf( "\nSSE DOT\n" );
         sseDotS = DotTest<float_vec_t>( &sseVectorTools );
+        printf( "\nSSE MAX\n" );
+        sseMaxS = MaxTest<float_vec_t>( &sseVectorTools );
     }
 
     srand( 0 );
@@ -179,6 +184,8 @@ int main( int argc, char** argv )
     defMulS = MulTest<float_vec_t>( &defVectorTools );
     printf( "\nDEF DOT\n" );
     defDotS = DotTest<float_vec_t>( &defVectorTools );
+    printf( "\nDEF MAX\n" );
+    defMaxS = MaxTest<float_vec_t>( &defVectorTools );
 
     printf( "\n" );
     printf( "Running double precision tests ... \n" );
@@ -192,6 +199,8 @@ int main( int argc, char** argv )
         avxMulD = MulTest<double_vec_t>( &avxVectorTools );
         printf( "\nAVX DOT\n" );
         avxDotD = DotTest<double_vec_t>( &avxVectorTools );
+        printf( "\nAVX MAX\n" );
+        avxMaxD = MaxTest<double_vec_t>( &avxVectorTools );
     }
 
     if ( sseSupported )
@@ -203,6 +212,8 @@ int main( int argc, char** argv )
         sseMulD = MulTest<double_vec_t>( &sseVectorTools );
         printf( "\nSSE DOT\n" );
         sseDotD = DotTest<double_vec_t>( &sseVectorTools );
+        printf( "\nSSE MAX\n" );
+        sseMaxD = MaxTest<double_vec_t>( &sseVectorTools );
     }
 
     srand( 0 );
@@ -212,32 +223,34 @@ int main( int argc, char** argv )
     defMulD = MulTest<double_vec_t>( &defVectorTools );
     printf( "\nDEF DOT\n" );
     defDotD = DotTest<double_vec_t>( &defVectorTools );
+    printf( "\nDEF MAX\n" );
+    defMaxD = MaxTest<double_vec_t>( &defVectorTools );
 
     printf( "\n\n" );
     printf( "Single precision:\n\n" );
-    printf( "\t   Add \t | Mul \t | Dot \n" );
+    printf( "\t   Add \t | Mul \t | Dot \t | Max \n" );
     if ( avxSupported )
     {
-        printf( "AVX \t | %0.2f | %0.2f | %0.2f \n", avxAddS, avxMulS, avxDotS );
+        printf( "AVX \t | %0.2f | %0.2f | %0.2f | %0.2f \n", avxAddS, avxMulS, avxDotS, avxMaxS );
     }
     if ( sseSupported )
     {
-        printf( "SSE \t | %0.2f | %0.2f | %0.2f \n", sseAddS, sseMulS, sseDotS );
+        printf( "SSE \t | %0.2f | %0.2f | %0.2f | %0.2f \n", sseAddS, sseMulS, sseDotS, sseMaxS );
     }
-    printf( "DEF \t | %0.2f | %0.2f | %0.2f \n", defAddS, defMulS, defDotS );
+    printf( "DEF \t | %0.2f | %0.2f | %0.2f | %0.2f \n", defAddS, defMulS, defDotS, defMaxS );
     printf( "\n" );
 
     printf( "Double precision:\n\n" );
-    printf( "\t   Add \t | Mul \t | Dot \n" );
+    printf( "\t   Add \t | Mul \t | Dot \t | Max \n" );
     if ( avxSupported )
     {
-        printf( "AVX \t | %0.2f | %0.2f | %0.2f \n", avxAddD, avxMulD, avxDotD );
+        printf( "AVX \t | %0.2f | %0.2f | %0.2f | %0.2f \n", avxAddD, avxMulD, avxDotD, avxMaxD );
     }
     if ( sseSupported )
     {
-        printf( "SSE \t | %0.2f | %0.2f | %0.2f \n", sseAddD, sseMulD, sseDotD );
+        printf( "SSE \t | %0.2f | %0.2f | %0.2f | %0.2f \n", sseAddD, sseMulD, sseDotD, sseMaxD );
     }
-    printf( "DEF \t | %0.2f | %0.2f | %0.2f \n", defAddD, defMulD, defDotD );
+    printf( "DEF \t | %0.2f | %0.2f | %0.2f | %0.2f \n", defAddD, defMulD, defDotD, defMaxD );
     printf( "\n" );
 
 	return 0;
@@ -267,7 +280,7 @@ template <typename vecType> float AddTest( const IVectorTools* vectorTools )
 
         auto timeTaken = duration_cast<std::chrono::milliseconds>( steady_clock::now( ) - start ).count( );
 
-        printf( "time taken: %u \n", ( uint32_t ) timeTaken );
+        printf( "time taken: %u \n", static_cast<uint32_t>( timeTaken ) );
         for ( size_t i = 0; i < 8; i++ )
         {
             printf( "%f ", static_cast<float>( dst[i] ) );
@@ -311,7 +324,7 @@ template <typename vecType> float MulTest( const IVectorTools* vectorTools )
 
         auto timeTaken = duration_cast<std::chrono::milliseconds>( steady_clock::now( ) - start ).count( );
 
-        printf( "time taken: %u \n", ( uint32_t ) timeTaken );
+        printf( "time taken: %u \n", static_cast<uint32_t>( timeTaken ) );
         for ( size_t i = 0; i < 8; i++ )
         {
             printf( "%f ", static_cast<float>( dst[i] ) );
@@ -359,6 +372,51 @@ template <typename vecType> float DotTest( const IVectorTools* vectorTools )
 
         printf( "time taken: %u \n", static_cast<uint32_t>( timeTaken ) );
         printf( "dot: %f \n", static_cast<float>( dot ) );
+
+        avgTime += static_cast<float>( timeTaken );
+    }
+
+    avgTime /= TESTS_COUNT;
+
+    return avgTime;
+}
+
+// Maximum value of vector's elements and the specified alpha value
+template <typename vecType> float MaxTest( const IVectorTools* vectorTools )
+{
+    vecType src( VECTOR_SIZE );
+    vecType dst( VECTOR_SIZE );
+    float   avgTime = 0.0f;
+
+    vecType::value_type alpha = vecType::value_type( 0 );
+
+    for ( size_t t = 0; t < TESTS_COUNT; t++ )
+    {
+        for ( size_t i = 0; i < VECTOR_SIZE; i++ )
+        {
+            src[i] = ( static_cast<float>( rand( ) ) / RAND_MAX ) * float( 2 ) - 1.0f;
+        }
+
+        steady_clock::time_point start = steady_clock::now( );
+
+        for ( size_t i = 0; i < ITERATIONS_COUNT; i++ )
+        {
+            vectorTools->Max( src.data( ), alpha, dst.data( ), src.size( ) );
+        }
+
+        auto timeTaken = duration_cast<std::chrono::milliseconds>( steady_clock::now( ) - start ).count( );
+
+        printf( "time taken: %u \n", static_cast<uint32_t>( timeTaken ) );
+        for ( size_t i = 0; i < 8; i++ )
+        {
+            printf( "%f ", static_cast<float>( dst[i] ) );
+        }
+        printf( "\n" );
+        for ( size_t i = 0; i < 8; i++ )
+        {
+            printf( "%f ", static_cast<float>( dst[VECTOR_SIZE - 8 + i] ) );
+        }
+        printf( "\n" );
 
         avgTime += static_cast<float>( timeTaken );
     }
