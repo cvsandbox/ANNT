@@ -22,6 +22,9 @@
     <Filter Include="Neuro\Layers\Activations">
       <UniqueIdentifier>{412e3dce-9c33-4083-b6e1-93fe13fa393a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Neuro\Network">
+      <UniqueIdentifier>{d5b4c896-aaaf-427b-b8d1-6de38e470616}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\lib\Neuro\CostFunctions\ICostFunction.hpp">
@@ -43,7 +46,6 @@
     <ClInclude Include="..\..\lib\Types\XAlignedAllocator.hpp">
       <Filter>Types</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\ANNT.hpp" />
     <ClInclude Include="..\..\lib\Neuro\CostFunctions\XCrossEntropyCost.hpp">
       <Filter>Neuro\Cost Functions</Filter>
     </ClInclude>
@@ -92,8 +94,33 @@
     <ClInclude Include="..\..\lib\Neuro\Layers\ILayer.hpp">
       <Filter>Neuro\Layers</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\lib\Neuro\Layers\XFullyConnectedLayer.hpp">
+      <Filter>Neuro\Layers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\Neuro\Layers\ITrainableLayer.hpp">
+      <Filter>Neuro\Layers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\ANNT.hpp" />
+    <ClInclude Include="..\..\lib\Neuro\Network\XNeuralNetwork.hpp">
+      <Filter>Neuro\Network</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\Neuro\Network\XNetworkComputation.hpp">
+      <Filter>Neuro\Network</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\Neuro\Network\XNetworkTraining.hpp">
+      <Filter>Neuro\Network</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\ANNT.cpp" />
+    <ClCompile Include="..\..\lib\Neuro\Layers\XFullyConnectedLayer.cpp">
+      <Filter>Neuro\Layers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\ANNT.cpp" />
+    <ClCompile Include="..\..\lib\Neuro\Network\XNetworkComputation.cpp">
+      <Filter>Neuro\Network</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\Neuro\Network\XNetworkTraining.cpp">
+      <Filter>Neuro\Network</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

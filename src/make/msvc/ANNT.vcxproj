@@ -11,7 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\ANNT.hpp" />
+    <ClInclude Include="..\..\lib\ANNT.hpp" />
     <ClInclude Include="..\..\lib\Config.hpp" />
     <ClInclude Include="..\..\lib\Neuro\CostFunctions\ICostFunction.hpp" />
     <ClInclude Include="..\..\lib\Neuro\CostFunctions\XAbsoluteCost.hpp" />
@@ -26,6 +26,11 @@
     <ClInclude Include="..\..\lib\Neuro\Layers\Activations\XSoftMaxActivation.hpp" />
     <ClInclude Include="..\..\lib\Neuro\Layers\Activations\XTanhActivation.hpp" />
     <ClInclude Include="..\..\lib\Neuro\Layers\ILayer.hpp" />
+    <ClInclude Include="..\..\lib\Neuro\Layers\ITrainableLayer.hpp" />
+    <ClInclude Include="..\..\lib\Neuro\Layers\XFullyConnectedLayer.hpp" />
+    <ClInclude Include="..\..\lib\Neuro\Network\XNetworkComputation.hpp" />
+    <ClInclude Include="..\..\lib\Neuro\Network\XNetworkTraining.hpp" />
+    <ClInclude Include="..\..\lib\Neuro\Network\XNeuralNetwork.hpp" />
     <ClInclude Include="..\..\lib\Neuro\Optimizers\INetworkOptimizer.hpp" />
     <ClInclude Include="..\..\lib\Neuro\Optimizers\XAdagradOptimizer.hpp" />
     <ClInclude Include="..\..\lib\Neuro\Optimizers\XAdamOptimizer.hpp" />
@@ -37,7 +42,10 @@
     <ClInclude Include="..\..\lib\Types\XAlignedAllocator.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\ANNT.cpp" />
+    <ClCompile Include="..\..\lib\ANNT.cpp" />
+    <ClCompile Include="..\..\lib\Neuro\Layers\XFullyConnectedLayer.cpp" />
+    <ClCompile Include="..\..\lib\Neuro\Network\XNetworkComputation.cpp" />
+    <ClCompile Include="..\..\lib\Neuro\Network\XNetworkTraining.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{428D26A1-BC29-4CB6-8B9A-8FEF53D1BCAD}</ProjectGuid>
@@ -68,7 +76,12 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>$(ProjectDir)$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>$(ProjectDir)$(Configuration)\</OutDir>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <PrecompiledHeader>
@@ -83,6 +96,15 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <PreBuildEvent>
+      <Command>
+      </Command>
+    </PreBuildEvent>
+    <PostBuildEvent>
+      <Command>xcopy /Y "$(TargetPath)" "$(ProjectDir)..\..\..\build\msvc\debug\lib\"
+xcopy /SY "$(ProjectDir)..\..\lib\*.hpp" "$(ProjectDir)..\..\..\build\msvc\debug\include\"
+</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -102,6 +124,15 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
+    <PreBuildEvent>
+      <Command>
+      </Command>
+    </PreBuildEvent>
+    <PostBuildEvent>
+      <Command>xcopy /Y "$(TargetPath)" "$(ProjectDir)..\..\..\build\msvc\release\lib\"
+xcopy /SY "$(ProjectDir)..\..\lib\*.hpp" "$(ProjectDir)..\..\..\build\msvc\release\include\"
+</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

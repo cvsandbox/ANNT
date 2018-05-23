@@ -20,12 +20,21 @@
 
 #include "Types/Types.hpp"
 
+/* Classes used for artificial neural networks inference */
+
+#include "Neuro/Layers/XFullyConnectedLayer.hpp"
+
 #include "Neuro/Layers/Activations/XSigmoidActivation.hpp"
 #include "Neuro/Layers/Activations/XTanhActivation.hpp"
 #include "Neuro/Layers/Activations/XReLuActivation.hpp"
 #include "Neuro/Layers/Activations/XLeakyReLuActivation.hpp"
 #include "Neuro/Layers/Activations/XEluActivation.hpp"
 #include "Neuro/Layers/Activations/XSoftMaxActivation.hpp"
+
+#include "Neuro/Network/XNeuralNetwork.hpp"
+#include "Neuro/Network/XNetworkComputation.hpp"
+
+/* Classes used for artificial neural networks training */
 
 #include "Neuro/CostFunctions/XMSECost.hpp"
 #include "Neuro/CostFunctions/XAbsoluteCost.hpp"
@@ -34,3 +43,9 @@
 
 #include "Neuro/Optimizers/XGradientDescentOptimizer.hpp"
 #include "Neuro/Optimizers/XMomentumOptimizer.hpp"
+#include "Neuro/Optimizers/XNesterovMomentumOptimizer.hpp"
+#include "Neuro/Optimizers/XAdagradOptimizer.hpp"
+#include "Neuro/Optimizers/XAdamOptimizer.hpp"
+#include "Neuro/Optimizers/XRMSpropOptimizer.hpp"
+
+#include "Neuro/Network/XNetworkTraining.hpp"
