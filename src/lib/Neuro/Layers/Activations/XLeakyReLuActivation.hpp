@@ -62,4 +62,4 @@ public:
 
 } } // namespace ANNT::Neuro
 
-#endif ANNT_XLEAKY_RELU_ACTIVATION_HPP
+#endif // ANNT_XLEAKY_RELU_ACTIVATION_HPP

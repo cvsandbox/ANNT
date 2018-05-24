@@ -75,4 +75,4 @@ public:
 
 } } // namespace ANNT::Neuro
 
-#endif ANNT_XSOFT_MAX_ACTIVATION_HPP
+#endif // ANNT_XSOFT_MAX_ACTIVATION_HPP

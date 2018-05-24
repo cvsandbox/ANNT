@@ -62,4 +62,4 @@ public:
 
 } } // namespace ANNT::Neuro
 
-#endif ANNT_XELU_ACTIVATION_HPP
+#endif // ANNT_XELU_ACTIVATION_HPP

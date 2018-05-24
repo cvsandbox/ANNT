@@ -52,4 +52,4 @@ public:
 
 } } // namespace ANNT::Neuro
 
-#endif ANNT_XTANH_ACTIVATION_HPP
+#endif // ANNT_XTANH_ACTIVATION_HPP

@@ -52,4 +52,4 @@ public:
 
 } } // namespace ANNT::Neuro
 
-#endif ANNT_XSIGMOID_ACTIVATION_HPP
+#endif // ANNT_XSIGMOID_ACTIVATION_HPP
