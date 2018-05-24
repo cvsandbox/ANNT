@@ -11,25 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\src\lib\Tools\XAvxVectorTools.cpp">
-      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\lib\Tools\XCpu.cpp" />
-    <ClCompile Include="..\..\..\..\src\lib\Tools\XSseVectorTools.cpp">
-      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\lib\Tools\XVectorTools.cpp" />
     <ClCompile Include="..\..\vectorization.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\..\..\..\src\lib\Config.hpp" />
-    <ClInclude Include="..\..\..\..\src\lib\Tools\IVectorTools.hpp" />
-    <ClInclude Include="..\..\..\..\src\lib\Tools\XAvxVectorTools.hpp" />
-    <ClInclude Include="..\..\..\..\src\lib\Tools\XCpu.hpp" />
-    <ClInclude Include="..\..\..\..\src\lib\Tools\XSseVectorTools.hpp" />
-    <ClInclude Include="..\..\..\..\src\lib\Tools\XVectorTools.hpp" />
-    <ClInclude Include="..\..\..\..\src\lib\Types\Types.hpp" />
-    <ClInclude Include="..\..\..\..\src\lib\Types\XAlignedAllocator.hpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{FC019C3B-2C0E-49FB-A0E6-8FCF7E156B5C}</ProjectGuid>
@@ -75,12 +57,14 @@
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>../../../../src/lib</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>"$(ProjectDir)..\..\..\..\build\msvc\debug\include\"</AdditionalIncludeDirectories>
       <EnableEnhancedInstructionSet>NoExtensions</EnableEnhancedInstructionSet>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>"$(ProjectDir)..\..\..\..\build\msvc\debug\lib\"</AdditionalLibraryDirectories>
+      <AdditionalDependencies>ANNT.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /Y "$(TargetPath)" "$(ProjectDir)..\..\..\..\build\msvc\debug\bin\"</Command>
@@ -95,7 +79,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_LIB;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>../../../../src/lib</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>"$(ProjectDir)..\..\..\..\build\msvc\release\include\"</AdditionalIncludeDirectories>
       <EnableEnhancedInstructionSet>NoExtensions</EnableEnhancedInstructionSet>
     </ClCompile>
     <Link>
@@ -103,6 +87,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>"$(ProjectDir)..\..\..\..\build\msvc\release\lib\"</AdditionalLibraryDirectories>
+      <AdditionalDependencies>ANNT.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /Y "$(TargetPath)" "$(ProjectDir)..\..\..\..\build\msvc\release\bin\"</Command>
