@@ -38,6 +38,11 @@
     <ClInclude Include="..\..\lib\Neuro\Optimizers\XMomentumOptimizer.hpp" />
     <ClInclude Include="..\..\lib\Neuro\Optimizers\XNesterovMomentumOptimizer.hpp" />
     <ClInclude Include="..\..\lib\Neuro\Optimizers\XRMSpropOptimizer.hpp" />
+    <ClInclude Include="..\..\lib\Tools\IVectorTools.hpp" />
+    <ClInclude Include="..\..\lib\Tools\XAvxVectorTools.hpp" />
+    <ClInclude Include="..\..\lib\Tools\XCpu.hpp" />
+    <ClInclude Include="..\..\lib\Tools\XSseVectorTools.hpp" />
+    <ClInclude Include="..\..\lib\Tools\XVectorTools.hpp" />
     <ClInclude Include="..\..\lib\Types\Types.hpp" />
     <ClInclude Include="..\..\lib\Types\XAlignedAllocator.hpp" />
   </ItemGroup>
@@ -46,6 +51,10 @@
     <ClCompile Include="..\..\lib\Neuro\Layers\XFullyConnectedLayer.cpp" />
     <ClCompile Include="..\..\lib\Neuro\Network\XNetworkComputation.cpp" />
     <ClCompile Include="..\..\lib\Neuro\Network\XNetworkTraining.cpp" />
+    <ClCompile Include="..\..\lib\Tools\XAvxVectorTools.cpp" />
+    <ClCompile Include="..\..\lib\Tools\XCpu.cpp" />
+    <ClCompile Include="..\..\lib\Tools\XSseVectorTools.cpp" />
+    <ClCompile Include="..\..\lib\Tools\XVectorTools.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{428D26A1-BC29-4CB6-8B9A-8FEF53D1BCAD}</ProjectGuid>

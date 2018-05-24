@@ -110,6 +110,21 @@
     <ClInclude Include="..\..\lib\Neuro\Network\XNetworkTraining.hpp">
       <Filter>Neuro\Network</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\lib\Tools\IVectorTools.hpp">
+      <Filter>Tools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\Tools\XAvxVectorTools.hpp">
+      <Filter>Tools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\Tools\XCpu.hpp">
+      <Filter>Tools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\Tools\XSseVectorTools.hpp">
+      <Filter>Tools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\Tools\XVectorTools.hpp">
+      <Filter>Tools</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\lib\Neuro\Layers\XFullyConnectedLayer.cpp">
@@ -121,6 +136,18 @@
     </ClCompile>
     <ClCompile Include="..\..\lib\Neuro\Network\XNetworkTraining.cpp">
       <Filter>Neuro\Network</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\Tools\XAvxVectorTools.cpp">
+      <Filter>Tools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\Tools\XCpu.cpp">
+      <Filter>Tools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\Tools\XSseVectorTools.cpp">
+      <Filter>Tools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\Tools\XVectorTools.cpp">
+      <Filter>Tools</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
