@@ -24,6 +24,7 @@
 
 #include <limits>
 #include <vector>
+#include <cmath>
 
 #include "../Config.hpp"
 #include "XAlignedAllocator.hpp"

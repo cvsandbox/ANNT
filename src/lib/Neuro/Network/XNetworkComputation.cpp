@@ -25,7 +25,7 @@ using namespace std;
 namespace ANNT { namespace Neuro {
 
 XNetworkComputation::XNetworkComputation( const shared_ptr<XNeuralNetwork>& network ) :
-    mNetwork( network ), mComputeInputs( ), mComputeOutputsStorage( ), mComputeOutputs( )
+    mNetwork( network )
 {
     mComputeInputs.resize( 1 );
 

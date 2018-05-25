@@ -21,6 +21,7 @@
 */
 
 #include <stdio.h>
+#include <string.h>
 #include <vector>
 #include <chrono>
 
@@ -353,7 +354,7 @@ template <typename vecType> float DotTest( const IVectorTools* vectorTools )
 
     for ( size_t t = 0; t < TESTS_COUNT; t++ )
     {
-        vecType::value_type dot = 0;
+        typename vecType::value_type dot = 0;
 
         for ( size_t i = 0; i < VECTOR_SIZE; i++ )
         {
@@ -388,7 +389,7 @@ template <typename vecType> float MaxTest( const IVectorTools* vectorTools )
     vecType dst( VECTOR_SIZE );
     float   avgTime = 0.0f;
 
-    vecType::value_type alpha = vecType::value_type( 0 );
+    typename vecType::value_type alpha = 0;
 
     for ( size_t t = 0; t < TESTS_COUNT; t++ )
     {
