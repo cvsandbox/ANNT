@@ -23,6 +23,7 @@
 
 #include "XNetworkTraining.hpp"
 #include "../Layers/ITrainableLayer.hpp"
+#include "../../Tools/XDataEncodingTools.hpp"
 
 using namespace std;
 
@@ -224,7 +225,7 @@ float_t XNetworkTraining::RunTraining( )
     return cost;
 }
 
-// Train single input/output sample
+// Trains single input/output sample
 float_t XNetworkTraining::TrainSample( const vector_t& input, const vector_t& targetOutput )
 {
     float_t cost = 0;
@@ -243,7 +244,7 @@ float_t XNetworkTraining::TrainSample( const vector_t& input, const vector_t& ta
     return cost;
 }
 
-// Train single batch of prepared samples (as vectors)
+// Trains single batch of prepared samples (as vectors)
 float_t XNetworkTraining::TrainBatch( const vector<vector_t>& inputs,
                                       const vector<vector_t>& targetOutputs )
 {
@@ -266,9 +267,9 @@ float_t XNetworkTraining::TrainBatch( const vector<vector_t>& inputs,
     return cost;
 }
 
-// Train single batch of prepared samples (as pointers to vectors)
-float_t XNetworkTraining::TrainBatch( const std::vector<vector_t*>& inputs,
-                                      const std::vector<vector_t*>& targetOutputs )
+// Trains single batch of prepared samples (as pointers to vectors)
+float_t XNetworkTraining::TrainBatch( const vector<vector_t*>& inputs,
+                                      const vector<vector_t*>& targetOutputs )
 {
     float_t cost = 0;
 
@@ -289,7 +290,61 @@ float_t XNetworkTraining::TrainBatch( const std::vector<vector_t*>& inputs,
     return cost;
 }
 
-// Test sample - calculate real output and provide error cost
+// Trains single epoch using batches of the specified size
+float_t XNetworkTraining::TrainEpoch( const vector<vector_t>& inputs,
+                                      const vector<vector_t>& targetOutputs,
+                                      size_t batchSize, bool randomPickIntoBatch )
+{
+    // It is not an average cost for all samples after completion of an epoch, since that
+    // requires re-testing all samples. Instead it is an average cost over all batches.
+    // However, at the end of each batch the model is updated and so may improve.
+    float_t averageRunningCost = 0;
+    size_t  samplesCount       = inputs.size( );
+
+    if ( samplesCount != 0 )
+    {
+        AllocateTrainVectors( batchSize );
+
+        if ( ( inputs.size( ) == batchSize ) && ( !randomPickIntoBatch ) )
+        {
+            averageRunningCost = TrainBatch( inputs, targetOutputs );
+        }
+        else
+        {
+            size_t iterations = ( inputs.size( ) - 1 ) / batchSize + 1;
+            
+            for ( size_t i = 0; i < iterations; i++ )
+            {
+                // prepare inputs vectors and target ouputs
+                for ( size_t j = 0; j < batchSize; j++ )
+                {
+                    size_t sampleIndex;
+
+                    if ( !randomPickIntoBatch )
+                    {
+                        sampleIndex = ( i * batchSize + j ) % samplesCount;
+                    }
+                    else
+                    {
+                        sampleIndex = rand( ) % samplesCount;
+                    }
+
+                    mTrainInputs[j]  = const_cast<vector_t*>( &( inputs[sampleIndex] ) );
+                    mTargetOuputs[j] = const_cast<vector_t*>( &( targetOutputs[sampleIndex] ) );
+                }
+
+                averageRunningCost += RunTraining( );
+            }
+
+            averageRunningCost /= iterations;
+        }
+    }
+
+    return averageRunningCost;
+}
+
+
+// Tests sample - calculates real output and provides error cost
 float_t XNetworkTraining::TestSample( const vector_t& input,
                                       const vector_t& targetOutput,
                                       vector_t& output )
@@ -307,6 +362,40 @@ float_t XNetworkTraining::TestSample( const vector_t& input,
     }
 
     return cost;
+}
+
+// Tests classification for the provided inputs and target labels - provides number of correctly classified
+// samples and average cost (target outputs are used)
+size_t XNetworkTraining::TestClassification( const std::vector<vector_t>& inputs, const std::vector<size_t>& targetLabels,
+                                             const std::vector<vector_t>& targetOutputs, float_t* pAvgCost )
+{
+    size_t  correctLabelsCounter = 0;
+    float_t cost = 0;
+
+    if ( ( mNetwork->LayersCount( ) != 0 ) && ( inputs.size( ) != 0 ) )
+    {
+        for ( size_t i = 0, n = inputs.size( ); i < n; i++ )
+        {
+            mComputeInputs[0] = const_cast<vector_t*>( &( inputs[i] ) );
+            DoCompute( mComputeInputs, mComputeOutputs );
+
+            cost += mCostFunction->Cost( mComputeOutputsStorage.back( )[0], targetOutputs[i] );
+
+            if ( XDataEncodingTools::MaxIndex( mComputeOutputsStorage.back( )[0] ) == targetLabels[i] )
+            {
+                correctLabelsCounter++;
+            }
+        }
+
+        cost /= inputs.size( );
+    }
+
+    if ( pAvgCost )
+    {
+        *pAvgCost = cost;
+    }
+
+    return correctLabelsCounter;
 }
 
 } } } // namespace ANNT::Neuro::Training

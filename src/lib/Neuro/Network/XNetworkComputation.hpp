@@ -50,6 +50,15 @@ public:
     // Computes output vector for the given input vector
     void Compute( const vector_t& input, vector_t& output );
 
+    // Runs classification for the given input - returns index of the maximum
+    // element in the corresponding output vector
+    size_t Classify( const vector_t& input );
+
+    // Tests classification for the provided inputs and target labels -
+    // provides number of correctly classified samples
+    size_t TestClassification( const std::vector<vector_t>& inputs,
+                               const std::vector<size_t>& targetLabels );
+
 protected:
 
     // Helper method to compute output vectors for the given input vectors using

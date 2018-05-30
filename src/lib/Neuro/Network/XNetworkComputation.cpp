@@ -19,6 +19,7 @@
 */
 
 #include "XNetworkComputation.hpp"
+#include "../../Tools/XDataEncodingTools.hpp"
 
 using namespace std;
 
@@ -49,6 +50,46 @@ void XNetworkComputation::Compute( const vector_t& input, vector_t& output )
         // copy output produced by the last layer
         output = mComputeOutputsStorage.back( )[0];
     }
+}
+
+// Runs classification for the given input - returns index of the maximum element in the corresponding output
+size_t XNetworkComputation::Classify( const vector_t& input )
+{
+    size_t classIndex = 0;
+
+    if ( mNetwork->LayersCount( ) != 0 )
+    {
+        mComputeInputs[0] = const_cast<vector_t*>( &input );
+
+        DoCompute( mComputeInputs, mComputeOutputs );
+
+        classIndex = XDataEncodingTools::MaxIndex( mComputeOutputsStorage.back( )[0] );
+    }
+
+    return classIndex;
+}
+
+// Tests classification for the provided inputs and target labels - provides number of correctly classified samples
+size_t XNetworkComputation::TestClassification( const vector<vector_t>& inputs, const vector<size_t>& targetLabels )
+{
+    size_t correctLabelsCounter = 0;
+
+    if ( mNetwork->LayersCount( ) != 0 )
+    {
+        for ( size_t i = 0, n = inputs.size( ); i < n; i++ )
+        {
+            mComputeInputs[0] = const_cast<vector_t*>( &( inputs[i] ) );
+
+            DoCompute( mComputeInputs, mComputeOutputs );
+
+            if ( XDataEncodingTools::MaxIndex( mComputeOutputsStorage.back( )[0] ) == targetLabels[i] )
+            {
+                correctLabelsCounter++;
+            }
+        }
+    }
+
+    return correctLabelsCounter;
 }
 
 // Helper method to compute output vectors for the given input vectors

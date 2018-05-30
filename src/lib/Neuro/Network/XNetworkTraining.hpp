@@ -104,21 +104,34 @@ public:
         mAverageWeightGradients = average;
     }
 
-    // Train single input/output sample
+    // Trains single input/output sample
     float_t TrainSample( const vector_t& input, const vector_t& targetOutput );
 
-    // Train single batch of prepared samples (as vectors)
+    // Trains single batch of prepared samples (as vectors)
     float_t TrainBatch( const std::vector<vector_t>& inputs,
                         const std::vector<vector_t>& targetOutputs );
 
-    // Train single batch of prepared samples (as pointers to vectors)
+    // Trains single batch of prepared samples (as pointers to vectors)
     float_t TrainBatch( const std::vector<vector_t*>& inputs,
                         const std::vector<vector_t*>& targetOutputs );
 
-    // Test sample - calculate real output and provide error cost
+    // Trains single epoch using batches of the specified size
+    float_t TrainEpoch( const std::vector<vector_t>& inputs, 
+                        const std::vector<vector_t>& targetOutputs,
+                        size_t batchSize,
+                        bool randomPickIntoBatch = false );
+
+    // Tests sample - calculates real output and provides error cost
     float_t TestSample( const vector_t& input,
                         const vector_t& targetOutput,
                         vector_t& output );
+
+    // Tests classification for the provided inputs and target labels -
+    // provides number of correctly classified samples and average cost (target outputs are used)
+    size_t TestClassification( const std::vector<vector_t>& inputs,
+                               const std::vector<size_t>& targetLabels,
+                               const std::vector<vector_t>& targetOutputs,
+                               float_t* pAvgCost );
 
 private:
 
