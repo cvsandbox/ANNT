@@ -125,6 +125,9 @@
     <ClInclude Include="..\..\lib\Tools\XVectorTools.hpp">
       <Filter>Tools</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\lib\Tools\XDataEncodingTools.hpp">
+      <Filter>Tools</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\lib\Neuro\Layers\XFullyConnectedLayer.cpp">
@@ -147,6 +150,9 @@
       <Filter>Tools</Filter>
     </ClCompile>
     <ClCompile Include="..\..\lib\Tools\XVectorTools.cpp">
+      <Filter>Tools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\Tools\XDataEncodingTools.cpp">
       <Filter>Tools</Filter>
     </ClCompile>
   </ItemGroup>

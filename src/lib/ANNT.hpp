@@ -20,6 +20,8 @@
 
 #include "Types/Types.hpp"
 
+#include "Tools/XDataEncodingTools.hpp"
+
 /* Classes used for artificial neural networks inference */
 
 #include "Neuro/Layers/XFullyConnectedLayer.hpp"

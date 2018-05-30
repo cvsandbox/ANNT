@@ -12,6 +12,7 @@ SRC = ANNT.cpp \
       XAvxVectorTools.cpp \
       XSseVectorTools.cpp \
       XVectorTools.cpp \
+      XDataEncodingTools.cpp \
       XFullyConnectedLayer.cpp \
       XNetworkComputation.cpp \
       XNetworkTraining.cpp
