@@ -25,6 +25,8 @@
 
 #include "ANNT.hpp"
 
+// If defined, batch training is used - all samples are given to network before updating it.
+// If commented, on-line training is done - samples are provided randomly one by one.
 #define USE_BATCH_TRAINING
 
 using namespace std;
@@ -62,6 +64,7 @@ void TestNetwork( const shared_ptr<XNeuralNetwork>& net, const vector<vector_t>&
     printf( "\n" );
 }
 
+// Example application's entry point
 int main( int /* argc */, char** /* argv */ )
 {
     printf( "XOR example with Fully Connected ANN \n\n" );
