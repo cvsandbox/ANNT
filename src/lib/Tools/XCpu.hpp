@@ -29,6 +29,9 @@ namespace ANNT {
 // Set of functions providing some CPU related information
 class XCpu
 {
+private:
+    XCpu( );
+
 public:
     enum FeatureRegisters
     {
