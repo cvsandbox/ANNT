@@ -103,6 +103,10 @@ template <typename T> vector<T> ExtractTestSamples( vector<T>& allSamples )
 {
     vector<T> testSamples( 30 );
 
+    // Iris flower dataset contains 150 samples - 3 classes of 50 samples each.
+    // Classes are not mixed and follow one after another. So take 10 samples
+    // from each class and move those into test data set.
+
     std::move( allSamples.begin( ) +  40, allSamples.begin( ) +  50, testSamples.begin( ) );
     std::move( allSamples.begin( ) +  90, allSamples.begin( ) + 100, testSamples.begin( ) + 10 );
     std::move( allSamples.begin( ) + 140, allSamples.begin( ) + 150, testSamples.begin( ) + 20 );
@@ -119,33 +123,33 @@ int main( int /* argc */, char** /* argv */ )
 {
     printf( "Iris classification example with Fully Connected ANN \n\n" );
 
-    vector<vector_t> attributes;
-    vector<size_t>   labels;
+    vector<vector_t> trainAttributes;
+    vector<size_t>   trainLabels;
 
-    if ( !LoadData( attributes, labels ) )
+    if ( !LoadData( trainAttributes, trainLabels ) )
     {
         printf( "Failed loading Iris database \n\n" );
         return -1;
     }
 
-    printf( "Loaded %d data samples \n\n", attributes.size( ) );
+    printf( "Loaded %u data samples \n\n", trainAttributes.size( ) );
 
     // make sure we have expected number of samples
-    if ( attributes.size( ) != 150 )
+    if ( trainAttributes.size( ) != 150 )
     {
         printf( "The data set is expected to provide 150 samples \n\n" );
         return -2;
     }
 
     // split the data set into two: training (120 samples) and test (30 samples)
-    vector<vector_t> testAttributes = ExtractTestSamples( attributes );
-    vector<size_t>   testLabels     = ExtractTestSamples( labels );
+    vector<vector_t> testAttributes = ExtractTestSamples( trainAttributes );
+    vector<size_t>   testLabels     = ExtractTestSamples( trainLabels );
 
-    printf( "Using %d samples for training and %d samples for test \n\n", attributes.size( ), testAttributes.size( ) );
+    printf( "Using %d samples for training and %d samples for test \n\n", trainAttributes.size( ), testAttributes.size( ) );
 
-    // perform one hot encoding of train/test classes
-    vector<vector_t> encodedLabels     = XDataEncodingTools::OneHotEncoding( labels, 3 );
-    vector<vector_t> encodedTestLabels = XDataEncodingTools::OneHotEncoding( testLabels, 3 );
+    // perform one hot encoding of train/test labels
+    vector<vector_t> encodedTrainLabels = XDataEncodingTools::OneHotEncoding( trainLabels, 3 );
+    vector<vector_t> encodedTestLabels  = XDataEncodingTools::OneHotEncoding( testLabels, 3 );
 
     // prepare a 3 layer ANN
     shared_ptr<XNeuralNetwork> net = make_shared<XNeuralNetwork>( );
@@ -163,23 +167,23 @@ int main( int /* argc */, char** /* argv */ )
                              make_shared<XBinaryCrossEntropyCost>( ) );
 
     // check classification error on the training data with random model
-    ANNT::float_t cost = 0;
+    ANNT::float_t cost    = 0;
     size_t        correct = 0;
 
-    correct = netCtx.TestClassification( attributes, labels, encodedLabels, &cost );
+    correct = netCtx.TestClassification( trainAttributes, trainLabels, encodedTrainLabels, &cost );
 
-    printf( "Before training: accuracy = %0.2f%% (%u/%u), cost = %0.4f \n", static_cast<float>( correct ) / attributes.size( ) * 100,
-            correct, attributes.size( ), static_cast<float>( cost ) );
+    printf( "Before training: accuracy = %0.2f%% (%u/%u), cost = %0.4f \n", static_cast<float>( correct ) / trainAttributes.size( ) * 100,
+            correct, trainAttributes.size( ), static_cast<float>( cost ) );
 
     // train the neural network
     for ( size_t i = 0; i < 32; i++ )
     {
-        netCtx.TrainEpoch( attributes, encodedLabels, 5, true );
+        netCtx.TrainEpoch( trainAttributes, encodedTrainLabels, 5, true );
 
-        correct = netCtx.TestClassification( attributes, labels, encodedLabels, &cost );
+        correct = netCtx.TestClassification( trainAttributes, trainLabels, encodedTrainLabels, &cost );
 
-        printf( "Epoch %3u : accuracy = %0.2f%% (%u/%u), cost = %0.4f \n", i + 1, static_cast<float>( correct ) / attributes.size( ) * 100,
-                correct, attributes.size( ), static_cast<float>( cost ) );
+        printf( "Epoch %3u : accuracy = %0.2f%% (%3u/%3u), cost = %0.4f \n", i + 1, static_cast<float>( correct ) / trainAttributes.size( ) * 100,
+                correct, trainAttributes.size( ), static_cast<float>( cost ) );
     }
     printf( "\n" );
 

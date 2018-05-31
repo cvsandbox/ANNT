@@ -40,7 +40,7 @@ void PrintVector( const vector_t& vec )
     printf( "{ " );
     for ( size_t i = 0; i < vec.size( ); i++ )
     {
-        printf( "%0.2f ", static_cast<float>( vec[i] ) );
+        printf( "%5.2f ", static_cast<float>( vec[i] ) );
     }
     printf( "}" );
 }
