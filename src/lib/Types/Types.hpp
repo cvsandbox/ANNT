@@ -42,6 +42,18 @@ typedef float  float_t;
 // Vector type to use for network's input/output/error/gradient flow
 typedef std::vector<float_t, XAlignedAllocator<float_t, 32>> vector_t;
 
+// Border handling modes for convolution and pooling
+enum class BorderMode
+{
+    Valid,  // Output is smaller than input, since convolution is only computed
+            // where input and filter fully overlap
+
+    Same    // Output is of the same size as input. To get this input is padded.
+};
+
+// A value to represent missing connection (between inputs/outputs, neurons, layers, etc)
+static const size_t ANNT_NOT_CONNECTED = std::numeric_limits<std::size_t>::max( );
+
 } // namespace ANNT
 
 #endif // ANNT_TYPES_HPP

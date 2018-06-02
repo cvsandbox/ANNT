@@ -27,6 +27,10 @@
     <ClInclude Include="..\..\lib\Neuro\Layers\Activations\XTanhActivation.hpp" />
     <ClInclude Include="..\..\lib\Neuro\Layers\ILayer.hpp" />
     <ClInclude Include="..\..\lib\Neuro\Layers\ITrainableLayer.hpp" />
+    <ClInclude Include="..\..\lib\Neuro\Layers\Processing\IProcessingLayer.hpp" />
+    <ClInclude Include="..\..\lib\Neuro\Layers\Processing\XAveragePooling.hpp" />
+    <ClInclude Include="..\..\lib\Neuro\Layers\Processing\XMaxPooling.hpp" />
+    <ClInclude Include="..\..\lib\Neuro\Layers\XConvolutionLayer.hpp" />
     <ClInclude Include="..\..\lib\Neuro\Layers\XFullyConnectedLayer.hpp" />
     <ClInclude Include="..\..\lib\Neuro\Network\XNetworkComputation.hpp" />
     <ClInclude Include="..\..\lib\Neuro\Network\XNetworkTraining.hpp" />
@@ -49,6 +53,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\lib\ANNT.cpp" />
+    <ClCompile Include="..\..\lib\Neuro\Layers\XConvolutionLayer.cpp" />
     <ClCompile Include="..\..\lib\Neuro\Layers\XFullyConnectedLayer.cpp" />
     <ClCompile Include="..\..\lib\Neuro\Network\XNetworkComputation.cpp" />
     <ClCompile Include="..\..\lib\Neuro\Network\XNetworkTraining.cpp" />

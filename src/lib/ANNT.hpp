@@ -25,6 +25,7 @@
 /* Classes used for artificial neural networks inference */
 
 #include "Neuro/Layers/XFullyConnectedLayer.hpp"
+#include "Neuro/Layers/XConvolutionLayer.hpp"
 
 #include "Neuro/Layers/Activations/XSigmoidActivation.hpp"
 #include "Neuro/Layers/Activations/XTanhActivation.hpp"
@@ -32,6 +33,9 @@
 #include "Neuro/Layers/Activations/XLeakyReLuActivation.hpp"
 #include "Neuro/Layers/Activations/XEluActivation.hpp"
 #include "Neuro/Layers/Activations/XSoftMaxActivation.hpp"
+
+#include "Neuro/Layers/Processing/XAveragePooling.hpp"
+#include "Neuro/Layers/Processing/XMaxPooling.hpp"
 
 #include "Neuro/Network/XNeuralNetwork.hpp"
 #include "Neuro/Network/XNetworkComputation.hpp"

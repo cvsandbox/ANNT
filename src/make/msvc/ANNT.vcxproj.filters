@@ -25,6 +25,9 @@
     <Filter Include="Neuro\Network">
       <UniqueIdentifier>{d5b4c896-aaaf-427b-b8d1-6de38e470616}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Neuro\Layers\Processing">
+      <UniqueIdentifier>{b6c2a90c-ed30-474a-83a5-2269e22c884c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\lib\Neuro\CostFunctions\ICostFunction.hpp">
@@ -128,6 +131,18 @@
     <ClInclude Include="..\..\lib\Tools\XDataEncodingTools.hpp">
       <Filter>Tools</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\lib\Neuro\Layers\XConvolutionLayer.hpp">
+      <Filter>Neuro\Layers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\Neuro\Layers\Processing\IProcessingLayer.hpp">
+      <Filter>Neuro\Layers\Processing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\Neuro\Layers\Processing\XAveragePooling.hpp">
+      <Filter>Neuro\Layers\Processing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\Neuro\Layers\Processing\XMaxPooling.hpp">
+      <Filter>Neuro\Layers\Processing</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\lib\Neuro\Layers\XFullyConnectedLayer.cpp">
@@ -154,6 +169,9 @@
     </ClCompile>
     <ClCompile Include="..\..\lib\Tools\XDataEncodingTools.cpp">
       <Filter>Tools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\Neuro\Layers\XConvolutionLayer.cpp">
+      <Filter>Neuro\Layers</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
