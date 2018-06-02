@@ -29,10 +29,6 @@ namespace ANNT { namespace Neuro {
 // Implementation of SoftMax activation function
 class XSoftMaxActivation : public IActivationLayer
 {
-private:
-    static float_t mEpsilon;
-    static float_t mOneMEpsilon;
-
 public:
 
     void ForwardActivate( const vector_t& input, vector_t& output ) override
@@ -49,15 +45,6 @@ public:
         for ( size_t i = 0; i < len; i++ )
         {
             output[i] /= sum;
-
-            if ( output[i] > mOneMEpsilon )
-            {
-                output[i] = mOneMEpsilon;
-            }
-            else if ( output[i] < mEpsilon )
-            {
-                output[i] = mEpsilon;
-            }
         }
     }
 
@@ -85,9 +72,6 @@ public:
         }
     }
 };
-
-float_t XSoftMaxActivation::mEpsilon     = float_t( 0.001 );
-float_t XSoftMaxActivation::mOneMEpsilon = float_t( 0.999 );
 
 } } // namespace ANNT::Neuro
 
