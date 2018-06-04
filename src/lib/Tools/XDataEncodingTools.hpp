@@ -42,6 +42,16 @@ public:
 
     // Returns index of the maximum element in the specified vector
     static size_t MaxIndex( const vector_t& vec );
+
+    // Pads the specified 2D input (although it can be of certain depth) with the specified value
+    static void AddPadding2d( const vector_t& src, vector_t& dst,
+                              size_t srcWidth, size_t srcHeight, size_t dstWidth, size_t dstHeight,
+                              size_t depth, float_t padValue );
+
+    // Removes padding from the specified 2D input (although it can be of certain depth)
+    static void RemovePadding2d( const vector_t& src, vector_t& dst,
+                                 size_t srcWidth, size_t srcHeight, size_t dstWidth, size_t dstHeight,
+                                 size_t depth );
 };
 
 } // namespace ANNT

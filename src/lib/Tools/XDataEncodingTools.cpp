@@ -67,4 +67,127 @@ size_t XDataEncodingTools::MaxIndex( const vector_t& vec )
     return maxIndex;
 }
 
+// Pads the specified 2D input (although it can be of certain depth) with the specified value
+void XDataEncodingTools::AddPadding2d( const vector_t& src, vector_t& dst,
+                                       size_t srcWidth, size_t srcHeight, size_t dstWidth, size_t dstHeight,
+                                       size_t depth, float_t padValue )
+{
+    if ( ( dstWidth >= srcWidth ) && ( dstHeight >= srcHeight ) )
+    {
+        size_t padWidth  = dstWidth  - srcWidth;
+        size_t padHeight = dstHeight - srcHeight;
+        // For even pad width/height it is distributed equally on each side.
+        // However for odd value, padding goes first to right/bottom sides.
+        size_t leftPad   = padWidth >> 1;
+        size_t rightPad  = padWidth - leftPad;
+        size_t topPad    = padHeight >> 1;
+        size_t bottomPad = padHeight - topPad;
+        size_t dstSize   = dstWidth * dstHeight * depth;
+
+        if ( dst.size( ) != dstSize )
+        {
+            dst.resize( dstSize );
+        }
+
+        const float* srcPtr = src.data( );
+        float*       dstPtr = dst.data( );
+
+        for ( size_t d = 0; d < depth; d++ )
+        {
+            // top padding
+            for ( size_t y = 0; y < topPad; y++ )
+            {
+                for ( size_t x = 0; x < dstWidth; x++, dstPtr++ )
+                {
+                    *dstPtr = padValue;
+                }
+            }
+
+            for ( size_t y = 0; y < srcHeight; y++ )
+            {
+                // left padding
+                for ( size_t x = 0; x < leftPad; x++, dstPtr++ )
+                {
+                    *dstPtr = padValue;
+                }
+
+                // copying the source
+                for ( size_t x = 0; x < srcWidth; x++, srcPtr++, dstPtr++ )
+                {
+                    *dstPtr = *srcPtr;
+                }
+
+                // right padding
+                for ( size_t x = 0; x < rightPad; x++, dstPtr++ )
+                {
+                    *dstPtr = padValue;
+                }
+            }
+
+            // bottom padding
+            for ( size_t y = 0; y < bottomPad; y++ )
+            {
+                for ( size_t x = 0; x < dstWidth; x++, dstPtr++ )
+                {
+                    *dstPtr = padValue;
+                }
+            }
+        }
+    }
+}
+
+// Removes padding from the specified 2D input
+void XDataEncodingTools::RemovePadding2d( const vector_t& src, vector_t& dst,
+                                          size_t srcWidth, size_t srcHeight, size_t dstWidth, size_t dstHeight,
+                                          size_t depth )
+{
+    if ( ( dstWidth <= srcWidth ) && ( dstHeight <= srcHeight ) )
+    {
+        size_t padWidth  = srcWidth  - dstWidth;
+        size_t padHeight = srcHeight - dstHeight;
+        // For even pad width/height it is distributed equally on each side.
+        // However for odd value, padding goes first to right/bottom sides.
+        size_t leftPad   = padWidth >> 1;
+        size_t rightPad  = padWidth - leftPad;
+        size_t topPad    = padHeight >> 1;
+        size_t bottomPad = padHeight - topPad;
+        size_t dstSize   = dstWidth * dstHeight * depth;
+
+        topPad    *= srcWidth;
+        bottomPad *= srcWidth;
+
+        if ( dst.size( ) != dstSize )
+        {
+            dst.resize( dstSize );
+        }
+
+        const float* srcPtr = src.data( );
+        float*       dstPtr = dst.data( );
+
+        for ( size_t d = 0; d < depth; d++ )
+        {
+            // skip top padding
+            srcPtr += topPad;
+
+            for ( size_t y = 0; y < dstHeight; y++ )
+            {
+                // skip left left padding
+                srcPtr += leftPad;
+
+                // copying the source
+                for ( size_t x = 0; x < dstWidth; x++, srcPtr++, dstPtr++ )
+                {
+                    *dstPtr = *srcPtr;
+                }
+
+                // skip right padding
+                srcPtr += rightPad;
+            }
+
+            // skip bottom padding
+            srcPtr += bottomPad;
+        }
+    }
+}
+
 } // namespace ANNT
