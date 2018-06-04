@@ -511,7 +511,7 @@ template <> inline void SseTools::Store<std::true_type>( const __m128& value, fl
 // Store 4 signle precision numbers into unaligned memory
 template <> inline void SseTools::Store<std::false_type>( const __m128& value, float* dst )
 {
-    _mm_store_ps( dst, value );
+    _mm_storeu_ps( dst, value );
 }
 
 // Store 2 double precision numbers into aligned memory
