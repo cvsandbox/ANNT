@@ -1,4 +1,4 @@
-# vectorization test makefile
+# fc_iris example makefile
 
 include ../../../../settings/gcc/compiler_cpp.mk
 include ../src.mk

@@ -1,4 +1,4 @@
-# fc_iris test source files
+# fc_iris example source files
 
 # search path for source files
 VPATH = ../../
@@ -7,6 +7,4 @@ VPATH = ../../
 SRC = fc_iris.cpp
 
 OBJ = $(SRC:.cpp=.o)
-
-
 

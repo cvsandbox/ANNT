@@ -1,4 +1,4 @@
-# fc_xor test source files
+# fc_xor example source files
 
 # search path for source files
 VPATH = ../../
