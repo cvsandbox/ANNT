@@ -6,7 +6,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\cnn_mnit.cpp" />
+    <ClCompile Include="..\..\cnn_mnist.cpp" />
     <ClCompile Include="..\..\..\tools\MNISTParser.cpp">
       <Filter>MNIST Parser</Filter>
     </ClCompile>

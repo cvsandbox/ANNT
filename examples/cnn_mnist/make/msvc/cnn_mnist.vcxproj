@@ -12,7 +12,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\tools\MNISTParser.cpp" />
-    <ClCompile Include="..\..\cnn_mnit.cpp" />
+    <ClCompile Include="..\..\cnn_mnist.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\tools\MNISTParser.hpp" />
@@ -20,7 +20,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{6264691F-4D6B-4C63-B054-7EC51244488B}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>cnn_mnit</RootNamespace>
+    <RootNamespace>cnn_mnist</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
