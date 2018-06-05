@@ -24,6 +24,7 @@
 #ifndef ANNT_MNIST_PARSER_HPP
 #define ANNT_MNIST_PARSER_HPP
 
+#include <string>
 #include "Types/Types.hpp"
 
 namespace ANNT {

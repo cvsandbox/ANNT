@@ -48,44 +48,45 @@ bool MNISTParser::LoadLabels( const std::string& fileName, std::vector<size_t>& 
     {
         uint32_t magic = 0, labelsCount = 0;
 
-        fread( &magic, 4, 1, file );
-        fread( &labelsCount, 4, 1, file );
-
-        magic       = ReverseEndian32( magic );
-        labelsCount = ReverseEndian32( labelsCount );
-
-        if ( magic == MNIST_LABELS_FILE_MAGIC )
+        if ( ( fread( &magic, 4, 1, file ) == 4 ) &&
+             ( fread( &labelsCount, 4, 1, file ) == 4 ) )
         {
-            uint8_t buffer[LABELS_READING_BUFFER_SIZE];
-            size_t  toLoad = labelsCount;
-            size_t  loaded = 0;
-            size_t  read   = 0;
+            magic       = ReverseEndian32( magic );
+            labelsCount = ReverseEndian32( labelsCount );
 
-            labels = vector<size_t>( toLoad );
-
-            while ( loaded != toLoad )
+            if ( magic == MNIST_LABELS_FILE_MAGIC )
             {
-                size_t nextRead = ( toLoad - loaded );
+                uint8_t buffer[LABELS_READING_BUFFER_SIZE];
+                size_t  toLoad = labelsCount;
+                size_t  loaded = 0;
+                size_t  read   = 0;
 
-                if ( nextRead > LABELS_READING_BUFFER_SIZE )
+                labels = vector<size_t>( toLoad );
+
+                while ( loaded != toLoad )
                 {
-                    nextRead = LABELS_READING_BUFFER_SIZE;
-                }
+                    size_t nextRead = ( toLoad - loaded );
 
-                read = fread( buffer, 1, nextRead, file );
-
-                if ( read == nextRead )
-                {
-                    for ( size_t i = 0; i < read; i++ )
+                    if ( nextRead > LABELS_READING_BUFFER_SIZE )
                     {
-                        labels[loaded + i] = static_cast<size_t>( buffer[i] );
+                        nextRead = LABELS_READING_BUFFER_SIZE;
                     }
 
-                    loaded += read;
-                }
-            }
+                    read = fread( buffer, 1, nextRead, file );
 
-            ret = true;
+                    if ( read == nextRead )
+                    {
+                        for ( size_t i = 0; i < read; i++ )
+                        {
+                            labels[loaded + i] = static_cast<size_t>( buffer[i] );
+                        }
+
+                        loaded += read;
+                    }
+                }
+
+                ret = true;
+            }
         }
 
         fclose( file );
@@ -105,49 +106,50 @@ bool MNISTParser::LoadImages( const string& fileName, vector<vector_t>& images,
     {
         uint32_t magic = 0, imageCount = 0, width = 0, height = 0;
 
-        fread( &magic, 4, 1, file );
-        fread( &imageCount, 4, 1, file );
-        fread( &height, 4, 1, file );
-        fread( &width, 4, 1, file );
-
-        magic      = ReverseEndian32( magic );
-        imageCount = ReverseEndian32( imageCount );
-        width      = ReverseEndian32( width );
-        height     = ReverseEndian32( height );
-
-        if ( magic == MNIST_IMAGES_FILE_MAGIC )
+        if ( ( fread( &magic, 4, 1, file ) == 4 ) &&
+             ( fread( &imageCount, 4, 1, file ) == 4 ) &&
+             ( fread( &height, 4, 1, file ) == 4 ) &&
+             ( fread( &width, 4, 1, file ) == 4 ) )
         {
-            size_t   imageSize    = width * height;
-            uint8_t* buffer       = new uint8_t[imageSize];
-            size_t   toLoad       = imageCount;
-            size_t   read         = 0;
+            magic      = ReverseEndian32( magic );
+            imageCount = ReverseEndian32( imageCount );
+            width      = ReverseEndian32( width );
+            height     = ReverseEndian32( height );
 
-            uint32_t paddedWidth  = width  + xPad * 2;
-            uint32_t paddedHeight = height + yPad * 2;
-            uint32_t paddedSize   = paddedWidth * paddedHeight;
-
-            for ( size_t i = 0; i < toLoad; i++ )
+            if ( magic == MNIST_IMAGES_FILE_MAGIC )
             {
-                if ( ( read = fread( buffer, 1, imageSize, file ) ) == imageSize )
+                size_t   imageSize    = width * height;
+                uint8_t* buffer       = new uint8_t[imageSize];
+                size_t   toLoad       = imageCount;
+                size_t   read         = 0;
+
+                uint32_t paddedWidth  = width  + xPad * 2;
+                uint32_t paddedHeight = height + yPad * 2;
+                uint32_t paddedSize   = paddedWidth * paddedHeight;
+
+                for ( size_t i = 0; i < toLoad; i++ )
                 {
-                    vector_t image( paddedSize, scaleMin );
-
-                    for ( uint32_t y = 0, i = 0; y < height; y++ )
+                    if ( ( read = fread( buffer, 1, imageSize, file ) ) == imageSize )
                     {
-                        for ( uint32_t x = 0; x < width; x++, i++ )
+                        vector_t image( paddedSize, scaleMin );
+
+                        for ( uint32_t y = 0, i = 0; y < height; y++ )
                         {
-                            image[( y + yPad ) * paddedWidth + xPad + x] = ( static_cast<float_t>( buffer[i] ) / 255 ) *
-                                                                           ( scaleMax - scaleMin ) + scaleMin;
+                            for ( uint32_t x = 0; x < width; x++, i++ )
+                            {
+                                image[( y + yPad ) * paddedWidth + xPad + x] = ( static_cast<float_t>( buffer[i] ) / 255 ) *
+                                                                               ( scaleMax - scaleMin ) + scaleMin;
+                            }
                         }
+
+                        images.push_back( image );
                     }
-
-                    images.push_back( image );
                 }
+
+                delete [] buffer;
+
+                ret = true;
             }
-
-            delete [] buffer;
-
-            ret = true;
         }
 
         fclose( file );

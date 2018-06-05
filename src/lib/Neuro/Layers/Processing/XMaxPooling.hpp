@@ -199,4 +199,5 @@ public:
 
 } } // namespace ANNT::Neuro
 
-#endif ANNT_XMAX_POOLING_HPP
+#endif // ANNT_XMAX_POOLING_HPP
+

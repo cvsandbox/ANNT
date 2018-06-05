@@ -189,4 +189,5 @@ public:
 
 } } // namespace ANNT::Neuro
 
-#endif ANNT_XAVERAGE_POOLING_HPP
+#endif // ANNT_XAVERAGE_POOLING_HPP
+

@@ -219,13 +219,11 @@ void XConvolutionLayer::BackwardCompute( const vector<vector_t*>& inputs,
     for ( size_t i = 0, n = inputs.size( ); i < n; i++ )
     {
         const float_t* deltaData     = deltas[i]->data( );
-        const float_t* inputData     = inputs[i]->data( );
         float_t*       prevDeltaData = prevDeltas[i]->data( );
 
         if ( mBorderMode == BorderMode::Same )
         {
             prevDeltaData = mPaddedPrevDeltas[i].data( );
-            inputData     = mPaddedInputs[i].data( );
         }
 
         fill( prevDeltaData, prevDeltaData + mInputsCount, float_t( 0 ) );
