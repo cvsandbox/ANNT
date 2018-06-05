@@ -5,7 +5,8 @@ include ../src.mk
 
 OUT = libannt.a
 
-CFLAGS += -mavx
+XAvxVectorTools.o: CFLAGS += -mavx
+XSseVectorTools.o: CFLAGS += -msse2
 
 include ../../../settings/gcc/build_lib.mk
 
