@@ -6,7 +6,7 @@ SELF_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
 OUT_FOLDER = "$(SELF_DIR)../../build/$(TARGET)/$(BUILD_TYPE)/bin/"
 
 # additional include folders
-INCLUDES = -I$(SELF_DIR)../../build/$(TARGET)/$(BUILD_TYPE)/include/
+INCLUDES += -I$(SELF_DIR)../../build/$(TARGET)/$(BUILD_TYPE)/include/
 
 CFLAGS += $(INCLUDES)
 
