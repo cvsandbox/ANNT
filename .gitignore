@@ -3,3 +3,5 @@ build
 *.suo
 *.sdf
 *.opensdf
+*.o
+
