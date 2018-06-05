@@ -38,7 +38,7 @@ static const char* MNIST_TRAIN_IMAGES_FILE = "data/train-images.idx3-ubyte";
 static const char* MNIST_TEST_LABELS_FILE  = "data/t10k-labels.idx1-ubyte";
 static const char* MNIST_TEST_IMAGES_FILE  = "data/t10k-images.idx3-ubyte";
 
-// Helper function to extract validation samples (20%) out of MNIST training data
+// Helper function to extract validation samples out of MNIST training data
 template <typename T> vector<T> ExtractValidationSamples( vector<T>& allSamples )
 {
     vector<T> validationSamples( allSamples.size( ) / 6 );
