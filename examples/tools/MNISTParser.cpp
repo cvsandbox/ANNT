@@ -48,8 +48,8 @@ bool MNISTParser::LoadLabels( const std::string& fileName, std::vector<size_t>& 
     {
         uint32_t magic = 0, labelsCount = 0;
 
-        if ( ( fread( &magic, 4, 1, file ) == 4 ) &&
-             ( fread( &labelsCount, 4, 1, file ) == 4 ) )
+        if ( ( fread( &magic, 4, 1, file ) == 1 ) &&
+             ( fread( &labelsCount, 4, 1, file ) == 1 ) )
         {
             magic       = ReverseEndian32( magic );
             labelsCount = ReverseEndian32( labelsCount );
@@ -106,10 +106,10 @@ bool MNISTParser::LoadImages( const string& fileName, vector<vector_t>& images,
     {
         uint32_t magic = 0, imageCount = 0, width = 0, height = 0;
 
-        if ( ( fread( &magic, 4, 1, file ) == 4 ) &&
-             ( fread( &imageCount, 4, 1, file ) == 4 ) &&
-             ( fread( &height, 4, 1, file ) == 4 ) &&
-             ( fread( &width, 4, 1, file ) == 4 ) )
+        if ( ( fread( &magic, 4, 1, file ) == 1 ) &&
+             ( fread( &imageCount, 4, 1, file ) == 1 ) &&
+             ( fread( &height, 4, 1, file ) == 1 ) &&
+             ( fread( &width, 4, 1, file ) == 1 ) )
         {
             magic      = ReverseEndian32( magic );
             imageCount = ReverseEndian32( imageCount );
