@@ -70,7 +70,7 @@ size_t XNetworkComputation::Classify( const fvector_t& input )
 }
 
 // Tests classification for the provided inputs and target labels - provides number of correctly classified samples
-size_t XNetworkComputation::TestClassification( const vector<fvector_t>& inputs, const vector<size_t>& targetLabels )
+size_t XNetworkComputation::TestClassification( const vector<fvector_t>& inputs, const uvector_t& targetLabels )
 {
     size_t correctLabelsCounter = 0;
 

@@ -40,7 +40,7 @@ private:
 public:
 
     // Loads labels from the specified MNIST labels' file
-    static bool LoadLabels( const std::string& fileName, std::vector<size_t>& labels );
+    static bool LoadLabels( const std::string& fileName, uvector_t& labels );
 
     // Loads images from the specified MNIST images' file
     static bool LoadImages( const std::string& fileName, std::vector<fvector_t>& images,

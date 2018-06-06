@@ -39,7 +39,7 @@ static uint32_t ReverseEndian32( uint32_t v )
 }
 
 // Loads labels from the specified MNIST labels' file
-bool MNISTParser::LoadLabels( const std::string& fileName, std::vector<size_t>& labels )
+bool MNISTParser::LoadLabels( const std::string& fileName, uvector_t& labels )
 {
     FILE* file = fopen( fileName.c_str( ), "rb" );
     bool  ret  = false;
@@ -61,7 +61,7 @@ bool MNISTParser::LoadLabels( const std::string& fileName, std::vector<size_t>& 
                 size_t  loaded = 0;
                 size_t  read   = 0;
 
-                labels = vector<size_t>( toLoad );
+                labels = uvector_t( toLoad );
 
                 while ( loaded != toLoad )
                 {

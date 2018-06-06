@@ -38,7 +38,7 @@ public:
     static fvector_t OneHotEncoding( size_t label, size_t labelsCount );
 
     // Encodes a vector of labels using one-hot encoding
-    static std::vector<fvector_t> OneHotEncoding( const std::vector<size_t>& labels, size_t labelsCount );
+    static std::vector<fvector_t> OneHotEncoding( const uvector_t& labels, size_t labelsCount );
 
     // Returns index of the maximum element in the specified vector
     static size_t MaxIndex( const fvector_t& vec );

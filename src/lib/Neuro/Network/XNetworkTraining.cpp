@@ -366,7 +366,7 @@ float_t XNetworkTraining::TestSample( const fvector_t& input,
 
 // Tests classification for the provided inputs and target labels - provides number of correctly classified
 // samples and average cost (target outputs are used)
-size_t XNetworkTraining::TestClassification( const std::vector<fvector_t>& inputs, const std::vector<size_t>& targetLabels,
+size_t XNetworkTraining::TestClassification( const std::vector<fvector_t>& inputs, const uvector_t& targetLabels,
                                              const std::vector<fvector_t>& targetOutputs, float_t* pAvgCost )
 {
     size_t  correctLabelsCounter = 0;

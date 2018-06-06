@@ -38,7 +38,7 @@ using namespace ANNT::Neuro::Training;
 static const char* IRIS_DATA_FILE = "data/iris.data";
 
 // Helper function to load Iris data set
-bool LoadData( vector<fvector_t>& attributes, vector<size_t>& labels )
+bool LoadData( vector<fvector_t>& attributes, uvector_t& labels )
 {
     bool  ret  = false;
     FILE* file = fopen( IRIS_DATA_FILE, "r" );
@@ -46,9 +46,9 @@ bool LoadData( vector<fvector_t>& attributes, vector<size_t>& labels )
     if ( file )
     {
         char     buff[256];
-        size_t   labelsCounter = 0;
+        uint_t   labelsCounter = 0;
 
-        map<string, size_t> labelsMap;
+        map<string, uint_t> labelsMap;
 
         while ( fgets( buff, 256, file ) != nullptr )
         {
@@ -68,7 +68,7 @@ bool LoadData( vector<fvector_t>& attributes, vector<size_t>& labels )
                 {
                     classNamePtr++;
 
-                    size_t labelId = labelsCounter;
+                    uint_t labelId = labelsCounter;
                     auto   labelIt = labelsMap.find( classNamePtr );
 
                     if ( labelIt != labelsMap.end( ) )
@@ -77,7 +77,7 @@ bool LoadData( vector<fvector_t>& attributes, vector<size_t>& labels )
                     }
                     else
                     {
-                        labelsMap.insert( pair<string, size_t>( classNamePtr, labelsCounter ) );
+                        labelsMap.insert( pair<string, uint_t>( classNamePtr, labelsCounter ) );
                         labelsCounter++;
                     }
 
@@ -124,7 +124,7 @@ int main( int /* argc */, char** /* argv */ )
     printf( "Iris classification example with Fully Connected ANN \n\n" );
 
     vector<fvector_t> trainAttributes;
-    vector<size_t>    trainLabels;
+    uvector_t         trainLabels;
 
     if ( !LoadData( trainAttributes, trainLabels ) )
     {
@@ -143,7 +143,7 @@ int main( int /* argc */, char** /* argv */ )
 
     // split the data set into two: training (120 samples) and test (30 samples)
     vector<fvector_t> testAttributes = ExtractTestSamples( trainAttributes );
-    vector<size_t>   testLabels      = ExtractTestSamples( trainLabels );
+    uvector_t         testLabels     = ExtractTestSamples( trainLabels );
 
     printf( "Using %d samples for training and %d samples for test \n\n", trainAttributes.size( ), testAttributes.size( ) );
 

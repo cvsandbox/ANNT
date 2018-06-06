@@ -36,7 +36,7 @@ fvector_t XDataEncodingTools::OneHotEncoding( size_t label, size_t labelsCount )
 }
 
 // Encodes a vector of classes using one-hot encoding
-vector<fvector_t> XDataEncodingTools::OneHotEncoding( const vector<size_t>& labels, size_t labelsCount )
+vector<fvector_t> XDataEncodingTools::OneHotEncoding( const uvector_t& labels, size_t labelsCount )
 {
     vector<fvector_t> encodedClasses( labels.size( ) );
 

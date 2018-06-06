@@ -57,7 +57,7 @@ public:
     // Tests classification for the provided inputs and target labels -
     // provides number of correctly classified samples
     size_t TestClassification( const std::vector<fvector_t>& inputs,
-                               const std::vector<size_t>& targetLabels );
+                               const uvector_t& targetLabels );
 
 protected:
 

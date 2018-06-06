@@ -56,9 +56,9 @@ int main( int /* argc */, char** /* argv */ )
 {
     printf( "MNIST handwritten digits classification example with Fully Connected ANN \n\n" );
 
-    vector<size_t>    trainLabels;
+    uvector_t         trainLabels;
     vector<fvector_t> trainImages;
-    vector<size_t>    testLabels;
+    uvector_t         testLabels;
     vector<fvector_t> testImages;
 
     // load training data set
@@ -103,7 +103,7 @@ int main( int /* argc */, char** /* argv */ )
     printf( "Loaded %u test data samples \n\n", testLabels.size( ) );
 
     // extract validation data set out of training set
-    vector<size_t>    validationLabels = ExtractValidationSamples( trainLabels );
+    uvector_t         validationLabels = ExtractValidationSamples( trainLabels );
     vector<fvector_t> validationImages = ExtractValidationSamples( trainImages );
 
     printf( "Samples usage: training = %u, validation = %u, test = %u \n\n",
