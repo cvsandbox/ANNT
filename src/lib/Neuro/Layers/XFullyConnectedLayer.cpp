@@ -48,14 +48,14 @@ void XFullyConnectedLayer::Randomize( )
 }
 
 // Calculates outputs for the given inputs
-void XFullyConnectedLayer::ForwardCompute( const vector<vector_t*>& inputs,
-                                           vector<vector_t*>& outputs )
+void XFullyConnectedLayer::ForwardCompute( const vector<fvector_t*>& inputs,
+                                           vector<fvector_t*>& outputs )
 {
     for ( size_t i = 0, n = inputs.size( ); i < n; i++ )
     {
-        const vector_t& input  = *( inputs [i] );
-        vector_t&       output = *( outputs[i] );
-        size_t          weightIndex = 0;
+        const fvector_t& input  = *( inputs [i] );
+        fvector_t&       output = *( outputs[i] );
+        size_t           weightIndex = 0;
 
         for ( size_t otputIndex = 0; otputIndex < mOutputsCount; otputIndex++ )
         {
@@ -72,18 +72,18 @@ void XFullyConnectedLayer::ForwardCompute( const vector<vector_t*>& inputs,
 }
 
 // Propagates error to the previous layer and calculates weights/biases gradients
-void XFullyConnectedLayer::BackwardCompute( const vector<vector_t*>& inputs,
-                                            const vector<vector_t*>& /* outputs */,
-                                            const vector<vector_t*>& deltas,
-                                            vector<vector_t*>& prevDeltas,
-                                            vector_t& gradWeights,
-                                            vector_t& gradBiases )
+void XFullyConnectedLayer::BackwardCompute( const vector<fvector_t*>& inputs,
+                                            const vector<fvector_t*>& /* outputs */,
+                                            const vector<fvector_t*>& deltas,
+                                            vector<fvector_t*>& prevDeltas,
+                                            fvector_t& gradWeights,
+                                            fvector_t& gradBiases )
 {
     // 1 - first propagate deltas to the previous layer
     for ( size_t i = 0, n = inputs.size( ); i < n; i++ )
     {
-        vector_t&       prevDelta = *( prevDeltas[i] );
-        const vector_t& delta     = *( deltas[i] );
+        fvector_t&       prevDelta = *( prevDeltas[i] );
+        const fvector_t& delta     = *( deltas[i] );
 
         for ( size_t inputIndex = 0; inputIndex < mInputsCount; inputIndex++ )
         {
@@ -104,8 +104,8 @@ void XFullyConnectedLayer::BackwardCompute( const vector<vector_t*>& inputs,
     {
         for ( size_t i = 0, n = inputs.size( ); i < n; i++ )
         {
-            const vector_t& input      = *( inputs[i] );
-            float_t         deltaValue = ( *( deltas[i] ) )[outputIndex];
+            const fvector_t& input      = *( inputs[i] );
+            float_t          deltaValue = ( *( deltas[i] ) )[outputIndex];
 
             for ( size_t inputIndex = 0, weightIndex = weightIndexStart; inputIndex < mInputsCount; inputIndex++, weightIndex++ )
             {
@@ -117,7 +117,7 @@ void XFullyConnectedLayer::BackwardCompute( const vector<vector_t*>& inputs,
     // 3 - accumulate baises' difference
     for ( size_t i = 0, n = inputs.size( ); i < n; i++ )
     {
-        const vector_t& delta = *( deltas[i] );
+        const fvector_t& delta = *( deltas[i] );
 
         for ( size_t outputIndex = 0; outputIndex < mOutputsCount; outputIndex++ )
         {
@@ -127,8 +127,8 @@ void XFullyConnectedLayer::BackwardCompute( const vector<vector_t*>& inputs,
 }
 
 // Applies updates to the layer's weights and biases
-void XFullyConnectedLayer::UpdateWeights( const vector_t& weightsUpdate,
-                                          const vector_t& biasesUpdate )
+void XFullyConnectedLayer::UpdateWeights( const fvector_t& weightsUpdate,
+                                          const fvector_t& biasesUpdate )
 {
     for ( size_t i = 0, n = mWeights.size( ); i < n; i++ )
     {

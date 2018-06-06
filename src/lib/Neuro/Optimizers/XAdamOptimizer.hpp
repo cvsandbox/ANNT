@@ -55,12 +55,12 @@ public:
         return 3;
     }
 
-    void CalculateUpdatesFromGradients( vector_t& updates, std::vector<vector_t>& paramVariables, vector_t& layerVariables ) override
+    void CalculateUpdatesFromGradients( fvector_t& updates, std::vector<fvector_t>& paramVariables, fvector_t& layerVariables ) override
     {
-        vector_t& mt  = paramVariables[0];
-        vector_t& vt  = paramVariables[1];
-        float_t   b1t = mB1;
-        float_t   b2t = mB2;
+        fvector_t& mt  = paramVariables[0];
+        fvector_t& vt  = paramVariables[1];
+        float_t    b1t = mB1;
+        float_t    b2t = mB2;
 
         // check if it is the first call
         if ( layerVariables[0] < float( 0.5 ) )

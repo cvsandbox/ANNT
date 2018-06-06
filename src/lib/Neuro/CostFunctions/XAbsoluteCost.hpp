@@ -34,7 +34,7 @@ class XAbsoluteCost : public ICostFunction
 {
 public:
     // Calculates cost value of the specified output vector
-    float_t Cost( const vector_t& output, const vector_t& target ) const override
+    float_t Cost( const fvector_t& output, const fvector_t& target ) const override
     {
         size_t  length = output.size( );
         float_t cost   = float_t( 0 );
@@ -50,11 +50,11 @@ public:
     }
 
     // Calculates gradient for the specified output/target pair
-    vector_t Gradient( const vector_t& output, const vector_t& target ) const override
+    fvector_t Gradient( const fvector_t& output, const fvector_t& target ) const override
     {
-        size_t   length = output.size( );
-        vector_t grad( length );
-        float_t  diff;
+        size_t    length = output.size( );
+        fvector_t grad( length );
+        float_t   diff;
 
         for ( size_t i = 0; i < length; i++ )
         {

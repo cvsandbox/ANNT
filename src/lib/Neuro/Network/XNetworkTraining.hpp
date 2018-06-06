@@ -41,39 +41,39 @@ namespace ANNT { namespace Neuro { namespace Training {
 class XNetworkTraining : public XNetworkComputation
 {
 private:
-    std::shared_ptr<INetworkOptimizer>  mOptimizer;
-    std::shared_ptr<ICostFunction>      mCostFunction;
-    bool                                mAverageWeightGradients;
+    std::shared_ptr<INetworkOptimizer >  mOptimizer;
+    std::shared_ptr<ICostFunction>       mCostFunction;
+    bool                                 mAverageWeightGradients;
 
 private:
     // storage and pointers for outputs computed during training
-    std::vector<std::vector<vector_t>>  mTrainOutputsStorage;
-    std::vector<std::vector<vector_t*>> mTrainOutputs;
+    std::vector<std::vector<fvector_t>>  mTrainOutputsStorage;
+    std::vector<std::vector<fvector_t*>> mTrainOutputs;
 
     // storade and pointers to compute deltas for each layer
-    std::vector<std::vector<vector_t>>  mDeltasStorage;
-    std::vector<std::vector<vector_t*>> mDeltas;
+    std::vector<std::vector<fvector_t>>  mDeltasStorage;
+    std::vector<std::vector<fvector_t*>> mDeltas;
 
     // storage and pointers "input deltas"
     // no needed, just to make calculations consistent
-    std::vector<vector_t>               mInputDeltasStorage;
-    std::vector<vector_t*>              mInputDeltas;
+    std::vector<fvector_t>               mInputDeltasStorage;
+    std::vector<fvector_t*>              mInputDeltas;
 
     // vectors used to assemble pointers to training samples (input/outputs)
-    std::vector<vector_t*>              mTrainInputs;
-    std::vector<vector_t*>              mTargetOuputs;
+    std::vector<fvector_t*>              mTrainInputs;
+    std::vector<fvector_t*>              mTargetOuputs;
 
     // weights/biases gradients for all layers
-    std::vector<vector_t>               mGradWeights;
-    std::vector<vector_t>               mGradBiases;
+    std::vector<fvector_t>               mGradWeights;
+    std::vector<fvector_t>               mGradBiases;
 
     // vectors with parameter variables for optimizer
-    std::vector<std::vector<vector_t>>  mWeightsParameterVariables;
-    std::vector<std::vector<vector_t>>  mBiasesParameterVariables;
+    std::vector<std::vector<fvector_t>>  mWeightsParameterVariables;
+    std::vector<std::vector<fvector_t>>  mBiasesParameterVariables;
 
     // vectors with layer variables for optimizer
-    std::vector<vector_t>               mWeightsLayerVariables;
-    std::vector<vector_t>               mBiasesLayerVariables;
+    std::vector<fvector_t>               mWeightsLayerVariables;
+    std::vector<fvector_t>               mBiasesLayerVariables;
 
 public:
 
@@ -105,32 +105,32 @@ public:
     }
 
     // Trains single input/output sample
-    float_t TrainSample( const vector_t& input, const vector_t& targetOutput );
+    float_t TrainSample( const fvector_t& input, const fvector_t& targetOutput );
 
     // Trains single batch of prepared samples (as vectors)
-    float_t TrainBatch( const std::vector<vector_t>& inputs,
-                        const std::vector<vector_t>& targetOutputs );
+    float_t TrainBatch( const std::vector<fvector_t>& inputs,
+                        const std::vector<fvector_t>& targetOutputs );
 
     // Trains single batch of prepared samples (as pointers to vectors)
-    float_t TrainBatch( const std::vector<vector_t*>& inputs,
-                        const std::vector<vector_t*>& targetOutputs );
+    float_t TrainBatch( const std::vector<fvector_t*>& inputs,
+                        const std::vector<fvector_t*>& targetOutputs );
 
     // Trains single epoch using batches of the specified size
-    float_t TrainEpoch( const std::vector<vector_t>& inputs, 
-                        const std::vector<vector_t>& targetOutputs,
+    float_t TrainEpoch( const std::vector<fvector_t>& inputs, 
+                        const std::vector<fvector_t>& targetOutputs,
                         size_t batchSize,
                         bool randomPickIntoBatch = false );
 
     // Tests sample - calculates real output and provides error cost
-    float_t TestSample( const vector_t& input,
-                        const vector_t& targetOutput,
-                        vector_t& output );
+    float_t TestSample( const fvector_t& input,
+                        const fvector_t& targetOutput,
+                        fvector_t& output );
 
     // Tests classification for the provided inputs and target labels -
     // provides number of correctly classified samples and average cost (target outputs are used)
-    size_t TestClassification( const std::vector<vector_t>& inputs,
+    size_t TestClassification( const std::vector<fvector_t>& inputs,
                                const std::vector<size_t>& targetLabels,
-                               const std::vector<vector_t>& targetOutputs,
+                               const std::vector<fvector_t>& targetOutputs,
                                float_t* pAvgCost );
 
 private:

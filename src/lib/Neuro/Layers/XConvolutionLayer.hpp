@@ -44,11 +44,11 @@ private:
     size_t      mPadWidth;
     size_t      mPadHeight;
 
-    vector_t    mKernelsWeights;
-    vector_t    mKernelsBiases;
+    fvector_t   mKernelsWeights;
+    fvector_t   mKernelsBiases;
 
-    std::vector<vector_t> mPaddedInputs;
-    std::vector<vector_t> mPaddedPrevDeltas;
+    std::vector<fvector_t> mPaddedInputs;
+    std::vector<fvector_t> mPaddedPrevDeltas;
 
 public:
     XConvolutionLayer( size_t inputWidth,  size_t inputHeight,  size_t inputDepth,
@@ -72,25 +72,25 @@ public:
     void Randomize( ) override;
 
     // Calculates outputs for the given inputs
-    void ForwardCompute( const std::vector<vector_t*>& inputs,
-                         std::vector<vector_t*>& outputs ) override;
+    void ForwardCompute( const std::vector<fvector_t*>& inputs,
+                         std::vector<fvector_t*>& outputs ) override;
 
     // Propagates error to the previous layer and calculates weights/biases gradients
-    void BackwardCompute( const std::vector<vector_t*>& inputs,
-                          const std::vector<vector_t*>& outputs,
-                          const std::vector<vector_t*>& deltas,
-                          std::vector<vector_t*>& prevDeltas,
-                          vector_t& gradWeights,
-                          vector_t& gradBiases ) override;
+    void BackwardCompute( const std::vector<fvector_t*>& inputs,
+                          const std::vector<fvector_t*>& outputs,
+                          const std::vector<fvector_t*>& deltas,
+                          std::vector<fvector_t*>& prevDeltas,
+                          fvector_t& gradWeights,
+                          fvector_t& gradBiases ) override;
 
     // Applies updates to the layer's weights and biases
-    void UpdateWeights( const vector_t& weightsUpdate,
-                        const vector_t& biasesUpdate ) override;
+    void UpdateWeights( const fvector_t& weightsUpdate,
+                        const fvector_t& biasesUpdate ) override;
 
 private:
 
-    void InputPadding( const std::vector<vector_t*>& input, std::vector<vector_t>& padded );
-    void DeltasUnpadding( std::vector<vector_t>& deltas, std::vector<vector_t*>& unpadded );
+    void InputPadding( const std::vector<fvector_t*>& input, std::vector<fvector_t>& padded );
+    void DeltasUnpadding( std::vector<fvector_t>& deltas, std::vector<fvector_t*>& unpadded );
 };
 
 } } // namespace ANNT::Neuro

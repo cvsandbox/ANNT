@@ -35,21 +35,21 @@ private:
 public:
     // Encodes single class/label using one-hot encoding - a vector of all zeros except the one element set to 1,
     // which index corresponds to the class value
-    static vector_t OneHotEncoding( size_t label, size_t labelsCount );
+    static fvector_t OneHotEncoding( size_t label, size_t labelsCount );
 
     // Encodes a vector of labels using one-hot encoding
-    static std::vector<vector_t> OneHotEncoding( const std::vector<size_t>& labels, size_t labelsCount );
+    static std::vector<fvector_t> OneHotEncoding( const std::vector<size_t>& labels, size_t labelsCount );
 
     // Returns index of the maximum element in the specified vector
-    static size_t MaxIndex( const vector_t& vec );
+    static size_t MaxIndex( const fvector_t& vec );
 
     // Pads the specified 2D input (although it can be of certain depth) with the specified value
-    static void AddPadding2d( const vector_t& src, vector_t& dst,
+    static void AddPadding2d( const fvector_t& src, fvector_t& dst,
                               size_t srcWidth, size_t srcHeight, size_t dstWidth, size_t dstHeight,
                               size_t depth, float_t padValue );
 
     // Removes padding from the specified 2D input (although it can be of certain depth)
-    static void RemovePadding2d( const vector_t& src, vector_t& dst,
+    static void RemovePadding2d( const fvector_t& src, fvector_t& dst,
                                  size_t srcWidth, size_t srcHeight, size_t dstWidth, size_t dstHeight,
                                  size_t depth );
 };

@@ -26,9 +26,9 @@ namespace ANNT {
 
 // Encodes single class using one-hot encoding - a vector of all zeros except the one element set to 1,
 // which index corresponds to the class value
-vector_t XDataEncodingTools::OneHotEncoding( size_t label, size_t labelsCount )
+fvector_t XDataEncodingTools::OneHotEncoding( size_t label, size_t labelsCount )
 {
-    vector_t encodedClass( labelsCount, 0 );
+    fvector_t encodedClass( labelsCount, 0 );
 
     encodedClass[label] = 1;
 
@@ -36,13 +36,13 @@ vector_t XDataEncodingTools::OneHotEncoding( size_t label, size_t labelsCount )
 }
 
 // Encodes a vector of classes using one-hot encoding
-vector<vector_t> XDataEncodingTools::OneHotEncoding( const vector<size_t>& labels, size_t labelsCount )
+vector<fvector_t> XDataEncodingTools::OneHotEncoding( const vector<size_t>& labels, size_t labelsCount )
 {
-    vector<vector_t> encodedClasses( labels.size( ) );
+    vector<fvector_t> encodedClasses( labels.size( ) );
 
     for ( size_t i = 0; i < labels.size( ); i++ )
     {
-        encodedClasses[i] = vector_t( labelsCount, 0 );
+        encodedClasses[i] = fvector_t( labelsCount, 0 );
         encodedClasses[i][labels[i]] = 1;
     }
 
@@ -50,7 +50,7 @@ vector<vector_t> XDataEncodingTools::OneHotEncoding( const vector<size_t>& label
 }
 
 // Returns index of the maximum element in the specified vector
-size_t XDataEncodingTools::MaxIndex( const vector_t& vec )
+size_t XDataEncodingTools::MaxIndex( const fvector_t& vec )
 {
     size_t maxIndex = 0;
     auto   maxValue = vec[0];
@@ -68,7 +68,7 @@ size_t XDataEncodingTools::MaxIndex( const vector_t& vec )
 }
 
 // Pads the specified 2D input (although it can be of certain depth) with the specified value
-void XDataEncodingTools::AddPadding2d( const vector_t& src, vector_t& dst,
+void XDataEncodingTools::AddPadding2d( const fvector_t& src, fvector_t& dst,
                                        size_t srcWidth, size_t srcHeight, size_t dstWidth, size_t dstHeight,
                                        size_t depth, float_t padValue )
 {
@@ -137,7 +137,7 @@ void XDataEncodingTools::AddPadding2d( const vector_t& src, vector_t& dst,
 }
 
 // Removes padding from the specified 2D input
-void XDataEncodingTools::RemovePadding2d( const vector_t& src, vector_t& dst,
+void XDataEncodingTools::RemovePadding2d( const fvector_t& src, fvector_t& dst,
                                           size_t srcWidth, size_t srcHeight, size_t dstWidth, size_t dstHeight,
                                           size_t depth )
 {

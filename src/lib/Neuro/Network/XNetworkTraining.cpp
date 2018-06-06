@@ -60,20 +60,20 @@ XNetworkTraining::XNetworkTraining( const shared_ptr<XNeuralNetwork>& network,
             biasesCount  = trainableLayer->BiasesCount( );
         }
 
-        mGradWeights.push_back( vector_t( weightsCount ) );
-        mGradBiases.push_back( vector_t( biasesCount ) );
+        mGradWeights.push_back( fvector_t( weightsCount ) );
+        mGradBiases.push_back( fvector_t( biasesCount ) );
 
         // optimizer's variables ...
-        mWeightsParameterVariables.push_back( vector<vector_t>( optimizerParameterVariablesCount ) );
-        mBiasesParameterVariables.push_back( vector<vector_t>( optimizerParameterVariablesCount ) );
+        mWeightsParameterVariables.push_back( vector<fvector_t>( optimizerParameterVariablesCount ) );
+        mBiasesParameterVariables.push_back( vector<fvector_t>( optimizerParameterVariablesCount ) );
 
-        mWeightsLayerVariables.push_back( vector_t( optimizerLayerVariablesCount ) );
-        mBiasesLayerVariables.push_back( vector_t( optimizerLayerVariablesCount ) );
+        mWeightsLayerVariables.push_back( fvector_t( optimizerLayerVariablesCount ) );
+        mBiasesLayerVariables.push_back( fvector_t( optimizerLayerVariablesCount ) );
 
         for ( size_t i = 0; i < optimizerParameterVariablesCount; i++ )
         {
-            mWeightsParameterVariables.back( )[i] = vector_t( weightsCount );
-            mBiasesParameterVariables.back( )[i]  = vector_t( biasesCount );
+            mWeightsParameterVariables.back( )[i] = fvector_t( weightsCount );
+            mBiasesParameterVariables.back( )[i]  = fvector_t( biasesCount );
         }
     }
 }
@@ -107,10 +107,10 @@ void XNetworkTraining::AllocateTrainVectors( size_t samplesCount )
 
             for ( size_t i = 0; i < samplesCount; i++ )
             {
-                mTrainOutputsStorage[layerIndex][i] = vector_t( layerOutputCount );
+                mTrainOutputsStorage[layerIndex][i] = fvector_t( layerOutputCount );
                 mTrainOutputs[layerIndex][i]        = &( mTrainOutputsStorage[layerIndex][i] );
 
-                mDeltasStorage[layerIndex][i] = vector_t( layerOutputCount );
+                mDeltasStorage[layerIndex][i] = fvector_t( layerOutputCount );
                 mDeltas[layerIndex][i]        = &( mDeltasStorage[layerIndex][i] );
             }
         }
@@ -121,7 +121,7 @@ void XNetworkTraining::AllocateTrainVectors( size_t samplesCount )
 
         for ( size_t i = 0; i < samplesCount; i++ )
         {
-            mInputDeltasStorage[i] = vector_t( mNetwork->InputsCount( ) );
+            mInputDeltasStorage[i] = fvector_t( mNetwork->InputsCount( ) );
             mInputDeltas[i] = &( mInputDeltasStorage[i] );
         }
     }
@@ -130,15 +130,15 @@ void XNetworkTraining::AllocateTrainVectors( size_t samplesCount )
 // Calculate error of the last layer for each training sample
 float_t XNetworkTraining::CalculateError( )
 {
-    vector<vector_t>& lastOutputs = mTrainOutputsStorage.back( );
-    vector<vector_t>& lastDeltas  = mDeltasStorage.back( );
-    float_t           cost        = 0;
+    vector<fvector_t>& lastOutputs = mTrainOutputsStorage.back( );
+    vector<fvector_t>& lastDeltas  = mDeltasStorage.back( );
+    float_t            cost        = 0;
 
     for ( size_t i = 0, n = mTrainInputs.size( ); i < n; i++ )
     {
-        vector_t& lastDelta    = lastDeltas[i];
-        vector_t& lastOutput   = lastOutputs[i];
-        vector_t& targetOutput = *mTargetOuputs[i];
+        fvector_t& lastDelta    = lastDeltas[i];
+        fvector_t& lastOutput   = lastOutputs[i];
+        fvector_t& targetOutput = *mTargetOuputs[i];
 
         cost     += mCostFunction->Cost( lastOutput, targetOutput );
         lastDelta = mCostFunction->Gradient( lastOutput, targetOutput );
@@ -226,7 +226,7 @@ float_t XNetworkTraining::RunTraining( )
 }
 
 // Trains single input/output sample
-float_t XNetworkTraining::TrainSample( const vector_t& input, const vector_t& targetOutput )
+float_t XNetworkTraining::TrainSample( const fvector_t& input, const fvector_t& targetOutput )
 {
     float_t cost = 0;
 
@@ -235,8 +235,8 @@ float_t XNetworkTraining::TrainSample( const vector_t& input, const vector_t& ta
         AllocateTrainVectors( 1 );
 
         // get the single input/output into usable form
-        mTrainInputs[0]  = const_cast<vector_t*>( &input );
-        mTargetOuputs[0] = const_cast<vector_t*>( &targetOutput );
+        mTrainInputs[0]  = const_cast<fvector_t*>( &input );
+        mTargetOuputs[0] = const_cast<fvector_t*>( &targetOutput );
 
         cost = RunTraining( );
     }
@@ -245,8 +245,8 @@ float_t XNetworkTraining::TrainSample( const vector_t& input, const vector_t& ta
 }
 
 // Trains single batch of prepared samples (as vectors)
-float_t XNetworkTraining::TrainBatch( const vector<vector_t>& inputs,
-                                      const vector<vector_t>& targetOutputs )
+float_t XNetworkTraining::TrainBatch( const vector<fvector_t>& inputs,
+                                      const vector<fvector_t>& targetOutputs )
 {
     float_t cost = 0;
 
@@ -257,8 +257,8 @@ float_t XNetworkTraining::TrainBatch( const vector<vector_t>& inputs,
         // prepare inputs vectors and target ouputs
         for ( size_t i = 0, n = inputs.size( ); i < n; i++ )
         {
-            mTrainInputs[i]  = const_cast<vector_t*>( &( inputs[i] ) );
-            mTargetOuputs[i] = const_cast<vector_t*>( &( targetOutputs[i] ) );
+            mTrainInputs[i]  = const_cast<fvector_t*>( &( inputs[i] ) );
+            mTargetOuputs[i] = const_cast<fvector_t*>( &( targetOutputs[i] ) );
         }
 
         cost = RunTraining( );
@@ -268,8 +268,8 @@ float_t XNetworkTraining::TrainBatch( const vector<vector_t>& inputs,
 }
 
 // Trains single batch of prepared samples (as pointers to vectors)
-float_t XNetworkTraining::TrainBatch( const vector<vector_t*>& inputs,
-                                      const vector<vector_t*>& targetOutputs )
+float_t XNetworkTraining::TrainBatch( const vector<fvector_t*>& inputs,
+                                      const vector<fvector_t*>& targetOutputs )
 {
     float_t cost = 0;
 
@@ -291,8 +291,8 @@ float_t XNetworkTraining::TrainBatch( const vector<vector_t*>& inputs,
 }
 
 // Trains single epoch using batches of the specified size
-float_t XNetworkTraining::TrainEpoch( const vector<vector_t>& inputs,
-                                      const vector<vector_t>& targetOutputs,
+float_t XNetworkTraining::TrainEpoch( const vector<fvector_t>& inputs,
+                                      const vector<fvector_t>& targetOutputs,
                                       size_t batchSize, bool randomPickIntoBatch )
 {
     // It is not an average cost for all samples after completion of an epoch, since that
@@ -329,8 +329,8 @@ float_t XNetworkTraining::TrainEpoch( const vector<vector_t>& inputs,
                         sampleIndex = rand( ) % samplesCount;
                     }
 
-                    mTrainInputs[j]  = const_cast<vector_t*>( &( inputs[sampleIndex] ) );
-                    mTargetOuputs[j] = const_cast<vector_t*>( &( targetOutputs[sampleIndex] ) );
+                    mTrainInputs[j]  = const_cast<fvector_t*>( &( inputs[sampleIndex] ) );
+                    mTargetOuputs[j] = const_cast<fvector_t*>( &( targetOutputs[sampleIndex] ) );
                 }
 
                 averageRunningCost += RunTraining( );
@@ -345,16 +345,16 @@ float_t XNetworkTraining::TrainEpoch( const vector<vector_t>& inputs,
 
 
 // Tests sample - calculates real output and provides error cost
-float_t XNetworkTraining::TestSample( const vector_t& input,
-                                      const vector_t& targetOutput,
-                                      vector_t& output )
+float_t XNetworkTraining::TestSample( const fvector_t& input,
+                                      const fvector_t& targetOutput,
+                                      fvector_t& output )
 {
     float_t cost = 0;
 
     if ( mNetwork->LayersCount( ) != 0 )
     {
         // compute the network to get the actual output
-        mComputeInputs[0] = const_cast<vector_t*>( &input );
+        mComputeInputs[0] = const_cast<fvector_t*>( &input );
         DoCompute( mComputeInputs, mComputeOutputs );
 
         output = mComputeOutputsStorage.back( )[0];
@@ -366,8 +366,8 @@ float_t XNetworkTraining::TestSample( const vector_t& input,
 
 // Tests classification for the provided inputs and target labels - provides number of correctly classified
 // samples and average cost (target outputs are used)
-size_t XNetworkTraining::TestClassification( const std::vector<vector_t>& inputs, const std::vector<size_t>& targetLabels,
-                                             const std::vector<vector_t>& targetOutputs, float_t* pAvgCost )
+size_t XNetworkTraining::TestClassification( const std::vector<fvector_t>& inputs, const std::vector<size_t>& targetLabels,
+                                             const std::vector<fvector_t>& targetOutputs, float_t* pAvgCost )
 {
     size_t  correctLabelsCounter = 0;
     float_t cost = 0;
@@ -376,7 +376,7 @@ size_t XNetworkTraining::TestClassification( const std::vector<vector_t>& inputs
     {
         for ( size_t i = 0, n = inputs.size( ); i < n; i++ )
         {
-            mComputeInputs[0] = const_cast<vector_t*>( &( inputs[i] ) );
+            mComputeInputs[0] = const_cast<fvector_t*>( &( inputs[i] ) );
             DoCompute( mComputeInputs, mComputeOutputs );
 
             cost += mCostFunction->Cost( mComputeOutputsStorage.back( )[0], targetOutputs[i] );

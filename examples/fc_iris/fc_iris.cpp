@@ -38,7 +38,7 @@ using namespace ANNT::Neuro::Training;
 static const char* IRIS_DATA_FILE = "data/iris.data";
 
 // Helper function to load Iris data set
-bool LoadData( vector<vector_t>& attributes, vector<size_t>& labels )
+bool LoadData( vector<fvector_t>& attributes, vector<size_t>& labels )
 {
     bool  ret  = false;
     FILE* file = fopen( IRIS_DATA_FILE, "r" );
@@ -84,7 +84,7 @@ bool LoadData( vector<vector_t>& attributes, vector<size_t>& labels )
                     // Iris data set has only 3 classes, so ignore anything else
                     if ( labelId <= 2 )
                     {
-                        attributes.push_back( vector_t( { attr1, attr2, attr3, attr4 } ) );
+                        attributes.push_back( fvector_t( { attr1, attr2, attr3, attr4 } ) );
                         labels.push_back( labelId );
                     }
                 }
@@ -123,8 +123,8 @@ int main( int /* argc */, char** /* argv */ )
 {
     printf( "Iris classification example with Fully Connected ANN \n\n" );
 
-    vector<vector_t> trainAttributes;
-    vector<size_t>   trainLabels;
+    vector<fvector_t> trainAttributes;
+    vector<size_t>    trainLabels;
 
     if ( !LoadData( trainAttributes, trainLabels ) )
     {
@@ -142,14 +142,14 @@ int main( int /* argc */, char** /* argv */ )
     }
 
     // split the data set into two: training (120 samples) and test (30 samples)
-    vector<vector_t> testAttributes = ExtractTestSamples( trainAttributes );
-    vector<size_t>   testLabels     = ExtractTestSamples( trainLabels );
+    vector<fvector_t> testAttributes = ExtractTestSamples( trainAttributes );
+    vector<size_t>   testLabels      = ExtractTestSamples( trainLabels );
 
     printf( "Using %d samples for training and %d samples for test \n\n", trainAttributes.size( ), testAttributes.size( ) );
 
     // perform one hot encoding of train/test labels
-    vector<vector_t> encodedTrainLabels = XDataEncodingTools::OneHotEncoding( trainLabels, 3 );
-    vector<vector_t> encodedTestLabels  = XDataEncodingTools::OneHotEncoding( testLabels, 3 );
+    vector<fvector_t> encodedTrainLabels = XDataEncodingTools::OneHotEncoding( trainLabels, 3 );
+    vector<fvector_t> encodedTestLabels  = XDataEncodingTools::OneHotEncoding( testLabels, 3 );
 
     // prepare a 3 layer ANN
     shared_ptr<XNeuralNetwork> net = make_shared<XNeuralNetwork>( );

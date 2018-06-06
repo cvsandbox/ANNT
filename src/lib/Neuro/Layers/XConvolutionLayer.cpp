@@ -57,8 +57,8 @@ XConvolutionLayer::XConvolutionLayer( size_t inputWidth, size_t inputHeight, siz
     Initialize( mInputWidth  * mInputHeight  * mInputDepth,
                 mOutputWidth * mOutputHeight * mKernelsCount );
 
-    mKernelsWeights = vector_t( mKernelWidth * mKernelHeight * mInputDepth * mKernelsCount );
-    mKernelsBiases  = vector_t( mKernelsCount );
+    mKernelsWeights = fvector_t( mKernelWidth * mKernelHeight * mInputDepth * mKernelsCount );
+    mKernelsBiases  = fvector_t( mKernelsCount );
 
     Randomize( );
 }
@@ -79,8 +79,8 @@ void XConvolutionLayer::Randomize( )
 }
 
 // Calculates outputs for the given inputs
-void XConvolutionLayer::ForwardCompute( const vector<vector_t*>& inputs,
-                                        vector<vector_t*>& outputs )
+void XConvolutionLayer::ForwardCompute( const vector<fvector_t*>& inputs,
+                                        vector<fvector_t*>& outputs )
 {
     const float_t* kernelsData  = mKernelsWeights.data( );
 
@@ -173,12 +173,12 @@ void XConvolutionLayer::ForwardCompute( const vector<vector_t*>& inputs,
 }
 
 // Propagates error to the previous layer and calculates weights/biases gradients
-void XConvolutionLayer::BackwardCompute( const vector<vector_t*>& inputs,
-                                         const vector<vector_t*>& /* outputs */,
-                                         const vector<vector_t*>& deltas,
-                                         vector<vector_t*>& prevDeltas,
-                                         vector_t& gradWeights,
-                                         vector_t& gradBiases )
+void XConvolutionLayer::BackwardCompute( const vector<fvector_t*>& inputs,
+                                         const vector<fvector_t*>& /* outputs */,
+                                         const vector<fvector_t*>& deltas,
+                                         vector<fvector_t*>& prevDeltas,
+                                         fvector_t& gradWeights,
+                                         fvector_t& gradBiases )
 {
     const float* kernelsData     = mKernelsWeights.data( );
     //const float* deltaData       = delta.data( );
@@ -368,8 +368,8 @@ void XConvolutionLayer::BackwardCompute( const vector<vector_t*>& inputs,
 }
 
 // Applies updates to the layer's weights and biases
-void XConvolutionLayer::UpdateWeights( const vector_t& weightsUpdate,
-                                       const vector_t& biasesUpdate )
+void XConvolutionLayer::UpdateWeights( const fvector_t& weightsUpdate,
+                                       const fvector_t& biasesUpdate )
 {
     for ( size_t i = 0, n = mKernelsWeights.size( ); i < n; i++ )
     {
@@ -381,7 +381,7 @@ void XConvolutionLayer::UpdateWeights( const vector_t& weightsUpdate,
     }
 }
 
-void XConvolutionLayer::InputPadding( const std::vector<vector_t*>& input, std::vector<vector_t>& padded )
+void XConvolutionLayer::InputPadding( const std::vector<fvector_t*>& input, std::vector<fvector_t>& padded )
 {
     // For odd size kernels, padding is distributed equally on each side.
     // However for even size kernels, padding goes first to right/bottom sides.
@@ -405,7 +405,7 @@ void XConvolutionLayer::InputPadding( const std::vector<vector_t*>& input, std::
 
         for ( size_t i = 0, n = input.size( ); i < n; i++ )
         {
-            padded[i] = vector_t( paddedInputSize );
+            padded[i] = fvector_t( paddedInputSize );
         }
     }
 
@@ -435,7 +435,7 @@ void XConvolutionLayer::InputPadding( const std::vector<vector_t*>& input, std::
     }
 }
 
-void XConvolutionLayer::DeltasUnpadding( std::vector<vector_t>& deltas, std::vector<vector_t*>& unpadded )
+void XConvolutionLayer::DeltasUnpadding( std::vector<fvector_t>& deltas, std::vector<fvector_t*>& unpadded )
 {
     size_t lefPad      = ( mKernelWidth  - 1 ) / 2;
     size_t rightPad    = ( mKernelWidth  - 1 ) - lefPad;

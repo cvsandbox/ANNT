@@ -33,17 +33,17 @@ XNetworkComputation::XNetworkComputation( const shared_ptr<XNeuralNetwork>& netw
     // prepare output vectors for all layers and for all samples (only one sample here for now)
     for ( auto layer : *mNetwork )
     {
-        mComputeOutputsStorage.push_back( vector<vector_t>( { vector_t( layer->OutputsCount( ) ) } ) );
-        mComputeOutputs.push_back( vector<vector_t*>( { &( mComputeOutputsStorage.back( )[0] ) } ) );
+        mComputeOutputsStorage.push_back( vector<fvector_t>( { fvector_t( layer->OutputsCount( ) ) } ) );
+        mComputeOutputs.push_back( vector<fvector_t*>( { &( mComputeOutputsStorage.back( )[0] ) } ) );
     }
 }
 
 // Computes output vector for the given input vector
-void XNetworkComputation::Compute( const vector_t& input, vector_t& output )
+void XNetworkComputation::Compute( const fvector_t& input, fvector_t& output )
 {
     if ( mNetwork->LayersCount( ) != 0 )
     {
-        mComputeInputs[0] = const_cast<vector_t*>( &input );
+        mComputeInputs[0] = const_cast<fvector_t*>( &input );
 
         DoCompute( mComputeInputs, mComputeOutputs );
 
@@ -53,13 +53,13 @@ void XNetworkComputation::Compute( const vector_t& input, vector_t& output )
 }
 
 // Runs classification for the given input - returns index of the maximum element in the corresponding output
-size_t XNetworkComputation::Classify( const vector_t& input )
+size_t XNetworkComputation::Classify( const fvector_t& input )
 {
     size_t classIndex = 0;
 
     if ( mNetwork->LayersCount( ) != 0 )
     {
-        mComputeInputs[0] = const_cast<vector_t*>( &input );
+        mComputeInputs[0] = const_cast<fvector_t*>( &input );
 
         DoCompute( mComputeInputs, mComputeOutputs );
 
@@ -70,7 +70,7 @@ size_t XNetworkComputation::Classify( const vector_t& input )
 }
 
 // Tests classification for the provided inputs and target labels - provides number of correctly classified samples
-size_t XNetworkComputation::TestClassification( const vector<vector_t>& inputs, const vector<size_t>& targetLabels )
+size_t XNetworkComputation::TestClassification( const vector<fvector_t>& inputs, const vector<size_t>& targetLabels )
 {
     size_t correctLabelsCounter = 0;
 
@@ -78,7 +78,7 @@ size_t XNetworkComputation::TestClassification( const vector<vector_t>& inputs, 
     {
         for ( size_t i = 0, n = inputs.size( ); i < n; i++ )
         {
-            mComputeInputs[0] = const_cast<vector_t*>( &( inputs[i] ) );
+            mComputeInputs[0] = const_cast<fvector_t*>( &( inputs[i] ) );
 
             DoCompute( mComputeInputs, mComputeOutputs );
 
@@ -93,8 +93,8 @@ size_t XNetworkComputation::TestClassification( const vector<vector_t>& inputs, 
 }
 
 // Helper method to compute output vectors for the given input vectors
-void XNetworkComputation::DoCompute( const vector<vector_t*>& inputs,
-                                     vector<vector<vector_t*>>& outputs )
+void XNetworkComputation::DoCompute( const vector<fvector_t*>& inputs,
+                                     vector<vector<fvector_t*>>& outputs )
 {
     mNetwork->LayerAt( 0 )->ForwardCompute( inputs, outputs[0] );
 

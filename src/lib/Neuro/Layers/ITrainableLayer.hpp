@@ -50,8 +50,8 @@ public:
     virtual void Randomize( ) = 0;
 
     // Applies updates to the layer's weights and biases
-    virtual void UpdateWeights( const vector_t& weightsUpdate,
-                                const vector_t& biasesUpdate ) = 0;
+    virtual void UpdateWeights( const fvector_t& weightsUpdate,
+                                const fvector_t& biasesUpdate ) = 0;
 };
 
 } } // namespace ANNT::Neuro

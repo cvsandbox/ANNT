@@ -141,13 +141,13 @@ public:
         }
     }
 
-    void ForwardCompute( const std::vector<vector_t*>& inputs,
-                         std::vector<vector_t*>& outputs ) override
+    void ForwardCompute( const std::vector<fvector_t*>& inputs,
+                         std::vector<fvector_t*>& outputs ) override
     {
         for ( size_t i = 0, n = inputs.size( ); i < n; i++ )
         {
-            vector_t& input  = *( inputs[i] );
-            vector_t& output = *( outputs[i] );
+            fvector_t& input  = *( inputs[i] );
+            fvector_t& output = *( outputs[i] );
 
             for ( size_t outputIndex = 0; outputIndex < mOutputsCount; outputIndex++ )
             {
@@ -170,15 +170,15 @@ public:
         }
     }
     
-    void BackwardProcess( const std::vector<vector_t*>& /* input  */,
-                          const std::vector<vector_t*>& /* output */,
-                          const std::vector<vector_t*>& deltas,
-                          std::vector<vector_t*>& prevDeltas ) const override
+    void BackwardProcess( const std::vector<fvector_t*>& /* input  */,
+                          const std::vector<fvector_t*>& /* output */,
+                          const std::vector<fvector_t*>& deltas,
+                          std::vector<fvector_t*>& prevDeltas ) const override
     {
         for ( size_t i = 0, n = deltas.size( ); i < n; i++ )
         {
-            const vector_t& delta = *( deltas[i] );
-            vector_t&       prevDelta = *( prevDeltas[i] );
+            const fvector_t& delta = *( deltas[i] );
+            fvector_t&       prevDelta = *( prevDeltas[i] );
 
             for ( size_t inputIndex = 0; inputIndex < mInputsCount; inputIndex++ )
             {

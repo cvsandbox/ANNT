@@ -35,7 +35,7 @@ using namespace ANNT::Neuro;
 using namespace ANNT::Neuro::Training;
 
 // Helper function to print values of the vector
-void PrintVector( const vector_t& vec )
+void PrintVector( const fvector_t& vec )
 {
     printf( "{ " );
     for ( size_t i = 0; i < vec.size( ); i++ )
@@ -46,10 +46,10 @@ void PrintVector( const vector_t& vec )
 }
 
 // Helper function to print specified inputs and corresponding computed outputs
-void TestNetwork( const shared_ptr<XNeuralNetwork>& net, const vector<vector_t>& inputs )
+void TestNetwork( const shared_ptr<XNeuralNetwork>& net, const vector<fvector_t>& inputs )
 {
     XNetworkComputation netCtx( net );
-    vector_t            output( net->OutputsCount( ) );
+    fvector_t           output( net->OutputsCount( ) );
 
     for ( size_t i = 0, n = inputs.size( ); i < n; i++ )
     {
@@ -70,8 +70,8 @@ int main( int /* argc */, char** /* argv */ )
     printf( "XOR example with Fully Connected ANN \n\n" );
 
     // prepare XOR training data encoded as -1, 1
-    vector<vector_t> inputs;
-    vector<vector_t> targetOutputs;
+    vector<fvector_t> inputs;
+    vector<fvector_t> targetOutputs;
 
     inputs.push_back( { -1.0f, -1.0f } ); /* -> */ targetOutputs.push_back( { -1.0f } );
     inputs.push_back( {  1.0f, -1.0f } ); /* -> */ targetOutputs.push_back( {  1.0f } );
@@ -127,5 +127,5 @@ int main( int /* argc */, char** /* argv */ )
     printf( "Network output after training: \n" );
     TestNetwork( net, inputs );
 
-	return 0;
+    return 0;
 }

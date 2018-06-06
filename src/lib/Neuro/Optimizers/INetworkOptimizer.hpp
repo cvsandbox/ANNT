@@ -65,7 +65,7 @@ public:
     }
 
     // Calculates weights/biases updates from given gradients
-    virtual void CalculateUpdatesFromGradients( vector_t& updates, std::vector<vector_t>& paramVariables, vector_t& layerVariables ) = 0;
+    virtual void CalculateUpdatesFromGradients( fvector_t& updates, std::vector<fvector_t>& paramVariables, fvector_t& layerVariables ) = 0;
 };
 
 } } } // namespace ANNT::Neuro::Training

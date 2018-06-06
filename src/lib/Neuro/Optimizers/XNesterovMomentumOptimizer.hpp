@@ -45,9 +45,9 @@ public:
         return 1;
     }
 
-    void CalculateUpdatesFromGradients( vector_t& updates, std::vector<vector_t>& paramVariables, vector_t& /* layerVariables */ ) override
+    void CalculateUpdatesFromGradients( fvector_t& updates, std::vector<fvector_t>& paramVariables, fvector_t& /* layerVariables */ ) override
     {
-        vector_t& prevUpdates = paramVariables[0];
+        fvector_t& prevUpdates = paramVariables[0];
 
         for ( size_t i = 0, n = updates.size( ); i < n; i++ )
         {

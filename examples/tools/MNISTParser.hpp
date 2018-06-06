@@ -43,7 +43,7 @@ public:
     static bool LoadLabels( const std::string& fileName, std::vector<size_t>& labels );
 
     // Loads images from the specified MNIST images' file
-    static bool LoadImages( const std::string& fileName, std::vector<vector_t>& images,
+    static bool LoadImages( const std::string& fileName, std::vector<fvector_t>& images,
                             float_t scaleMin, float_t scaleMax, size_t xPad, size_t yPad );
 };
 

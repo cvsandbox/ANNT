@@ -34,10 +34,10 @@ public:
     virtual ~ICostFunction( ) { }
 
     // Calculates cost value of the specified output vector
-    virtual float_t Cost( const vector_t& output, const vector_t& target ) const = 0;
+    virtual float_t Cost( const fvector_t& output, const fvector_t& target ) const = 0;
 
     // Calculates gradient for the specified output/target pair
-    virtual vector_t Gradient( const vector_t& output, const vector_t& target ) const = 0;
+    virtual fvector_t Gradient( const fvector_t& output, const fvector_t& target ) const = 0;
 };
 
 } } } // namespace ANNT::Neuro::Training

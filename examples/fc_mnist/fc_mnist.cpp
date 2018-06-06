@@ -56,10 +56,10 @@ int main( int /* argc */, char** /* argv */ )
 {
     printf( "MNIST handwritten digits classification example with Fully Connected ANN \n\n" );
 
-    vector<size_t>   trainLabels;
-    vector<vector_t> trainImages;
-    vector<size_t>   testLabels;
-    vector<vector_t> testImages;
+    vector<size_t>    trainLabels;
+    vector<fvector_t> trainImages;
+    vector<size_t>    testLabels;
+    vector<fvector_t> testImages;
 
     // load training data set
     if ( !MNISTParser::LoadLabels( MNIST_TRAIN_LABELS_FILE, trainLabels ) )
@@ -103,16 +103,16 @@ int main( int /* argc */, char** /* argv */ )
     printf( "Loaded %u test data samples \n\n", testLabels.size( ) );
 
     // extract validation data set out of training set
-    vector<size_t>   validationLabels = ExtractValidationSamples( trainLabels );
-    vector<vector_t> validationImages = ExtractValidationSamples( trainImages );
+    vector<size_t>    validationLabels = ExtractValidationSamples( trainLabels );
+    vector<fvector_t> validationImages = ExtractValidationSamples( trainImages );
 
     printf( "Samples usage: training = %u, validation = %u, test = %u \n\n",
             trainLabels.size( ), validationLabels.size( ), testLabels.size( ) );
 
     // perform one hot encoding for all labels
-    vector<vector_t> encodedTrainLabels      = XDataEncodingTools::OneHotEncoding( trainLabels, 10 );
-    vector<vector_t> encodedValidationLabels = XDataEncodingTools::OneHotEncoding( validationLabels, 10 );
-    vector<vector_t> encodedTestLabels       = XDataEncodingTools::OneHotEncoding( testLabels, 10 );
+    vector<fvector_t> encodedTrainLabels      = XDataEncodingTools::OneHotEncoding( trainLabels, 10 );
+    vector<fvector_t> encodedValidationLabels = XDataEncodingTools::OneHotEncoding( validationLabels, 10 );
+    vector<fvector_t> encodedTestLabels       = XDataEncodingTools::OneHotEncoding( testLabels, 10 );
 
     // prepare a 3 layer ANN
     shared_ptr<XNeuralNetwork> net = make_shared<XNeuralNetwork>( );
@@ -139,11 +139,11 @@ int main( int /* argc */, char** /* argv */ )
             correct, trainImages.size( ), static_cast<float>( cost ) );
 
     //
-    vector<vector_t*> inputs( 50 );
-    vector<vector_t*> outputs( 50 );
+    vector<fvector_t*> inputs( 50 );
+    vector<fvector_t*> outputs( 50 );
 
     // train the neural network
-    for ( size_t i = 0; i < 10; i++ )
+    for ( size_t i = 0; i < 20; i++ )
     {
         printf( "epoch %u \n", i + 1 );
         for ( size_t j = 0; j < 1000; j++ )

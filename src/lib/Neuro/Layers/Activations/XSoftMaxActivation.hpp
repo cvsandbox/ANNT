@@ -31,7 +31,7 @@ class XSoftMaxActivation : public IActivationLayer
 {
 public:
 
-    void ForwardActivate( const vector_t& input, vector_t& output ) override
+    void ForwardActivate( const fvector_t& input, fvector_t& output ) override
     {
         size_t  len = input.size( );
         float_t sum = 0;
@@ -48,11 +48,11 @@ public:
         }
     }
 
-    void BackwardActivate( const vector_t& input, const vector_t& output,
-                           const vector_t& delta, vector_t& prevDelta ) override
+    void BackwardActivate( const fvector_t& input, const fvector_t& output,
+                           const fvector_t& delta, fvector_t& prevDelta ) override
     {
-        size_t   len = input.size( );
-        vector_t der( len, float_t( 0 ) );
+        size_t    len = input.size( );
+        fvector_t der( len, float_t( 0 ) );
 
         for ( size_t i = 0; i < len; i++ )
         {

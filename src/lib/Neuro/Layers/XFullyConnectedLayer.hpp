@@ -29,8 +29,8 @@ namespace ANNT { namespace Neuro {
 class XFullyConnectedLayer : public ITrainableLayer
 {
 private:
-    vector_t mWeights;
-    vector_t mBiases;
+    fvector_t mWeights;
+    fvector_t mBiases;
 
 public:
     XFullyConnectedLayer( size_t inputsCount, size_t outputsCount );
@@ -51,20 +51,20 @@ public:
     void Randomize( ) override;
 
     // Calculates outputs for the given inputs
-    void ForwardCompute( const std::vector<vector_t*>& inputs,
-                         std::vector<vector_t*>& outputs ) override;
+    void ForwardCompute( const std::vector<fvector_t*>& inputs,
+                         std::vector<fvector_t*>& outputs ) override;
 
     // Propagates error to the previous layer and calculates weights/biases gradients
-    void BackwardCompute( const std::vector<vector_t*>& inputs,
-                          const std::vector<vector_t*>& outputs,
-                          const std::vector<vector_t*>& deltas,
-                          std::vector<vector_t*>& prevDeltas,
-                          vector_t& gradWeights,
-                          vector_t& gradBiases ) override;
+    void BackwardCompute( const std::vector<fvector_t*>& inputs,
+                          const std::vector<fvector_t*>& outputs,
+                          const std::vector<fvector_t*>& deltas,
+                          std::vector<fvector_t*>& prevDeltas,
+                          fvector_t& gradWeights,
+                          fvector_t& gradBiases ) override;
 
     // Applies updates to the layer's weights and biases
-    void UpdateWeights( const vector_t& weightsUpdate,
-                        const vector_t& biasesUpdate ) override;
+    void UpdateWeights( const fvector_t& weightsUpdate,
+                        const fvector_t& biasesUpdate ) override;
 };
 
 } } // namespace ANNT::Neuro

@@ -31,7 +31,7 @@ class XReLuActivation : public IActivationLayer
 {
 public:
 
-    void ForwardActivate( const vector_t& input, vector_t& output ) override
+    void ForwardActivate( const fvector_t& input, fvector_t& output ) override
     {
         for ( size_t i = 0, n = input.size( ); i < n; i++ )
         {
@@ -39,8 +39,8 @@ public:
         }
     }
 
-    void BackwardActivate( const vector_t& input, const vector_t& output,
-                           const vector_t& delta, vector_t& prevDelta ) override
+    void BackwardActivate( const fvector_t& input, const fvector_t& output,
+                           const fvector_t& delta, fvector_t& prevDelta ) override
     {
         for ( size_t i = 0, len = input.size( ); i < len; i++ )
         {

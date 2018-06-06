@@ -68,17 +68,17 @@ public:
     virtual bool Trainable( ) const = 0;
 
     // Calculates outputs for the given inputs - forward pass
-    virtual void ForwardCompute( const std::vector<vector_t*>& inputs,
-                                 std::vector<vector_t*>& outputs ) = 0;
+    virtual void ForwardCompute( const std::vector<fvector_t*>& inputs,
+                                 std::vector<fvector_t*>& outputs ) = 0;
 
     // Propagates error to the previous layer and calculates weights/biases
     // gradients (in the case the layer is trainable)
-    virtual void BackwardCompute( const std::vector<vector_t*>& inputs,
-                                  const std::vector<vector_t*>& outputs,
-                                  const std::vector<vector_t*>& deltas,
-                                  std::vector<vector_t*>& prevDeltas,
-                                  vector_t& gradWeights,
-                                  vector_t& gradBiases ) = 0;
+    virtual void BackwardCompute( const std::vector<fvector_t*>& inputs,
+                                  const std::vector<fvector_t*>& outputs,
+                                  const std::vector<fvector_t*>& deltas,
+                                  std::vector<fvector_t*>& prevDeltas,
+                                  fvector_t& gradWeights,
+                                  fvector_t& gradBiases ) = 0;
 };
 
 } } // namespace ANNT::Neuro

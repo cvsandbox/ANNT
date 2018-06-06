@@ -96,7 +96,7 @@ bool MNISTParser::LoadLabels( const std::string& fileName, std::vector<size_t>& 
 }
 
 // Loads images from the specified MNIST images' file
-bool MNISTParser::LoadImages( const string& fileName, vector<vector_t>& images,
+bool MNISTParser::LoadImages( const string& fileName, vector<fvector_t>& images,
                               float_t scaleMin, float_t scaleMax, size_t xPad, size_t yPad )
 {
     FILE* file = fopen( fileName.c_str( ), "rb" );
@@ -131,7 +131,7 @@ bool MNISTParser::LoadImages( const string& fileName, vector<vector_t>& images,
                 {
                     if ( ( read = fread( buffer, 1, imageSize, file ) ) == imageSize )
                     {
-                        vector_t image( paddedSize, scaleMin );
+                        fvector_t image( paddedSize, scaleMin );
 
                         for ( uint32_t y = 0, i = 0; y < height; y++ )
                         {

@@ -38,7 +38,7 @@ public:
     {
     }
 
-    void CalculateUpdatesFromGradients( vector_t& updates, std::vector<vector_t>& /* paramVariables */, vector_t& /* layerVariables */ ) override
+    void CalculateUpdatesFromGradients( fvector_t& updates, std::vector<fvector_t>& /* paramVariables */, fvector_t& /* layerVariables */ ) override
     {
         for ( auto& update : updates )
         {

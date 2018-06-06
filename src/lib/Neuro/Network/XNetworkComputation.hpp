@@ -35,12 +35,12 @@ namespace ANNT { namespace Neuro {
 class XNetworkComputation
 {
 protected:
-    std::shared_ptr<XNeuralNetwork>     mNetwork;
+    std::shared_ptr<XNeuralNetwork>      mNetwork;
 
 protected:
-    std::vector<std::vector<vector_t>>  mComputeOutputsStorage;
-    std::vector<std::vector<vector_t*>> mComputeOutputs;
-    std::vector<vector_t*>              mComputeInputs;
+    std::vector<std::vector<fvector_t>>  mComputeOutputsStorage;
+    std::vector<std::vector<fvector_t*>> mComputeOutputs;
+    std::vector<fvector_t*>              mComputeInputs;
 
 public:
     // The passed network must be fully constructed at this point - no adding new layers
@@ -48,23 +48,23 @@ public:
     virtual ~XNetworkComputation( ) { }
 
     // Computes output vector for the given input vector
-    void Compute( const vector_t& input, vector_t& output );
+    void Compute( const fvector_t& input, fvector_t& output );
 
     // Runs classification for the given input - returns index of the maximum
     // element in the corresponding output vector
-    size_t Classify( const vector_t& input );
+    size_t Classify( const fvector_t& input );
 
     // Tests classification for the provided inputs and target labels -
     // provides number of correctly classified samples
-    size_t TestClassification( const std::vector<vector_t>& inputs,
+    size_t TestClassification( const std::vector<fvector_t>& inputs,
                                const std::vector<size_t>& targetLabels );
 
 protected:
 
     // Helper method to compute output vectors for the given input vectors using
     // the provided storage for the intermediate outputs of all layers
-    void DoCompute( const std::vector<vector_t*>& inputs,
-                    std::vector<std::vector<vector_t*>>& outputs );
+    void DoCompute( const std::vector<fvector_t*>& inputs,
+                    std::vector<std::vector<fvector_t*>>& outputs );
 };
 
 } } // namespace ANNT::Neuro

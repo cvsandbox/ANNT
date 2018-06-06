@@ -40,8 +40,8 @@ public:
     }
 
     // Calls ForwardActivate() for individual input/output vectors passed by reference
-    void ForwardCompute( const std::vector<vector_t*>& inputs,
-                         std::vector<vector_t*>& outputs ) override
+    void ForwardCompute( const std::vector<fvector_t*>& inputs,
+                         std::vector<fvector_t*>& outputs ) override
     {
         for ( size_t i = 0, n = inputs.size( ); i < n; i++ )
         {
@@ -50,12 +50,12 @@ public:
     }
 
     // Calls BackwardActivate() for individual input/output/delta vectors passed by reference
-    void BackwardCompute( const std::vector<vector_t*>& inputs,
-                          const std::vector<vector_t*>& outputs,
-                          const std::vector<vector_t*>& deltas,
-                          std::vector<vector_t*>& prevDeltas,
-                          vector_t& /* gradWeights */,
-                          vector_t& /* gradBiases  */ ) override
+    void BackwardCompute( const std::vector<fvector_t*>& inputs,
+                          const std::vector<fvector_t*>& outputs,
+                          const std::vector<fvector_t*>& deltas,
+                          std::vector<fvector_t*>& prevDeltas,
+                          fvector_t& /* gradWeights */,
+                          fvector_t& /* gradBiases  */ ) override
     {
         for ( size_t i = 0, n = inputs.size( ); i < n; i++ )
         {
@@ -64,11 +64,11 @@ public:
     }
 
     // Applies activation function to the input vector
-    virtual void ForwardActivate( const vector_t& input, vector_t& output ) = 0;
+    virtual void ForwardActivate( const fvector_t& input, fvector_t& output ) = 0;
 
     // Propagates error back to previous layer by multiplying delta with activation function's derivative
-    virtual void BackwardActivate( const vector_t& input, const vector_t& output,
-                                   const vector_t& delta, vector_t& prevDelta ) = 0;
+    virtual void BackwardActivate( const fvector_t& input, const fvector_t& output,
+                                   const fvector_t& delta, fvector_t& prevDelta ) = 0;
 };
 
 } } // namespace ANNT::Neuro
