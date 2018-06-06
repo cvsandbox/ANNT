@@ -4,4 +4,4 @@ build
 *.sdf
 *.opensdf
 *.o
-
+*.vcxproj.user
