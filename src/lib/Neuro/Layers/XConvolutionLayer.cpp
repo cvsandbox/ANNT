@@ -205,6 +205,17 @@ void XConvolutionLayer::BackwardCompute( const vector<vector_t*>& inputs,
         inputHeight  += mPadHeight;
 
         //fill( mPaddedPrevDeltas.begin( ), mPaddedPrevDeltas.end( ), 0.0f );
+
+        if ( ( mPaddedPrevDeltas.size( ) != inputs.size( ) ) ||
+             ( mPaddedPrevDeltas[0].size( ) != inputWidth * inputHeight * mInputDepth ) )
+        {
+            mPaddedPrevDeltas.resize( inputs.size( ) );
+
+            for ( size_t i = 0; i < inputs.size( ); i++ )
+            {
+                mPaddedPrevDeltas[i].resize( inputWidth * inputHeight * mInputDepth );
+            }
+        }
     }
     else
     {
