@@ -22,6 +22,7 @@
 #include <functional>
 
 #include "XNetworkTraining.hpp"
+#include "XNetworkContext.hpp"
 #include "../Layers/ITrainableLayer.hpp"
 #include "../../Tools/XDataEncodingTools.hpp"
 
@@ -78,6 +79,11 @@ XNetworkTraining::XNetworkTraining( const shared_ptr<XNeuralNetwork>& network,
     }
 }
 
+XNetworkTraining::~XNetworkTraining( )
+{
+    FreeWorkingBuffers( mTrainingMemoryBuffers );
+}
+
 // Allocate the rest of vectors required for training - those which depend on the batch size
 void XNetworkTraining::AllocateTrainVectors( size_t samplesCount )
 {
@@ -124,6 +130,10 @@ void XNetworkTraining::AllocateTrainVectors( size_t samplesCount )
             mInputDeltasStorage[i] = fvector_t( mNetwork->InputsCount( ) );
             mInputDeltas[i] = &( mInputDeltasStorage[i] );
         }
+
+        // free old and allocate new buffers for layers
+        FreeWorkingBuffers( mTrainingMemoryBuffers );
+        AllocateWorkingBuffers( mTrainingMemoryBuffers, samplesCount );
     }
 }
 
@@ -152,22 +162,29 @@ float_t XNetworkTraining::CalculateError( )
 // Propagate error through the network starting from last layer
 void XNetworkTraining::DoBackwardCompute( )
 {
-    size_t layerIndex  = mNetwork->LayersCount( ) - 1;
+    XNetworkContext ctx( true );
+    size_t          layerIndex  = mNetwork->LayersCount( ) - 1;
     
     // propagate deltas for all layers except the first one
     for ( ; layerIndex > 0; layerIndex-- )
     {
+        ctx.SetWorkingBuffers( &( mTrainingMemoryBuffers[layerIndex] ) );
+
         mNetwork->LayerAt( layerIndex )->
             BackwardCompute( mTrainOutputs[layerIndex - 1], mTrainOutputs[layerIndex],
                              mDeltas[layerIndex], mDeltas[layerIndex - 1],
-                             mGradWeights[layerIndex], mGradBiases[layerIndex] );
+                             mGradWeights[layerIndex], mGradBiases[layerIndex],
+                             ctx );
     }
 
     // now same for the first layer
+    ctx.SetWorkingBuffers( &( mTrainingMemoryBuffers[0] ) );
+
     mNetwork->LayerAt( 0 )->
         BackwardCompute( mTrainInputs, mTrainOutputs[0],
                          mDeltas[0], mInputDeltas,
-                         mGradWeights[0], mGradBiases[0] );
+                         mGradWeights[0], mGradBiases[0],
+                         ctx );
 }
 
 // Calculate weights/biases updates from gradients and apply them
@@ -211,7 +228,7 @@ float_t XNetworkTraining::RunTraining( )
     float_t cost;
 
     // 1 - compute the network to get the actual output
-    DoCompute( mTrainInputs, mTrainOutputs );
+    DoCompute( mTrainInputs, mTrainOutputs, mTrainingMemoryBuffers, true );
 
     // 2 - get error of the last layer
     cost = CalculateError( );
@@ -355,7 +372,7 @@ float_t XNetworkTraining::TestSample( const fvector_t& input,
     {
         // compute the network to get the actual output
         mComputeInputs[0] = const_cast<fvector_t*>( &input );
-        DoCompute( mComputeInputs, mComputeOutputs );
+        DoCompute( mComputeInputs, mComputeOutputs, mComputeMemoryBuffers );
 
         output = mComputeOutputsStorage.back( )[0];
         cost   = mCostFunction->Cost( output, targetOutput );
@@ -377,7 +394,7 @@ size_t XNetworkTraining::TestClassification( const std::vector<fvector_t>& input
         for ( size_t i = 0, n = inputs.size( ); i < n; i++ )
         {
             mComputeInputs[0] = const_cast<fvector_t*>( &( inputs[i] ) );
-            DoCompute( mComputeInputs, mComputeOutputs );
+            DoCompute( mComputeInputs, mComputeOutputs, mComputeMemoryBuffers );
 
             cost += mCostFunction->Cost( mComputeOutputsStorage.back( )[0], targetOutputs[i] );
 

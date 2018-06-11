@@ -72,6 +72,19 @@ void XDataEncodingTools::AddPadding2d( const fvector_t& src, fvector_t& dst,
                                        size_t srcWidth, size_t srcHeight, size_t dstWidth, size_t dstHeight,
                                        size_t depth, float_t padValue )
 {
+    size_t dstSize = dstWidth * dstHeight * depth;
+
+    if ( dst.size( ) != dstSize )
+    {
+        dst.resize( dstSize );
+    }
+
+    AddPadding2d( src.data( ), dst.data( ), srcWidth, srcHeight, dstWidth, dstHeight, depth, padValue );
+}
+void XDataEncodingTools::AddPadding2d( const float_t* src, float* dst,
+                                       size_t srcWidth, size_t srcHeight, size_t dstWidth, size_t dstHeight,
+                                       size_t depth, float_t padValue )
+{
     if ( ( dstWidth >= srcWidth ) && ( dstHeight >= srcHeight ) )
     {
         size_t padWidth  = dstWidth  - srcWidth;
@@ -82,15 +95,9 @@ void XDataEncodingTools::AddPadding2d( const fvector_t& src, fvector_t& dst,
         size_t rightPad  = padWidth - leftPad;
         size_t topPad    = padHeight >> 1;
         size_t bottomPad = padHeight - topPad;
-        size_t dstSize   = dstWidth * dstHeight * depth;
 
-        if ( dst.size( ) != dstSize )
-        {
-            dst.resize( dstSize );
-        }
-
-        const float* srcPtr = src.data( );
-        float*       dstPtr = dst.data( );
+        const float* srcPtr = src;
+        float*       dstPtr = dst;
 
         for ( size_t d = 0; d < depth; d++ )
         {
@@ -141,6 +148,17 @@ void XDataEncodingTools::RemovePadding2d( const fvector_t& src, fvector_t& dst,
                                           size_t srcWidth, size_t srcHeight, size_t dstWidth, size_t dstHeight,
                                           size_t depth )
 {
+    size_t dstSize = dstWidth * dstHeight * depth;
+
+    if ( dst.size( ) != dstSize )
+    {
+        dst.resize( dstSize );
+    }
+}
+void XDataEncodingTools::RemovePadding2d( const float_t* src, float_t* dst,
+                                          size_t srcWidth, size_t srcHeight, size_t dstWidth, size_t dstHeight,
+                                          size_t depth )
+{
     if ( ( dstWidth <= srcWidth ) && ( dstHeight <= srcHeight ) )
     {
         size_t padWidth  = srcWidth  - dstWidth;
@@ -151,18 +169,12 @@ void XDataEncodingTools::RemovePadding2d( const fvector_t& src, fvector_t& dst,
         size_t rightPad  = padWidth - leftPad;
         size_t topPad    = padHeight >> 1;
         size_t bottomPad = padHeight - topPad;
-        size_t dstSize   = dstWidth * dstHeight * depth;
 
         topPad    *= srcWidth;
         bottomPad *= srcWidth;
 
-        if ( dst.size( ) != dstSize )
-        {
-            dst.resize( dstSize );
-        }
-
-        const float* srcPtr = src.data( );
-        float*       dstPtr = dst.data( );
+        const float* srcPtr = src;
+        float*       dstPtr = dst;
 
         for ( size_t d = 0; d < depth; d++ )
         {

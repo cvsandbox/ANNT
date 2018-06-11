@@ -143,6 +143,9 @@
     <ClInclude Include="..\..\lib\Neuro\Layers\Processing\XMaxPooling.hpp">
       <Filter>Neuro\Layers\Processing</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\lib\Neuro\Network\XNetworkContext.hpp">
+      <Filter>Neuro\Network</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\lib\Neuro\Layers\XFullyConnectedLayer.cpp">

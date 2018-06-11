@@ -142,7 +142,8 @@ public:
     }
 
     void ForwardCompute( const std::vector<fvector_t*>& inputs,
-                         std::vector<fvector_t*>& outputs ) override
+                         std::vector<fvector_t*>& outputs,
+                         const XNetworkContext& ctx ) override
     {
         for ( size_t i = 0, n = inputs.size( ); i < n; i++ )
         {
@@ -173,7 +174,8 @@ public:
     void BackwardProcess( const std::vector<fvector_t*>& /* input  */,
                           const std::vector<fvector_t*>& /* output */,
                           const std::vector<fvector_t*>& deltas,
-                          std::vector<fvector_t*>& prevDeltas ) const override
+                          std::vector<fvector_t*>& prevDeltas,
+                          const XNetworkContext& ctx ) const override
     {
         for ( size_t i = 0, n = deltas.size( ); i < n; i++ )
         {

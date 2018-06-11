@@ -41,8 +41,12 @@ public:
 
     // Calls ForwardActivate() for individual input/output vectors passed by reference
     void ForwardCompute( const std::vector<fvector_t*>& inputs,
-                         std::vector<fvector_t*>& outputs ) override
+                         std::vector<fvector_t*>& outputs,
+                         const XNetworkContext& /* ctx */ ) override
     {
+        // Activation functions have little need of context, so don't use it here.
+        // If any requires it, then ForwardCompute() can be overrided.
+
         for ( size_t i = 0, n = inputs.size( ); i < n; i++ )
         {
             ForwardActivate( *( inputs[i] ), *( outputs[i] ) );
@@ -55,7 +59,8 @@ public:
                           const std::vector<fvector_t*>& deltas,
                           std::vector<fvector_t*>& prevDeltas,
                           fvector_t& /* gradWeights */,
-                          fvector_t& /* gradBiases  */ ) override
+                          fvector_t& /* gradBiases  */,
+                          const XNetworkContext& /* ctx */ ) override
     {
         for ( size_t i = 0, n = inputs.size( ); i < n; i++ )
         {

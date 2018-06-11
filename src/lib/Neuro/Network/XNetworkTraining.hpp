@@ -75,12 +75,15 @@ private:
     std::vector<fvector_t>               mWeightsLayerVariables;
     std::vector<fvector_t>               mBiasesLayerVariables;
 
+    // layers' working buffers for training
+    std::vector<std::vector<std::vector<void*>>> mTrainingMemoryBuffers;
+
 public:
 
     XNetworkTraining( const std::shared_ptr<XNeuralNetwork>& network,
                       const std::shared_ptr<INetworkOptimizer>& optimizer,
-                      const std::shared_ptr<ICostFunction>& costFunction
-                      );
+                      const std::shared_ptr<ICostFunction>& costFunction );
+    ~XNetworkTraining( );
 
     // Provides access to the weights/biases optimizer
     std::shared_ptr<INetworkOptimizer> Optimizer( ) const

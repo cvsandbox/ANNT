@@ -23,6 +23,7 @@
 #define ANNT_ILAYER_HPP
 
 #include "../../Types/Types.hpp"
+#include "../Network/XNetworkContext.hpp"
 
 namespace ANNT { namespace Neuro {
 
@@ -64,12 +65,25 @@ public:
         return mOutputsCount;
     }
 
+    // Some of the layers may need extra memory required for processing inputs or for
+    // keeping state between forward and backward pass. The method below tells
+    // how many buffers are required and their size.
+    //
+    // For example, if a layer needs two temporary buffers of type *float_t*
+    // (one vector with *inputsCount* elements and another with *outputsCount* elements),
+    // it may return something like this: uvector_t( { inputsCount * sizeof( float ), outputsCount * sizeof( float ) } ).
+    //
+    // Each individual memory buffer is 32 byte aligned, so AVX friendly.
+    // 
+    virtual uvector_t WorkingMemSize( bool /* trainingMode */ ) const { return uvector_t( 0 ); }
+
     // Reports if the layer is trainable or not (has weights/biases)
     virtual bool Trainable( ) const = 0;
 
     // Calculates outputs for the given inputs - forward pass
     virtual void ForwardCompute( const std::vector<fvector_t*>& inputs,
-                                 std::vector<fvector_t*>& outputs ) = 0;
+                                 std::vector<fvector_t*>& outputs,
+                                 const XNetworkContext& ctx ) = 0;
 
     // Propagates error to the previous layer and calculates weights/biases
     // gradients (in the case the layer is trainable)
@@ -78,7 +92,8 @@ public:
                                   const std::vector<fvector_t*>& deltas,
                                   std::vector<fvector_t*>& prevDeltas,
                                   fvector_t& gradWeights,
-                                  fvector_t& gradBiases ) = 0;
+                                  fvector_t& gradBiases,
+                                  const XNetworkContext& ctx ) = 0;
 };
 
 } } // namespace ANNT::Neuro

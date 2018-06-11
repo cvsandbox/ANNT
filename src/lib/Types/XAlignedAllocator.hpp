@@ -34,6 +34,38 @@
 
 namespace ANNT {
 
+// Allocate aligned memory
+static void* AlignedAlloc( std::size_t align, std::size_t size )
+{
+#if defined(_MSC_VER)
+    return ::_aligned_malloc( size, align );
+#elif defined(__MINGW32__)
+    return ::_mm_malloc( size, align );
+#else  // posix assumed
+    void* p;
+
+    if ( ::posix_memalign( &p, align, size ) != 0 )
+    {
+        p = 0;
+    }
+
+    return p;
+#endif
+}
+
+// Free aligned memory
+static void AlignedFree( void* ptr )
+{
+#if defined(_MSC_VER)
+    ::_aligned_free( ptr );
+#elif defined(__MINGW32__)
+    ::_mm_free( ptr );
+#else
+    ::free( ptr );
+#endif
+}
+    
+// Aligned allocator for standard containers
 template <typename T, std::size_t Alignment>
 class XAlignedAllocator
 {
@@ -109,37 +141,6 @@ public:
 
     inline bool operator==( const XAlignedAllocator& ) { return true; }
     inline bool operator!=( const XAlignedAllocator& rhs ) { return !operator==( rhs ); }
-
-private:
-
-    void* AlignedAlloc( size_type align, size_type size ) const
-    {
-#if defined(_MSC_VER)
-        return ::_aligned_malloc( size, align );
-#elif defined(__MINGW32__)
-        return ::_mm_malloc( size, align );
-#else  // posix assumed
-        void* p;
-
-        if ( ::posix_memalign( &p, align, size ) != 0 )
-        {
-            p = 0;
-        }
-
-        return p;
-#endif
-    }
-
-    void AlignedFree( pointer ptr )
-    {
-#if defined(_MSC_VER)
-        ::_aligned_free( ptr );
-#elif defined(__MINGW32__)
-        ::_mm_free( ptr );
-#else
-        ::free( ptr );
-#endif
-    }
 };
 
 } // namespace ANNT

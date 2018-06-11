@@ -52,7 +52,8 @@ public:
 
     // Calculates outputs for the given inputs
     void ForwardCompute( const std::vector<fvector_t*>& inputs,
-                         std::vector<fvector_t*>& outputs ) override;
+                         std::vector<fvector_t*>& outputs,
+                         const XNetworkContext& ctx ) override;
 
     // Propagates error to the previous layer and calculates weights/biases gradients
     void BackwardCompute( const std::vector<fvector_t*>& inputs,
@@ -60,7 +61,8 @@ public:
                           const std::vector<fvector_t*>& deltas,
                           std::vector<fvector_t*>& prevDeltas,
                           fvector_t& gradWeights,
-                          fvector_t& gradBiases ) override;
+                          fvector_t& gradBiases,
+                          const XNetworkContext& ctx ) override;
 
     // Applies updates to the layer's weights and biases
     void UpdateWeights( const fvector_t& weightsUpdate,

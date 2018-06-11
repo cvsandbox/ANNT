@@ -47,9 +47,15 @@ public:
     static void AddPadding2d( const fvector_t& src, fvector_t& dst,
                               size_t srcWidth, size_t srcHeight, size_t dstWidth, size_t dstHeight,
                               size_t depth, float_t padValue );
+    static void AddPadding2d( const float_t* src, float_t* dst,
+                              size_t srcWidth, size_t srcHeight, size_t dstWidth, size_t dstHeight,
+                              size_t depth, float_t padValue );
 
     // Removes padding from the specified 2D input (although it can be of certain depth)
     static void RemovePadding2d( const fvector_t& src, fvector_t& dst,
+                                 size_t srcWidth, size_t srcHeight, size_t dstWidth, size_t dstHeight,
+                                 size_t depth );
+    static void RemovePadding2d( const float_t* src, float_t* dst,
                                  size_t srcWidth, size_t srcHeight, size_t dstWidth, size_t dstHeight,
                                  size_t depth );
 };

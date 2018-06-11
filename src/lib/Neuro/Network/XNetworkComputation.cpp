@@ -19,6 +19,7 @@
 */
 
 #include "XNetworkComputation.hpp"
+#include "XNetworkContext.hpp"
 #include "../../Tools/XDataEncodingTools.hpp"
 
 using namespace std;
@@ -36,6 +37,58 @@ XNetworkComputation::XNetworkComputation( const shared_ptr<XNeuralNetwork>& netw
         mComputeOutputsStorage.push_back( vector<fvector_t>( { fvector_t( layer->OutputsCount( ) ) } ) );
         mComputeOutputs.push_back( vector<fvector_t*>( { &( mComputeOutputsStorage.back( )[0] ) } ) );
     }
+
+    AllocateWorkingBuffers( mComputeMemoryBuffers, 1 );
+}
+
+XNetworkComputation::~XNetworkComputation( )
+{
+    FreeWorkingBuffers( mComputeMemoryBuffers );
+}
+
+// Allocate working buffers for layer needing them
+void XNetworkComputation::AllocateWorkingBuffers( std::vector<std::vector<std::vector<void*>>>& workingBuffer, size_t batchSize )
+{
+    for ( auto layer : *mNetwork )
+    {
+        uvector_t workingMemSize = layer->WorkingMemSize( false );
+
+        // filling this nice vector
+        //
+        //       -- for each layer
+        //       |           -- for each requested buffer
+        //       |           |           -- for each sample
+        //       |           |           |       -- requested memory buffer
+        //       |           |           |       |
+        // std::vector<std::vector<std::vector<void*>>>
+
+        workingBuffer.push_back( std::vector<std::vector<void*>>( workingMemSize.size( ) ) );
+
+        for ( size_t i = 0; i < workingMemSize.size( ); i++ )
+        {
+            workingBuffer.back( )[i] = std::vector<void*>( );
+
+            for ( size_t j = 0; j < batchSize; j++ )
+            {
+                workingBuffer.back( )[i].push_back( AlignedAlloc( 32, workingMemSize[i] ) );
+            }
+        }
+    }
+}
+
+// Free layers' working buffers
+void XNetworkComputation::FreeWorkingBuffers( std::vector<std::vector<std::vector<void*>>>& workingBuffer )
+{
+    for ( size_t i = 0; i < workingBuffer.size( ); i++ )
+    {
+        for ( size_t j = 0; j < workingBuffer[i].size( ); j++ )
+        {
+            for ( size_t k = 0; k < workingBuffer[i][j].size( ); k++ )
+            {
+                AlignedFree( workingBuffer[i][j][k] );
+            }
+        }
+    }
 }
 
 // Computes output vector for the given input vector
@@ -45,7 +98,7 @@ void XNetworkComputation::Compute( const fvector_t& input, fvector_t& output )
     {
         mComputeInputs[0] = const_cast<fvector_t*>( &input );
 
-        DoCompute( mComputeInputs, mComputeOutputs );
+        DoCompute( mComputeInputs, mComputeOutputs, mComputeMemoryBuffers );
 
         // copy output produced by the last layer
         output = mComputeOutputsStorage.back( )[0];
@@ -61,7 +114,7 @@ size_t XNetworkComputation::Classify( const fvector_t& input )
     {
         mComputeInputs[0] = const_cast<fvector_t*>( &input );
 
-        DoCompute( mComputeInputs, mComputeOutputs );
+        DoCompute( mComputeInputs, mComputeOutputs, mComputeMemoryBuffers );
 
         classIndex = XDataEncodingTools::MaxIndex( mComputeOutputsStorage.back( )[0] );
     }
@@ -80,7 +133,7 @@ size_t XNetworkComputation::TestClassification( const vector<fvector_t>& inputs,
         {
             mComputeInputs[0] = const_cast<fvector_t*>( &( inputs[i] ) );
 
-            DoCompute( mComputeInputs, mComputeOutputs );
+            DoCompute( mComputeInputs, mComputeOutputs, mComputeMemoryBuffers );
 
             if ( XDataEncodingTools::MaxIndex( mComputeOutputsStorage.back( )[0] ) == targetLabels[i] )
             {
@@ -94,13 +147,19 @@ size_t XNetworkComputation::TestClassification( const vector<fvector_t>& inputs,
 
 // Helper method to compute output vectors for the given input vectors
 void XNetworkComputation::DoCompute( const vector<fvector_t*>& inputs,
-                                     vector<vector<fvector_t*>>& outputs )
+                                     vector<vector<fvector_t*>>& outputs,
+                                     vector<vector<vector<void*>>> workingBuffer,
+                                     bool trainingMode )
 {
-    mNetwork->LayerAt( 0 )->ForwardCompute( inputs, outputs[0] );
+    XNetworkContext ctx( trainingMode );
+
+    ctx.SetWorkingBuffers( &( workingBuffer[0] ) );
+    mNetwork->LayerAt( 0 )->ForwardCompute( inputs, outputs[0], ctx );
 
     for ( size_t i = 1, layersCount = mNetwork->LayersCount( ); i < layersCount; i++ )
     {
-        mNetwork->LayerAt( i )->ForwardCompute( outputs[i - 1], outputs[i] );
+        ctx.SetWorkingBuffers( &( workingBuffer[i] ) );
+        mNetwork->LayerAt( i )->ForwardCompute( outputs[i - 1], outputs[i], ctx );
     }
 }
 

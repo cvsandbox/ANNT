@@ -47,16 +47,18 @@ public:
                           const std::vector<fvector_t*>& deltas,
                           std::vector<fvector_t*>& prevDeltas,
                           fvector_t& /* gradWeights */,
-                          fvector_t& /* gradBiases */ ) override
+                          fvector_t& /* gradBiases */,
+                          const XNetworkContext& ctx ) override
     {
-        BackwardProcess( inputs, outputs, deltas, prevDeltas );
+        BackwardProcess( inputs, outputs, deltas, prevDeltas, ctx );
     }
 
     // Propagates error to the previous layer
     virtual void BackwardProcess( const std::vector<fvector_t*>& inputs,
                                   const std::vector<fvector_t*>& outputs,
                                   const std::vector<fvector_t*>& deltas,
-                                  std::vector<fvector_t*>& prevDeltas ) const = 0;
+                                  std::vector<fvector_t*>& prevDeltas,
+                                  const XNetworkContext& ctx ) const = 0;
 };
 
 } } // namespace ANNT::Neuro

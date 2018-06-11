@@ -33,6 +33,7 @@
     <ClInclude Include="..\..\lib\Neuro\Layers\XConvolutionLayer.hpp" />
     <ClInclude Include="..\..\lib\Neuro\Layers\XFullyConnectedLayer.hpp" />
     <ClInclude Include="..\..\lib\Neuro\Network\XNetworkComputation.hpp" />
+    <ClInclude Include="..\..\lib\Neuro\Network\XNetworkContext.hpp" />
     <ClInclude Include="..\..\lib\Neuro\Network\XNetworkTraining.hpp" />
     <ClInclude Include="..\..\lib\Neuro\Network\XNeuralNetwork.hpp" />
     <ClInclude Include="..\..\lib\Neuro\Optimizers\INetworkOptimizer.hpp" />

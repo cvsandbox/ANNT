@@ -19,6 +19,7 @@
 */
 
 #include "XConvolutionLayer.hpp"
+#include "../../Tools/XDataEncodingTools.hpp"
 
 using namespace std;
 
@@ -32,26 +33,25 @@ XConvolutionLayer::XConvolutionLayer( size_t inputWidth, size_t inputHeight, siz
     mOutputWidth( 0 ), mOutputHeight( 0 ),
     mKernelWidth( kernelWidth ), mKernelHeight( kernelHeight ), mKernelsCount( kernelsCount ),
     mHorizontalStep( horizontalStep ), mVerticalStep( verticalStep ), mBorderMode( borderMode ), 
-    mPadWidth( 0 ), mPadHeight( 0 )
+    mPaddedWidth( inputWidth ), mPaddedHeight( inputHeight )
 {
+    size_t padWidth = 0, padHeight = 0;
+
     // use input padding, if border handling mode is set to produce same size output
     // (same ouput size will be only when step size is 1; output is always smaller for larger steps)
     if ( mBorderMode == BorderMode::Same )
     {
-        mPadWidth  = mKernelWidth  - 1;
-        mPadHeight = mKernelHeight - 1;
+        padWidth  = mKernelWidth  - 1;
+        padHeight = mKernelHeight - 1;
 
-        //size_t paddedInputSize = ( mInputWidth + mPadWidth ) * ( mInputHeight + mPadHeight ) * mInputDepth;
-
-        // allocate memory for padded input data and deltas of the previous layer
-        //mPaddedInput      = vector<float>( paddedInputSize );
-        //mPaddedPrevDeltas = vector<float>( paddedInputSize );
+        mPaddedWidth  = mInputWidth  + padWidth;
+        mPaddedHeight = mInputHeight + padHeight;
     }
 
     // calculation of output width/height as:
     //   outSize = ( inSize - kernelSize + padSize ) / step + 1
-    mOutputWidth  = ( mInputWidth  - mKernelWidth  + mPadWidth  ) / mHorizontalStep + 1;
-    mOutputHeight = ( mInputHeight - mKernelHeight + mPadHeight ) / mVerticalStep   + 1;
+    mOutputWidth  = ( mInputWidth  - mKernelWidth  + padWidth  ) / mHorizontalStep + 1;
+    mOutputHeight = ( mInputHeight - mKernelHeight + padHeight ) / mVerticalStep   + 1;
 
     // total input/output size
     Initialize( mInputWidth  * mInputHeight  * mInputDepth,
@@ -80,7 +80,8 @@ void XConvolutionLayer::Randomize( )
 
 // Calculates outputs for the given inputs
 void XConvolutionLayer::ForwardCompute( const vector<fvector_t*>& inputs,
-                                        vector<fvector_t*>& outputs )
+                                        vector<fvector_t*>& outputs,
+                                        const XNetworkContext& ctx )
 {
     const float_t* kernelsData  = mKernelsWeights.data( );
 
@@ -95,10 +96,8 @@ void XConvolutionLayer::ForwardCompute( const vector<fvector_t*>& inputs,
     // decide if raw data to be used or padded
     if ( mBorderMode == BorderMode::Same )
     {
-        InputPadding( inputs, mPaddedInputs );
-        //inputData    = mPaddedInput.data( );
-        inputWidth  += mPadWidth;
-        inputHeight += mPadHeight;
+        inputWidth  = mPaddedWidth;
+        inputHeight = mPaddedHeight;
     }
 
     size_t  inputRowInc     = inputWidth * mVerticalStep;
@@ -113,7 +112,13 @@ void XConvolutionLayer::ForwardCompute( const vector<fvector_t*>& inputs,
 
         if ( mBorderMode == BorderMode::Same )
         {
-            inputData = mPaddedInputs[i].data( );
+            // get working buffer for padded inputs
+            float* paddedInput = static_cast<float*>( ctx.GetWorkingBuffer( 0, i ) );
+
+            XDataEncodingTools::AddPadding2d( inputData, paddedInput,
+                                              mInputWidth, mInputHeight, mPaddedWidth, mPaddedHeight,
+                                              mInputDepth, float_t( 0 ) );
+            inputData = paddedInput;
         }
 
         // clear the output
@@ -178,7 +183,8 @@ void XConvolutionLayer::BackwardCompute( const vector<fvector_t*>& inputs,
                                          const vector<fvector_t*>& deltas,
                                          vector<fvector_t*>& prevDeltas,
                                          fvector_t& gradWeights,
-                                         fvector_t& gradBiases )
+                                         fvector_t& gradBiases,
+                                         const XNetworkContext& ctx )
 {
     const float* kernelsData     = mKernelsWeights.data( );
     //const float* deltaData       = delta.data( );
@@ -199,27 +205,8 @@ void XConvolutionLayer::BackwardCompute( const vector<fvector_t*>& inputs,
     // decide if raw data to be used or padded
     if ( mBorderMode == BorderMode::Same )
     {
-        //prevDeltaData = mPaddedPrevDeltas.data( );
-        //inputData     = mPaddedInput.data( );
-        inputWidth   += mPadWidth;
-        inputHeight  += mPadHeight;
-
-        //fill( mPaddedPrevDeltas.begin( ), mPaddedPrevDeltas.end( ), 0.0f );
-
-        if ( ( mPaddedPrevDeltas.size( ) != inputs.size( ) ) ||
-             ( mPaddedPrevDeltas[0].size( ) != inputWidth * inputHeight * mInputDepth ) )
-        {
-            mPaddedPrevDeltas.resize( inputs.size( ) );
-
-            for ( size_t i = 0; i < inputs.size( ); i++ )
-            {
-                mPaddedPrevDeltas[i].resize( inputWidth * inputHeight * mInputDepth );
-            }
-        }
-    }
-    else
-    {
-        //fill( prevDelta.begin( ), prevDelta.end( ), 0.0f );
+        inputWidth  = mPaddedWidth;
+        inputHeight = mPaddedHeight;
     }
 
     size_t inputRowInc         = inputWidth * mVerticalStep;
@@ -234,7 +221,8 @@ void XConvolutionLayer::BackwardCompute( const vector<fvector_t*>& inputs,
 
         if ( mBorderMode == BorderMode::Same )
         {
-            prevDeltaData = mPaddedPrevDeltas[i].data( );
+            // get working buffer for padded previous deltas
+            prevDeltaData = static_cast<float*>( ctx.GetWorkingBuffer( 1, i ) );
         }
 
         fill( prevDeltaData, prevDeltaData + mInputsCount, float_t( 0 ) );
@@ -284,6 +272,12 @@ void XConvolutionLayer::BackwardCompute( const vector<fvector_t*>& inputs,
                 }
             }
         }
+
+        if ( mBorderMode == BorderMode::Same )
+        {
+            // do unpadding of previous deltas
+            XDataEncodingTools::RemovePadding2d( prevDeltaData, prevDeltas[i]->data( ), mPaddedWidth, mPaddedHeight, mInputWidth, mInputHeight, mInputDepth );
+        }
     }
 
     // 2 - accumulate weights' difference
@@ -298,7 +292,8 @@ void XConvolutionLayer::BackwardCompute( const vector<fvector_t*>& inputs,
 
             if ( mBorderMode == BorderMode::Same )
             {
-                inputData = mPaddedInputs[i].data( );
+                // get working buffer for padded inputs
+                inputData = static_cast<float*>( ctx.GetWorkingBuffer( 0, i ) );
             }
 
             const float_t* inputBase = inputData + inputDepthIndex * inputWidth * inputHeight;
@@ -359,12 +354,6 @@ void XConvolutionLayer::BackwardCompute( const vector<fvector_t*>& inputs,
             gradBiases[kernelIndex] += sum;
         }
     }
-
-    // do unpadding of previous deltas
-    if ( mBorderMode == BorderMode::Same )
-    {
-        DeltasUnpadding( mPaddedPrevDeltas, prevDeltas );
-    }
 }
 
 // Applies updates to the layer's weights and biases
@@ -378,102 +367,6 @@ void XConvolutionLayer::UpdateWeights( const fvector_t& weightsUpdate,
     for ( size_t i = 0, n = mKernelsBiases.size( ); i < n; i++ )
     {
         mKernelsBiases[i] += biasesUpdate[i];
-    }
-}
-
-void XConvolutionLayer::InputPadding( const std::vector<fvector_t*>& input, std::vector<fvector_t>& padded )
-{
-    // For odd size kernels, padding is distributed equally on each side.
-    // However for even size kernels, padding goes first to right/bottom sides.
-    size_t lefPad      = ( mKernelWidth  - 1 ) / 2;
-    size_t rightPad    = ( mKernelWidth  - 1 ) - lefPad;
-    size_t topPad      = ( mKernelHeight - 1 ) / 2;
-    size_t bottomPad   = ( mKernelHeight - 1 ) - topPad;
-    size_t paddedWidth = mInputWidth + mPadWidth;
-
-    topPad    *= paddedWidth;
-    bottomPad *= paddedWidth;
-
-    size_t paddedInputSize = ( mInputWidth + mPadWidth ) * ( mInputHeight + mPadHeight ) * mInputDepth;
-
-    // make sure padded vector has enough space
-    if ( ( padded.size( ) == 0 ) ||
-         ( padded.size( ) != input.size( ) ) ||
-         ( padded[0].size( ) != paddedInputSize ) )
-    {
-        padded.resize( input.size( ) );
-
-        for ( size_t i = 0, n = input.size( ); i < n; i++ )
-        {
-            padded[i] = fvector_t( paddedInputSize );
-        }
-    }
-
-    for ( size_t i = 0, n = input.size( ); i < n; i++ )
-    {
-        const float* ptrInput  = input[i]->data( );
-        float*       ptrPadded = padded[i].data( );
-
-        for ( size_t d = 0; d < mInputDepth; d++ )
-        {
-            ptrPadded += topPad;
-
-            for ( size_t y = 0; y < mInputHeight; y++ )
-            {
-                ptrPadded += lefPad;
-
-                for ( size_t x = 0; x < mInputWidth; x++, ptrInput++, ptrPadded++ )
-                {
-                    *ptrPadded = *ptrInput;
-                }
-
-                ptrPadded += rightPad;
-            }
-
-            ptrPadded += bottomPad;
-        }
-    }
-}
-
-void XConvolutionLayer::DeltasUnpadding( std::vector<fvector_t>& deltas, std::vector<fvector_t*>& unpadded )
-{
-    size_t lefPad      = ( mKernelWidth  - 1 ) / 2;
-    size_t rightPad    = ( mKernelWidth  - 1 ) - lefPad;
-    size_t topPad      = ( mKernelHeight - 1 ) / 2;
-    size_t bottomPad   = ( mKernelHeight - 1 ) - topPad;
-    size_t paddedWidth = mInputWidth + mPadWidth;
-
-    topPad    *= paddedWidth;
-    bottomPad *= paddedWidth;
-
-    // make sure unpadded vector has enough space
-    if ( ( unpadded.size( ) == deltas.size( ) ) &&
-         ( unpadded[0]->size( ) == mInputsCount ) )
-    {
-        for ( size_t i = 0, n = deltas.size( ); i < n; i++ )
-        {
-            const float_t* ptrPadded = deltas[i].data( );
-            float_t*       ptrUnpadded = unpadded[i]->data( );
-
-            for ( size_t d = 0; d < mInputDepth; d++ )
-            {
-                ptrPadded += topPad;
-
-                for ( size_t y = 0; y < mInputHeight; y++ )
-                {
-                    ptrPadded += lefPad;
-
-                    for ( size_t x = 0; x < mInputWidth; x++, ptrPadded++, ptrUnpadded++ )
-                    {
-                        *ptrUnpadded = *ptrPadded;
-                    }
-
-                    ptrPadded += rightPad;
-                }
-
-                ptrPadded += bottomPad;
-            }
-        }
     }
 }
 

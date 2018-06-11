@@ -49,7 +49,8 @@ void XFullyConnectedLayer::Randomize( )
 
 // Calculates outputs for the given inputs
 void XFullyConnectedLayer::ForwardCompute( const vector<fvector_t*>& inputs,
-                                           vector<fvector_t*>& outputs )
+                                           vector<fvector_t*>& outputs,
+                                           const XNetworkContext& /* ctx */ )
 {
     for ( size_t i = 0, n = inputs.size( ); i < n; i++ )
     {
@@ -77,7 +78,8 @@ void XFullyConnectedLayer::BackwardCompute( const vector<fvector_t*>& inputs,
                                             const vector<fvector_t*>& deltas,
                                             vector<fvector_t*>& prevDeltas,
                                             fvector_t& gradWeights,
-                                            fvector_t& gradBiases )
+                                            fvector_t& gradBiases,
+                                            const XNetworkContext& /* ctx */ )
 {
     // 1 - first propagate deltas to the previous layer
     for ( size_t i = 0, n = inputs.size( ); i < n; i++ )

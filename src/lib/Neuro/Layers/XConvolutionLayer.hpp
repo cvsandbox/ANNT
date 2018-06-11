@@ -41,14 +41,11 @@ private:
     size_t      mVerticalStep;
     BorderMode  mBorderMode;
 
-    size_t      mPadWidth;
-    size_t      mPadHeight;
+    size_t      mPaddedWidth;
+    size_t      mPaddedHeight;
 
     fvector_t   mKernelsWeights;
     fvector_t   mKernelsBiases;
-
-    std::vector<fvector_t> mPaddedInputs;
-    std::vector<fvector_t> mPaddedPrevDeltas;
 
 public:
     XConvolutionLayer( size_t inputWidth,  size_t inputHeight,  size_t inputDepth,
@@ -68,12 +65,26 @@ public:
         return mKernelsBiases.size( );
     }
 
+    // Tells that we may need some extra memory for padding/unpadding
+    uvector_t WorkingMemSize( bool /* trainingMode */ ) const override
+    {
+        uvector_t workingMemSize = uvector_t( 2, 0 );
+
+        if ( mBorderMode == BorderMode::Same )
+        {
+            workingMemSize[1] = workingMemSize[0] = mPaddedWidth * mPaddedHeight * mInputDepth * sizeof( float_t );
+        }
+
+        return workingMemSize;
+    }
+
     // Randomizes layer's weights, clears biases
     void Randomize( ) override;
 
     // Calculates outputs for the given inputs
     void ForwardCompute( const std::vector<fvector_t*>& inputs,
-                         std::vector<fvector_t*>& outputs ) override;
+                         std::vector<fvector_t*>& outputs,
+                         const XNetworkContext& ctx ) override;
 
     // Propagates error to the previous layer and calculates weights/biases gradients
     void BackwardCompute( const std::vector<fvector_t*>& inputs,
@@ -81,16 +92,12 @@ public:
                           const std::vector<fvector_t*>& deltas,
                           std::vector<fvector_t*>& prevDeltas,
                           fvector_t& gradWeights,
-                          fvector_t& gradBiases ) override;
+                          fvector_t& gradBiases,
+                          const XNetworkContext& ctx ) override;
 
     // Applies updates to the layer's weights and biases
     void UpdateWeights( const fvector_t& weightsUpdate,
                         const fvector_t& biasesUpdate ) override;
-
-private:
-
-    void InputPadding( const std::vector<fvector_t*>& input, std::vector<fvector_t>& padded );
-    void DeltasUnpadding( std::vector<fvector_t>& deltas, std::vector<fvector_t*>& unpadded );
 };
 
 } } // namespace ANNT::Neuro
