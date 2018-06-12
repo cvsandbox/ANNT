@@ -154,6 +154,8 @@ void XDataEncodingTools::RemovePadding2d( const fvector_t& src, fvector_t& dst,
     {
         dst.resize( dstSize );
     }
+
+    RemovePadding2d( src.data( ), dst.data( ), srcWidth, srcHeight, dstWidth, dstHeight, depth );
 }
 void XDataEncodingTools::RemovePadding2d( const float_t* src, float_t* dst,
                                           size_t srcWidth, size_t srcHeight, size_t dstWidth, size_t dstHeight,
@@ -198,6 +200,72 @@ void XDataEncodingTools::RemovePadding2d( const float_t* src, float_t* dst,
 
             // skip bottom padding
             srcPtr += bottomPad;
+        }
+    }
+}
+
+//
+uvector_t XDataEncodingTools::BuildPoolingInToOutMap( size_t inputWidth, size_t inputHeight, size_t inputDepth,
+                                                      size_t poolSizeX, size_t poolSizeY,
+                                                      size_t horizontalStep, size_t verticalStep,
+                                                      BorderMode borderMode )
+{
+    size_t padWidth    = 0;
+    size_t padHeight   = 0;
+    size_t leftPad     = 0;
+    size_t topPad      = 0;
+    size_t paddedWidth = inputWidth;
+
+    if ( borderMode == BorderMode::Same )
+    {
+        padWidth     = poolSizeX - 1;
+        padHeight    = poolSizeY - 1;
+        leftPad      = padWidth  / 2;
+        topPad       = padHeight / 2;
+
+        paddedWidth += padWidth;
+    }
+
+    // calculation of output width/height as:
+    //   outSize = ( inSize - kernelSize + padSize ) / step + 1
+    size_t outputWidth  = ( inputWidth  - poolSizeX + padWidth )  / horizontalStep + 1;
+    size_t outputHeight = ( inputHeight - poolSizeY + padHeight ) / verticalStep   + 1;
+
+    size_t inputsCount  = inputWidth  * inputHeight  * inputDepth;
+
+    // build the map providing output index for the given input index
+    uvector_t inToOutMap = uvector_t( inputsCount );
+
+    std::fill( inToOutMap.begin( ), inToOutMap.end( ), ANNT_NOT_CONNECTED );
+
+    for ( size_t depthIndex = 0, outputIndex = 0; depthIndex < inputDepth; depthIndex++ )
+    {
+        for ( size_t outY = 0, inY = 0; outY < outputHeight; outY++, inY += verticalStep )
+        {
+            size_t inRowIndex = ( inY + depthIndex * inputHeight ) * inputWidth;
+
+            for ( size_t outX = 0, inX = 0; outX < outputWidth; outX++, inX += horizontalStep, outputIndex++ )
+            {
+                size_t inStartIndex = inRowIndex + inX;
+
+                for ( size_t poolY = 0, i = 0; poolY < poolSizeY; poolY++ )
+                {
+                    if ( ( inY + poolY >= topPad ) &&
+                         ( inY + poolY <  topPad + inputHeight ) )
+                    {
+                        for ( size_t poolX = 0; poolX < poolSizeX; poolX++, i++ )
+                        {
+                            if ( ( inX + poolX >= leftPad ) &&
+                                 ( inX + poolX <  leftPad + inputWidth ) )
+                            {
+                                size_t inputIndex = inStartIndex + ( poolY - topPad ) * inputWidth + poolX - leftPad;
+
+                                inToOutMap[inputIndex] = static_cast<uint_t>( outputIndex );
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }
