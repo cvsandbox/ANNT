@@ -268,6 +268,8 @@ uvector_t XDataEncodingTools::BuildPoolingInToOutMap( size_t inputWidth, size_t 
             }
         }
     }
+
+    return inToOutMap;
 }
 
 } // namespace ANNT
