@@ -5,3 +5,5 @@ build
 *.opensdf
 *.o
 *.vcxproj.user
+*.a
+
