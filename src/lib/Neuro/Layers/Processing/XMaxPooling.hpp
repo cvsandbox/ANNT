@@ -26,6 +26,7 @@
 
 namespace ANNT { namespace Neuro {
 
+// Implementation of maximum pooling - outputs are maximum values of corresponding inputs from a square window
 class XMaxPooling : public IProcessingLayer
 {
     size_t      mInputWidth;
@@ -44,7 +45,6 @@ class XMaxPooling : public IProcessingLayer
 
     std::vector<std::vector<size_t>> mOutToInMap;
     std::vector<size_t>              mInToOutMap;
-    std::vector<size_t>              mMaxIndexes;
 
 public:
 
@@ -93,9 +93,6 @@ public:
         Initialize( mInputWidth  * mInputHeight  * mInputDepth,
                     mOutputWidth * mOutputHeight * mInputDepth );
 
-        // allocate vector to keep indexes of maximum input value for a given output
-        mMaxIndexes = std::vector<size_t>( mOutputsCount );
-
         // build two maps:
         //   1) first tells indexes of inputs for a specified output;
         //   2) second tells output index for a specified input index.
@@ -141,14 +138,27 @@ public:
         }
     }
 
+    // Tells that we may need some extra memory for keeping indexes of maximum elements (in training mode)
+    uvector_t WorkingMemSize( bool /* trainingMode */ ) const override
+    {
+        uvector_t workingMemSize = uvector_t( 1 );
+
+        // we don't really need this memory for inference only, but don't want to check that always when doing forward pass
+        workingMemSize[0] = mOutputsCount * sizeof( uint_t );
+
+        return workingMemSize;
+    }
+
+    // Calculates outputs for the given inputs
     void ForwardCompute( const std::vector<fvector_t*>& inputs,
                          std::vector<fvector_t*>& outputs,
                          const XNetworkContext& ctx ) override
     {
         for ( size_t i = 0, n = inputs.size( ); i < n; i++ )
         {
-            fvector_t& input  = *( inputs[i] );
-            fvector_t& output = *( outputs[i] );
+            fvector_t& input      = *( inputs[i] );
+            fvector_t& output     = *( outputs[i] );
+            uint_t*    maxIndexes = static_cast<uint_t*>( ctx.GetWorkingBuffer( 0, i ) );
 
             for ( size_t outputIndex = 0; outputIndex < mOutputsCount; outputIndex++ )
             {
@@ -165,12 +175,13 @@ public:
                     }
                 }
 
-                output[outputIndex]      = maxValue;
-                mMaxIndexes[outputIndex] = maxIndex;
+                output[outputIndex]     = maxValue;
+                maxIndexes[outputIndex] = maxIndex;
             }
         }
     }
     
+    // Propagates error to the previous layer
     void BackwardProcess( const std::vector<fvector_t*>& /* input  */,
                           const std::vector<fvector_t*>& /* output */,
                           const std::vector<fvector_t*>& deltas,
@@ -179,8 +190,9 @@ public:
     {
         for ( size_t i = 0, n = deltas.size( ); i < n; i++ )
         {
-            const fvector_t& delta = *( deltas[i] );
-            fvector_t&       prevDelta = *( prevDeltas[i] );
+            const fvector_t& delta      = *( deltas[i] );
+            fvector_t&       prevDelta  = *( prevDeltas[i] );
+            uint_t*          maxIndexes = static_cast<uint_t*>( ctx.GetWorkingBuffer( 0, i ) );
 
             for ( size_t inputIndex = 0; inputIndex < mInputsCount; inputIndex++ )
             {
@@ -192,7 +204,7 @@ public:
                 {
                     size_t outputIndex = mInToOutMap[inputIndex];
 
-                    prevDelta[inputIndex] = ( mMaxIndexes[outputIndex] == inputIndex ) ? delta[outputIndex] : 0.0f;
+                    prevDelta[inputIndex] = ( maxIndexes[outputIndex] == inputIndex ) ? delta[outputIndex] : 0.0f;
                 }
             }
         }
