@@ -25,7 +25,7 @@
 #include <memory>
 #include <vector>
 
-#include "XNetworkComputation.hpp"
+#include "XNetworkInference.hpp"
 #include "../Optimizers/INetworkOptimizer.hpp"
 #include "../CostFunctions/ICostFunction.hpp"
 
@@ -38,7 +38,7 @@ namespace ANNT { namespace Neuro { namespace Training {
 // network calculating gradients of weights/biases and applying
 // them.
 //
-class XNetworkTraining : public XNetworkComputation
+class XNetworkTraining : public XNetworkInference
 {
 private:
     std::shared_ptr<INetworkOptimizer >  mOptimizer;

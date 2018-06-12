@@ -162,15 +162,15 @@ int main( int /* argc */, char** /* argv */ )
     net->AddLayer( make_shared<XSigmoidActivation>( ) );
   
     // create training context with Nesterov optimizer and Binary Cross Entropy cost function
-    XNetworkTraining netCtx( net,
-                             make_shared<XNesterovMomentumOptimizer>( 0.001f ),
-                             make_shared<XBinaryCrossEntropyCost>( ) );
+    XNetworkTraining netTraining( net,
+                                  make_shared<XNesterovMomentumOptimizer>( 0.001f ),
+                                  make_shared<XBinaryCrossEntropyCost>( ) );
 
     // check classification error on the training data with random model
     ANNT::float_t cost    = 0;
     size_t        correct = 0;
 
-    correct = netCtx.TestClassification( trainAttributes, trainLabels, encodedTrainLabels, &cost );
+    correct = netTraining.TestClassification( trainAttributes, trainLabels, encodedTrainLabels, &cost );
 
     printf( "Before training: accuracy = %0.2f%% (%u/%u), cost = %0.4f \n", static_cast<float>( correct ) / trainAttributes.size( ) * 100,
             correct, trainAttributes.size( ), static_cast<float>( cost ) );
@@ -178,9 +178,9 @@ int main( int /* argc */, char** /* argv */ )
     // train the neural network
     for ( size_t i = 0; i < 32; i++ )
     {
-        netCtx.TrainEpoch( trainAttributes, encodedTrainLabels, 5, true );
+        netTraining.TrainEpoch( trainAttributes, encodedTrainLabels, 5, true );
 
-        correct = netCtx.TestClassification( trainAttributes, trainLabels, encodedTrainLabels, &cost );
+        correct = netTraining.TestClassification( trainAttributes, trainLabels, encodedTrainLabels, &cost );
 
         printf( "Epoch %3u : accuracy = %0.2f%% (%3u/%3u), cost = %0.4f \n", i + 1, static_cast<float>( correct ) / trainAttributes.size( ) * 100,
                 correct, trainAttributes.size( ), static_cast<float>( cost ) );
@@ -188,7 +188,7 @@ int main( int /* argc */, char** /* argv */ )
     printf( "\n" );
 
     // check the trained ANN on the test data
-    correct = netCtx.TestClassification( testAttributes, testLabels, encodedTestLabels, &cost );
+    correct = netTraining.TestClassification( testAttributes, testLabels, encodedTestLabels, &cost );
 
     printf( "Final test: accuracy = %0.2f%% (%u/%u), cost = %0.4f \n", static_cast<float>( correct ) / testAttributes.size( ) * 100,
             correct, testAttributes.size( ), static_cast<float>( cost ) );

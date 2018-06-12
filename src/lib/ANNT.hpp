@@ -38,7 +38,7 @@
 #include "Neuro/Layers/Processing/XMaxPooling.hpp"
 
 #include "Neuro/Network/XNeuralNetwork.hpp"
-#include "Neuro/Network/XNetworkComputation.hpp"
+#include "Neuro/Network/XNetworkInference.hpp"
 
 /* Classes used for artificial neural networks training */
 

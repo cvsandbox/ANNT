@@ -36,7 +36,7 @@ namespace Training
 // The class encapsulates some context passed to layers by inference/training classes
 class XNetworkContext
 {
-    friend class XNetworkComputation;
+    friend class XNetworkInference;
     friend class Training::XNetworkTraining;
 
 private:

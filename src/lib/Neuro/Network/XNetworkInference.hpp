@@ -32,7 +32,7 @@ namespace ANNT { namespace Neuro {
 // Implementation of artificial neural network inference - wraps
 // everything necessary to compute network's outputs for a given inputs.
 //
-class XNetworkComputation
+class XNetworkInference
 {
 protected:
     std::shared_ptr<XNeuralNetwork>      mNetwork;
@@ -46,8 +46,8 @@ protected:
 
 public:
     // The passed network must be fully constructed at this point - no adding new layers
-    XNetworkComputation( const std::shared_ptr<XNeuralNetwork>& network );
-    virtual ~XNetworkComputation( );
+    XNetworkInference( const std::shared_ptr<XNeuralNetwork>& network );
+    virtual ~XNetworkInference( );
 
     // Computes output vector for the given input vector
     void Compute( const fvector_t& input, fvector_t& output );
@@ -73,7 +73,7 @@ protected:
 protected:
 
     // Allocate/free working buffers for layer needing them
-    void AllocateWorkingBuffers( std::vector<std::vector<std::vector<void*>>>& workingBuffer, size_t batchSize );
+    void AllocateWorkingBuffers( std::vector<std::vector<std::vector<void*>>>& workingBuffer, size_t batchSize, bool trainingMode );
     void FreeWorkingBuffers( std::vector<std::vector<std::vector<void*>>>& workingBuffer );
 };
 

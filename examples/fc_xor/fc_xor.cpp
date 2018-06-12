@@ -48,12 +48,12 @@ void PrintVector( const fvector_t& vec )
 // Helper function to print specified inputs and corresponding computed outputs
 void TestNetwork( const shared_ptr<XNeuralNetwork>& net, const vector<fvector_t>& inputs )
 {
-    XNetworkComputation netCtx( net );
-    fvector_t           output( net->OutputsCount( ) );
+    XNetworkInference netInference( net );
+    fvector_t         output( net->OutputsCount( ) );
 
     for ( size_t i = 0, n = inputs.size( ); i < n; i++ )
     {
-        netCtx.Compute( inputs[i], output );
+        netInference.Compute( inputs[i], output );
 
         PrintVector( inputs[i] );
         printf( " -> " );
@@ -87,12 +87,12 @@ int main( int /* argc */, char** /* argv */ )
     net->AddLayer( make_shared<XFullyConnectedLayer>( 2, 1 ) );
   
     // create training context with Nesterov optimizer and MSE cost function
-    XNetworkTraining netCtx( net,
-                             make_shared<XNesterovMomentumOptimizer>( 0.05f ),
-                             make_shared<XMSECost>( ) );
+    XNetworkTraining netTraining( net,
+                                  make_shared<XNesterovMomentumOptimizer>( 0.05f ),
+                                  make_shared<XMSECost>( ) );
 
     // don't average weight/bias gradients over batch
-    netCtx.SetAverageWeightGradients( false );
+    netTraining.SetAverageWeightGradients( false );
 
     printf( "Network output before training: \n" );
     TestNetwork( net, inputs );
@@ -114,7 +114,7 @@ int main( int /* argc */, char** /* argv */ )
     printf( "Cost of each batch: \n" );
     for ( size_t i = 0; i < 64; i++ )
     {
-        auto cost= netCtx.TrainBatch( inputs, targetOutputs );
+        auto cost = netTraining.TrainBatch( inputs, targetOutputs );
 
         printf( "%.04f ", cost );
 

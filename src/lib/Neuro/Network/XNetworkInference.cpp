@@ -18,7 +18,7 @@
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "XNetworkComputation.hpp"
+#include "XNetworkInference.hpp"
 #include "XNetworkContext.hpp"
 #include "../../Tools/XDataEncodingTools.hpp"
 
@@ -26,7 +26,7 @@ using namespace std;
 
 namespace ANNT { namespace Neuro {
 
-XNetworkComputation::XNetworkComputation( const shared_ptr<XNeuralNetwork>& network ) :
+XNetworkInference::XNetworkInference( const shared_ptr<XNeuralNetwork>& network ) :
     mNetwork( network )
 {
     mComputeInputs.resize( 1 );
@@ -38,20 +38,20 @@ XNetworkComputation::XNetworkComputation( const shared_ptr<XNeuralNetwork>& netw
         mComputeOutputs.push_back( vector<fvector_t*>( { &( mComputeOutputsStorage.back( )[0] ) } ) );
     }
 
-    AllocateWorkingBuffers( mComputeMemoryBuffers, 1 );
+    AllocateWorkingBuffers( mComputeMemoryBuffers, 1, false );
 }
 
-XNetworkComputation::~XNetworkComputation( )
+XNetworkInference::~XNetworkInference( )
 {
     FreeWorkingBuffers( mComputeMemoryBuffers );
 }
 
 // Allocate working buffers for layer needing them
-void XNetworkComputation::AllocateWorkingBuffers( std::vector<std::vector<std::vector<void*>>>& workingBuffer, size_t batchSize )
+void XNetworkInference::AllocateWorkingBuffers( std::vector<std::vector<std::vector<void*>>>& workingBuffer, size_t batchSize, bool trainingMode )
 {
     for ( auto layer : *mNetwork )
     {
-        uvector_t workingMemSize = layer->WorkingMemSize( false );
+        uvector_t workingMemSize = layer->WorkingMemSize( trainingMode );
 
         // filling this nice vector
         //
@@ -77,7 +77,7 @@ void XNetworkComputation::AllocateWorkingBuffers( std::vector<std::vector<std::v
 }
 
 // Free layers' working buffers
-void XNetworkComputation::FreeWorkingBuffers( std::vector<std::vector<std::vector<void*>>>& workingBuffer )
+void XNetworkInference::FreeWorkingBuffers( std::vector<std::vector<std::vector<void*>>>& workingBuffer )
 {
     for ( size_t i = 0; i < workingBuffer.size( ); i++ )
     {
@@ -92,7 +92,7 @@ void XNetworkComputation::FreeWorkingBuffers( std::vector<std::vector<std::vecto
 }
 
 // Computes output vector for the given input vector
-void XNetworkComputation::Compute( const fvector_t& input, fvector_t& output )
+void XNetworkInference::Compute( const fvector_t& input, fvector_t& output )
 {
     if ( mNetwork->LayersCount( ) != 0 )
     {
@@ -106,7 +106,7 @@ void XNetworkComputation::Compute( const fvector_t& input, fvector_t& output )
 }
 
 // Runs classification for the given input - returns index of the maximum element in the corresponding output
-size_t XNetworkComputation::Classify( const fvector_t& input )
+size_t XNetworkInference::Classify( const fvector_t& input )
 {
     size_t classIndex = 0;
 
@@ -123,7 +123,7 @@ size_t XNetworkComputation::Classify( const fvector_t& input )
 }
 
 // Tests classification for the provided inputs and target labels - provides number of correctly classified samples
-size_t XNetworkComputation::TestClassification( const vector<fvector_t>& inputs, const uvector_t& targetLabels )
+size_t XNetworkInference::TestClassification( const vector<fvector_t>& inputs, const uvector_t& targetLabels )
 {
     size_t correctLabelsCounter = 0;
 
@@ -146,7 +146,7 @@ size_t XNetworkComputation::TestClassification( const vector<fvector_t>& inputs,
 }
 
 // Helper method to compute output vectors for the given input vectors
-void XNetworkComputation::DoCompute( const vector<fvector_t*>& inputs,
+void XNetworkInference::DoCompute( const vector<fvector_t*>& inputs,
                                      vector<vector<fvector_t*>>& outputs,
                                      vector<vector<vector<void*>>> workingBuffer,
                                      bool trainingMode )

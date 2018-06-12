@@ -33,7 +33,7 @@ namespace ANNT { namespace Neuro { namespace Training {
 XNetworkTraining::XNetworkTraining( const shared_ptr<XNeuralNetwork>& network,
                                     const shared_ptr<INetworkOptimizer>& optimizer,
                                     const shared_ptr<ICostFunction>& costFunction ) :
-    XNetworkComputation( network ),
+    XNetworkInference( network ),
     mOptimizer( optimizer ),
     mCostFunction( costFunction ),
     mAverageWeightGradients( true )
@@ -133,7 +133,7 @@ void XNetworkTraining::AllocateTrainVectors( size_t samplesCount )
 
         // free old and allocate new buffers for layers
         FreeWorkingBuffers( mTrainingMemoryBuffers );
-        AllocateWorkingBuffers( mTrainingMemoryBuffers, samplesCount );
+        AllocateWorkingBuffers( mTrainingMemoryBuffers, samplesCount, true );
     }
 }
 

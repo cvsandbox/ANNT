@@ -107,9 +107,6 @@
     <ClInclude Include="..\..\lib\Neuro\Network\XNeuralNetwork.hpp">
       <Filter>Neuro\Network</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\lib\Neuro\Network\XNetworkComputation.hpp">
-      <Filter>Neuro\Network</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\lib\Neuro\Network\XNetworkTraining.hpp">
       <Filter>Neuro\Network</Filter>
     </ClInclude>
@@ -146,15 +143,15 @@
     <ClInclude Include="..\..\lib\Neuro\Network\XNetworkContext.hpp">
       <Filter>Neuro\Network</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\lib\Neuro\Network\XNetworkInference.hpp">
+      <Filter>Neuro\Network</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\lib\Neuro\Layers\XFullyConnectedLayer.cpp">
       <Filter>Neuro\Layers</Filter>
     </ClCompile>
     <ClCompile Include="..\..\lib\ANNT.cpp" />
-    <ClCompile Include="..\..\lib\Neuro\Network\XNetworkComputation.cpp">
-      <Filter>Neuro\Network</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\lib\Neuro\Network\XNetworkTraining.cpp">
       <Filter>Neuro\Network</Filter>
     </ClCompile>
@@ -175,6 +172,9 @@
     </ClCompile>
     <ClCompile Include="..\..\lib\Neuro\Layers\XConvolutionLayer.cpp">
       <Filter>Neuro\Layers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\Neuro\Network\XNetworkInference.cpp">
+      <Filter>Neuro\Network</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

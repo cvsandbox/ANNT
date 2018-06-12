@@ -15,8 +15,7 @@ SRC = ANNT.cpp \
       XDataEncodingTools.cpp \
       XFullyConnectedLayer.cpp \
       XConvolutionLayer.cpp \
-      XNetworkComputation.cpp \
+      XNetworkInference.cpp \
       XNetworkTraining.cpp
 
 OBJ = $(SRC:.cpp=.o)
-

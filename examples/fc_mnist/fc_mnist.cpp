@@ -125,15 +125,15 @@ int main( int /* argc */, char** /* argv */ )
     net->AddLayer( make_shared<XSoftMaxActivation>( ) );
 
     // create training context with Nesterov optimizer and Binary Cross Entropy cost function
-    XNetworkTraining netCtx( net,
-                             make_shared<XAdamOptimizer>( 0.001f ),
-                             make_shared<XBinaryCrossEntropyCost>( ) );
+    XNetworkTraining netTraining( net,
+                                  make_shared<XAdamOptimizer>( 0.001f ),
+                                  make_shared<XBinaryCrossEntropyCost>( ) );
 
     // check classification error on the training data with random model
     ANNT::float_t cost = 0;
     size_t        correct = 0;
 
-    correct = netCtx.TestClassification( trainImages, trainLabels, encodedTrainLabels, &cost );
+    correct = netTraining.TestClassification( trainImages, trainLabels, encodedTrainLabels, &cost );
 
     printf( "Before training: accuracy = %0.2f%% (%u/%u), cost = %0.4f \n", static_cast<float>( correct ) / trainImages.size( ) * 100,
             correct, trainImages.size( ), static_cast<float>( cost ) );
@@ -156,7 +156,7 @@ int main( int /* argc */, char** /* argv */ )
                 outputs[k] = &( encodedTrainLabels[s] );
             }
 
-            auto batchCost = netCtx.TrainBatch( inputs, outputs );
+            auto batchCost = netTraining.TrainBatch( inputs, outputs );
 
             if ( ( j % 10 ) == 0 )
             {
@@ -170,7 +170,7 @@ int main( int /* argc */, char** /* argv */ )
 
         printf( "\n" );
 
-        correct = netCtx.TestClassification( trainImages, trainLabels, encodedTrainLabels, &cost );
+        correct = netTraining.TestClassification( trainImages, trainLabels, encodedTrainLabels, &cost );
 
         printf( "Epoch %3u : accuracy = %0.2f%% (%5u/%5u), cost = %0.4f \n", i + 1, static_cast<float>( correct ) / trainImages.size( ) * 100,
                 correct, trainImages.size( ), static_cast<float>( cost ) );
