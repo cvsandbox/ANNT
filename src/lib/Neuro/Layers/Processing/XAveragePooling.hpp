@@ -26,6 +26,7 @@
 
 namespace ANNT { namespace Neuro {
 
+// Implementation of average pooling - outputs are average values of corresponding inputs from a square window
 class XAveragePooling : public IProcessingLayer
 {
     size_t      mInputWidth;
@@ -137,6 +138,7 @@ public:
         }
     }
 
+    // Calculates outputs for the given inputs
     void ForwardCompute( const std::vector<fvector_t*>& inputs,
                          std::vector<fvector_t*>& outputs,
                          const XNetworkContext& /* ctx */ ) override
@@ -161,6 +163,7 @@ public:
         }
     }
     
+    // Propagates error to the previous layer
     void BackwardProcess( const std::vector<fvector_t*>& /* input  */,
                           const std::vector<fvector_t*>& /* output */,
                           const std::vector<fvector_t*>& deltas,

@@ -26,6 +26,7 @@
 
 namespace ANNT { namespace Neuro {
 
+// Implementation of fully connected layer - each neuron is connected to each input
 class XFullyConnectedLayer : public ITrainableLayer
 {
 private:

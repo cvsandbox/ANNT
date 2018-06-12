@@ -26,6 +26,7 @@
 
 namespace ANNT { namespace Neuro {
 
+// Implementation of convolution layer - output is the result of convolving input with layer's weight (convolution kernel)
 class XConvolutionLayer : public ITrainableLayer
 {
 private:
