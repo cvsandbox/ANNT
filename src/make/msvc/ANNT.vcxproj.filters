@@ -149,6 +149,9 @@
     <ClInclude Include="..\..\lib\Tools\XVectorize.hpp">
       <Filter>Tools</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\lib\Tools\XParallel.hpp">
+      <Filter>Tools</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\lib\Neuro\Layers\XFullyConnectedLayer.cpp">

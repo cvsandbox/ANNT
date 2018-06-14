@@ -47,6 +47,7 @@
     <ClInclude Include="..\..\lib\Tools\XAvxVectorTools.hpp" />
     <ClInclude Include="..\..\lib\Tools\XCpu.hpp" />
     <ClInclude Include="..\..\lib\Tools\XDataEncodingTools.hpp" />
+    <ClInclude Include="..\..\lib\Tools\XParallel.hpp" />
     <ClInclude Include="..\..\lib\Tools\XSseVectorTools.hpp" />
     <ClInclude Include="..\..\lib\Tools\XVectorize.hpp" />
     <ClInclude Include="..\..\lib\Tools\XVectorTools.hpp" />
@@ -110,6 +111,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <EnableEnhancedInstructionSet>NoExtensions</EnableEnhancedInstructionSet>
       <AdditionalIncludeDirectories>../../lib</AdditionalIncludeDirectories>
+      <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -136,6 +138,7 @@ xcopy /SY "$(ProjectDir)..\..\lib\*.hpp" "$(ProjectDir)..\..\..\build\msvc\debug
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <EnableEnhancedInstructionSet>NoExtensions</EnableEnhancedInstructionSet>
       <AdditionalIncludeDirectories>../../lib</AdditionalIncludeDirectories>
+      <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

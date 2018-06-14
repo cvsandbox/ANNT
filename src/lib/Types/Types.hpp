@@ -61,6 +61,9 @@ enum class BorderMode
 // A value to represent missing connection (between inputs/outputs, neurons, layers, etc)
 static const uint_t ANNT_NOT_CONNECTED = std::numeric_limits<uint_t>::max( );
 
+// Macro to suppress warnings caused by unreferenced parameter
+#define ANNT_UNREFERENCED_PARAMETER(param) (void)param
+
 } // namespace ANNT
 
 #endif // ANNT_TYPES_HPP
