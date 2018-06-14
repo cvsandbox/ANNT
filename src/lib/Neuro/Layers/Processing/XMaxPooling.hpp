@@ -114,7 +114,7 @@ public:
                          std::vector<fvector_t*>& outputs,
                          const XNetworkContext& ctx ) override
     {
-        for ( size_t i = 0, n = inputs.size( ); i < n; i++ )
+        XParallel::For( inputs.size( ), ctx.IsTraining( ), [&]( size_t i )
         {
             fvector_t& input      = *( inputs[i] );
             fvector_t& output     = *( outputs[i] );
@@ -138,7 +138,7 @@ public:
                 output[outputIndex]     = maxValue;
                 maxIndexes[outputIndex] = maxIndex;
             }
-        }
+        } );
     }
     
     // Propagates error to the previous layer
@@ -148,7 +148,7 @@ public:
                           std::vector<fvector_t*>& prevDeltas,
                           const XNetworkContext& ctx ) const override
     {
-        for ( size_t i = 0, n = deltas.size( ); i < n; i++ )
+        XParallel::For( deltas.size( ), ctx.IsTraining( ), [&]( size_t i )
         {
             const fvector_t& delta      = *( deltas[i] );
             fvector_t&       prevDelta  = *( prevDeltas[i] );
@@ -158,16 +158,16 @@ public:
             {
                 if ( mInToOutMap[inputIndex] == ANNT_NOT_CONNECTED )
                 {
-                    prevDelta[inputIndex] = 0.0f;
+                    prevDelta[inputIndex] = float_t( 0 );
                 }
                 else
                 {
                     size_t outputIndex = mInToOutMap[inputIndex];
 
-                    prevDelta[inputIndex] = ( maxIndexes[outputIndex] == inputIndex ) ? delta[outputIndex] : 0.0f;
+                    prevDelta[inputIndex] = ( maxIndexes[outputIndex] == inputIndex ) ? delta[outputIndex] : float_t( 0 );
                 }
             }
-        }
+        } );
     }
 };
 

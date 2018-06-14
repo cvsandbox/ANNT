@@ -23,6 +23,7 @@
 #define ANNT_IACTIVATION_LAYER_HPP
 
 #include "../ILayer.hpp"
+#include "../../../Tools/XParallel.hpp"
 
 namespace ANNT { namespace Neuro {
 
@@ -42,15 +43,12 @@ public:
     // Calls ForwardActivate() for individual input/output vectors passed by reference
     void ForwardCompute( const std::vector<fvector_t*>& inputs,
                          std::vector<fvector_t*>& outputs,
-                         const XNetworkContext& /* ctx */ ) override
+                         const XNetworkContext& ctx ) override
     {
-        // Activation functions have little need of context, so don't use it here.
-        // If any requires it, then ForwardCompute() can be overrided.
-
-        for ( size_t i = 0, n = inputs.size( ); i < n; i++ )
+        XParallel::For( inputs.size( ), ctx.IsTraining( ), [&]( size_t i )
         {
             ForwardActivate( *( inputs[i] ), *( outputs[i] ) );
-        }
+        } );
     }
 
     // Calls BackwardActivate() for individual input/output/delta vectors passed by reference
@@ -60,12 +58,12 @@ public:
                           std::vector<fvector_t*>& prevDeltas,
                           fvector_t& /* gradWeights */,
                           fvector_t& /* gradBiases  */,
-                          const XNetworkContext& /* ctx */ ) override
+                          const XNetworkContext& ctx ) override
     {
-        for ( size_t i = 0, n = inputs.size( ); i < n; i++ )
+        XParallel::For( inputs.size( ), ctx.IsTraining( ), [&]( size_t i )
         {
             BackwardActivate( *( inputs[i] ), *( outputs[i] ), *( deltas[i] ), *( prevDeltas[i] ) );
-        }
+        } );
     }
 
     // Applies activation function to the input vector

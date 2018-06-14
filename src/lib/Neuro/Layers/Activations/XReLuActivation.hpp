@@ -23,6 +23,7 @@
 #define ANNT_XRELU_ACTIVATION_HPP
 
 #include "IActivationLayer.hpp"
+#include "../../../Tools/XVectorize.hpp"
 
 namespace ANNT { namespace Neuro {
 
@@ -33,10 +34,7 @@ public:
 
     void ForwardActivate( const fvector_t& input, fvector_t& output ) override
     {
-        for ( size_t i = 0, n = input.size( ); i < n; i++ )
-        {
-            output[i] = ( input[i] > float_t( 0 ) ) ? input[i] : float_t( 0 );
-        }
+        XVectorize::Max( input.data( ), float_t( 0 ), output.data( ), input.size( ) );
     }
 
     void BackwardActivate( const fvector_t& input, const fvector_t& output,

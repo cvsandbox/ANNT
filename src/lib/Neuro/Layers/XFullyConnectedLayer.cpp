@@ -19,6 +19,8 @@
 */
 
 #include "XFullyConnectedLayer.hpp"
+#include "../../Tools/XParallel.hpp"
+#include "../../Tools/XVectorize.hpp"
 
 using namespace std;
 
@@ -50,26 +52,21 @@ void XFullyConnectedLayer::Randomize( )
 // Calculates outputs for the given inputs
 void XFullyConnectedLayer::ForwardCompute( const vector<fvector_t*>& inputs,
                                            vector<fvector_t*>& outputs,
-                                           const XNetworkContext& /* ctx */ )
+                                           const XNetworkContext& ctx )
 {
-    for ( size_t i = 0, n = inputs.size( ); i < n; i++ )
+    XParallel::For( inputs.size( ), ctx.IsTraining( ), [&]( size_t i )
     {
-        const fvector_t& input  = *( inputs [i] );
-        fvector_t&       output = *( outputs[i] );
-        size_t           weightIndex = 0;
+        const float_t* weights = mWeights.data( );
+        const float_t* input   = inputs[i]->data( );
+        fvector_t&     output  = *( outputs[i] );
 
         for ( size_t otputIndex = 0; otputIndex < mOutputsCount; otputIndex++ )
         {
-            float_t sum = 0;
+            output[otputIndex] = XVectorize::Dot( input, weights, mInputsCount ) + mBiases[otputIndex];
 
-            for ( size_t inputIndex = 0; inputIndex < mInputsCount; inputIndex++, weightIndex++ )
-            {
-                sum += input[inputIndex] * mWeights[weightIndex];
-            }
-
-            output[otputIndex] = sum + mBiases[otputIndex];
+            weights += mInputsCount;
         }
-    }
+    } );
 }
 
 // Propagates error to the previous layer and calculates weights/biases gradients
@@ -79,10 +76,10 @@ void XFullyConnectedLayer::BackwardCompute( const vector<fvector_t*>& inputs,
                                             vector<fvector_t*>& prevDeltas,
                                             fvector_t& gradWeights,
                                             fvector_t& gradBiases,
-                                            const XNetworkContext& /* ctx */ )
+                                            const XNetworkContext& ctx )
 {
     // 1 - first propagate deltas to the previous layer
-    for ( size_t i = 0, n = inputs.size( ); i < n; i++ )
+    XParallel::For( inputs.size( ), ctx.IsTraining( ), [&]( size_t i )
     {
         fvector_t&       prevDelta = *( prevDeltas[i] );
         const fvector_t& delta     = *( deltas[i] );
@@ -99,22 +96,22 @@ void XFullyConnectedLayer::BackwardCompute( const vector<fvector_t*>& inputs,
 
             prevDelta[inputIndex] = sum;
         }
-    }
+    } );
 
     // 2 - accumulate weights' difference
-    for ( size_t outputIndex = 0, weightIndexStart = 0; outputIndex < mOutputsCount; outputIndex++, weightIndexStart += mInputsCount )
+    XParallel::For( mOutputsCount, ctx.IsTraining( ), [&]( size_t outputIndex )
     {
         for ( size_t i = 0, n = inputs.size( ); i < n; i++ )
         {
             const fvector_t& input      = *( inputs[i] );
             float_t          deltaValue = ( *( deltas[i] ) )[outputIndex];
 
-            for ( size_t inputIndex = 0, weightIndex = weightIndexStart; inputIndex < mInputsCount; inputIndex++, weightIndex++ )
+            for ( size_t inputIndex = 0, weightIndex = outputIndex * mInputsCount; inputIndex < mInputsCount; inputIndex++, weightIndex++ )
             {
                 gradWeights[weightIndex] += deltaValue * input[inputIndex];
             }
         }
-    }
+    } );
 
     // 3 - accumulate baises' difference
     for ( size_t i = 0, n = inputs.size( ); i < n; i++ )

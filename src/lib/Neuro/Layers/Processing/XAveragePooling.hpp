@@ -24,6 +24,7 @@
 
 #include "IProcessingLayer.hpp"
 #include "../../../Tools/XDataEncodingTools.hpp"
+#include "../../../Tools/XParallel.hpp"
 
 namespace ANNT { namespace Neuro {
 
@@ -102,17 +103,17 @@ public:
     // Calculates outputs for the given inputs
     void ForwardCompute( const std::vector<fvector_t*>& inputs,
                          std::vector<fvector_t*>& outputs,
-                         const XNetworkContext& /* ctx */ ) override
+                         const XNetworkContext& ctx ) override
     {
-        for ( size_t i = 0, n = inputs.size( ); i < n; i++ )
+        XParallel::For( inputs.size( ), ctx.IsTraining( ), [&]( size_t i )
         {
             fvector_t& input  = *( inputs[i]  );
             fvector_t& output = *( outputs[i] );
 
             for ( size_t outputIndex = 0; outputIndex < mOutputsCount; outputIndex++ )
             {
-                const std::vector<size_t>& outputMap = mOutToInMap[outputIndex];
-                float_t                    sum       = float_t( 0 );
+                const uvector_t& outputMap = mOutToInMap[outputIndex];
+                float_t          sum       = float_t( 0 );
 
                 for ( auto inputIndex : outputMap )
                 {
@@ -121,7 +122,7 @@ public:
 
                 output[outputIndex] = sum / outputMap.size( );
             }
-        }
+        } );
     }
     
     // Propagates error to the previous layer
@@ -129,9 +130,9 @@ public:
                           const std::vector<fvector_t*>& /* output */,
                           const std::vector<fvector_t*>& deltas,
                           std::vector<fvector_t*>& prevDeltas,
-                          const XNetworkContext& /* ctx */ ) const override
+                          const XNetworkContext& ctx ) const override
     {
-        for ( size_t i = 0, n = deltas.size( ); i < n; i++ )
+        XParallel::For( deltas.size( ), ctx.IsTraining( ), [&]( size_t i )
         {
             const fvector_t& delta     = *( deltas[i] );
             fvector_t&       prevDelta = *( prevDeltas[i] );
@@ -149,7 +150,7 @@ public:
                     prevDelta[inputIndex] = delta[outputIndex] / mOutToInMap[outputIndex].size( );
                 }
             }
-        }
+        } );
     }
 };
 

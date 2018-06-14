@@ -20,6 +20,7 @@
 
 #include "XConvolutionLayer.hpp"
 #include "../../Tools/XDataEncodingTools.hpp"
+#include "../../Tools/XParallel.hpp"
 
 using namespace std;
 
@@ -105,7 +106,7 @@ void XConvolutionLayer::ForwardCompute( const vector<fvector_t*>& inputs,
     size_t  inputNextRowGap = inputWidth - mKernelWidth;
 
     // process all samples
-    for ( size_t i = 0, n = inputs.size( ); i < n; i++ )
+    XParallel::For( inputs.size( ), ctx.IsTraining( ), [&]( size_t i )
     {
         const float_t* inputData  = inputs[i]->data( );
         float_t*       outputData = outputs[i]->data( );
@@ -113,7 +114,7 @@ void XConvolutionLayer::ForwardCompute( const vector<fvector_t*>& inputs,
         if ( mBorderMode == BorderMode::Same )
         {
             // get working buffer for padded inputs
-            float* paddedInput = static_cast<float*>( ctx.GetWorkingBuffer( 0, i ) );
+            float_t* paddedInput = static_cast<float_t*>( ctx.GetWorkingBuffer( 0, i ) );
 
             XDataEncodingTools::AddPadding2d( inputData, paddedInput,
                                               mInputWidth, mInputHeight, mPaddedWidth, mPaddedHeight,
@@ -128,19 +129,19 @@ void XConvolutionLayer::ForwardCompute( const vector<fvector_t*>& inputs,
         for ( size_t kernelIndex = 0; kernelIndex < mKernelsCount; kernelIndex++ )
         {
             float_t* outputBase = outputData + kernelIndex * mOutputWidth * mOutputHeight;
-            float_t  biasValue = mKernelsBiases[kernelIndex];
+            float_t  biasValue  = mKernelsBiases[kernelIndex];
 
             // go through all input layers (or feature maps produced by previous layers)
             for ( size_t inputDepthIndex = 0; inputDepthIndex < mInputDepth; inputDepthIndex++ )
             {
-                const float_t* inputBase = inputData + inputDepthIndex * inputWidth * inputHeight;
+                const float_t* inputBase  = inputData + inputDepthIndex * inputWidth * inputHeight;
                 // get the 2D kernel for current input/output map combination
                 const float_t* kernelBase = kernelsData + kernelIndex * kernelSize3D + inputDepthIndex * kernelSize2D;
 
                 // calculate output contributions for the current input map
                 for ( size_t oy = 0; oy < mOutputHeight; oy++ )
                 {
-                    const float_t* inputRow = inputBase + oy * inputRowInc;
+                    const float_t* inputRow  = inputBase + oy * inputRowInc;
                     float_t*       outputRow = outputBase + oy * mOutputWidth;
 
                     for ( size_t ox = 0; ox < mOutputWidth; ox++ )
@@ -174,7 +175,7 @@ void XConvolutionLayer::ForwardCompute( const vector<fvector_t*>& inputs,
                 }
             }
         }
-    }
+    } );
 }
 
 // Propagates error to the previous layer and calculates weights/biases gradients
@@ -186,11 +187,8 @@ void XConvolutionLayer::BackwardCompute( const vector<fvector_t*>& inputs,
                                          fvector_t& gradBiases,
                                          const XNetworkContext& ctx )
 {
-    const float* kernelsData     = mKernelsWeights.data( );
-    //const float* deltaData       = delta.data( );
-    //const float* inputData       = input.data( );
-    //float*       prevDeltaData   = prevDelta.data( );
-    float*       gradWeightsData = gradWeights.data( );
+    const float_t* kernelsData = mKernelsWeights.data( );
+    float_t*       gradWeightsData = gradWeights.data( );
 
     size_t       outputSize      = mOutputWidth * mOutputHeight;
 
@@ -214,7 +212,7 @@ void XConvolutionLayer::BackwardCompute( const vector<fvector_t*>& inputs,
     size_t prevDeltaNextRowGap = inputWidth - mKernelWidth;
     
     // 1 - first propagate deltas to the previous layer
-    for ( size_t i = 0, n = inputs.size( ); i < n; i++ )
+    XParallel::For( inputs.size( ), ctx.IsTraining( ), [&]( size_t i )
     {
         const float_t* deltaData     = deltas[i]->data( );
         float_t*       prevDeltaData = prevDeltas[i]->data( );
@@ -222,7 +220,7 @@ void XConvolutionLayer::BackwardCompute( const vector<fvector_t*>& inputs,
         if ( mBorderMode == BorderMode::Same )
         {
             // get working buffer for padded previous deltas
-            prevDeltaData = static_cast<float*>( ctx.GetWorkingBuffer( 1, i ) );
+            prevDeltaData = static_cast<float_t*>( ctx.GetWorkingBuffer( 1, i ) );
         }
 
         fill( prevDeltaData, prevDeltaData + mInputsCount, float_t( 0 ) );
@@ -235,7 +233,7 @@ void XConvolutionLayer::BackwardCompute( const vector<fvector_t*>& inputs,
             // go through all kernels, which were applied to the feature map
             for ( size_t kernelIndex = 0; kernelIndex < mKernelsCount; kernelIndex++ )
             {
-                const float_t* deltaBase = deltaData + kernelIndex * outputSize;
+                const float_t* deltaBase  = deltaData + kernelIndex * outputSize;
                 // get the 2D kernel for then current input/output map combination
                 const float_t* kernelBase = kernelsData + kernelIndex * kernelSize3D + inputDepthIndex * kernelSize2D;
 
@@ -278,12 +276,12 @@ void XConvolutionLayer::BackwardCompute( const vector<fvector_t*>& inputs,
             // do unpadding of previous deltas
             XDataEncodingTools::RemovePadding2d( prevDeltaData, prevDeltas[i]->data( ), mPaddedWidth, mPaddedHeight, mInputWidth, mInputHeight, mInputDepth );
         }
-    }
+    } );
 
     // 2 - accumulate weights' difference
 
     // go through all input feature maps
-    for ( size_t inputDepthIndex = 0; inputDepthIndex < mInputDepth; inputDepthIndex++ )
+    XParallel::For( mInputDepth, ctx.IsTraining( ), [&]( size_t inputDepthIndex )
     {
         for ( size_t i = 0, n = inputs.size( ); i < n; i++ )
         {
@@ -293,7 +291,7 @@ void XConvolutionLayer::BackwardCompute( const vector<fvector_t*>& inputs,
             if ( mBorderMode == BorderMode::Same )
             {
                 // get working buffer for padded inputs
-                inputData = static_cast<float*>( ctx.GetWorkingBuffer( 0, i ) );
+                inputData = static_cast<float_t*>( ctx.GetWorkingBuffer( 0, i ) );
             }
 
             const float_t* inputBase = inputData + inputDepthIndex * inputWidth * inputHeight;
@@ -333,27 +331,26 @@ void XConvolutionLayer::BackwardCompute( const vector<fvector_t*>& inputs,
                 }
             }
         }
-    }
+    } );
 
     // 3 - accumulate baises' difference
-    for ( size_t i = 0, n = inputs.size( ); i < n; i++ )
+    XParallel::For( mKernelsCount, ctx.IsTraining( ), [&]( size_t kernelIndex )
     {
-        const float* deltaPtr = deltas[i]->data( );
+        float_t sum = 0;
 
-        // go through all kernels
-        for ( size_t kernelIndex = 0; kernelIndex < mKernelsCount; kernelIndex++ )
+        for ( size_t i = 0, n = inputs.size( ); i < n; i++ )
         {
-            float sum = 0.0f;
+            const float_t* deltaPtr = deltas[i]->data( ) + kernelIndex * outputSize;
 
             for ( size_t outputIndex = 0; outputIndex < outputSize; outputIndex++ )
             {
                 sum += *deltaPtr;
                 deltaPtr++;
             }
-
-            gradBiases[kernelIndex] += sum;
         }
-    }
+
+        gradBiases[kernelIndex] += sum;
+    } );
 }
 
 // Applies updates to the layer's weights and biases
