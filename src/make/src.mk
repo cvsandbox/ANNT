@@ -12,6 +12,7 @@ SRC = ANNT.cpp \
       XAvxVectorTools.cpp \
       XSseVectorTools.cpp \
       XVectorTools.cpp \
+      XVectorize.cpp \
       XDataEncodingTools.cpp \
       XFullyConnectedLayer.cpp \
       XConvolutionLayer.cpp \

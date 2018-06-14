@@ -146,6 +146,9 @@
     <ClInclude Include="..\..\lib\Neuro\Network\XNetworkInference.hpp">
       <Filter>Neuro\Network</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\lib\Tools\XVectorize.hpp">
+      <Filter>Tools</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\lib\Neuro\Layers\XFullyConnectedLayer.cpp">
@@ -175,6 +178,9 @@
     </ClCompile>
     <ClCompile Include="..\..\lib\Neuro\Network\XNetworkInference.cpp">
       <Filter>Neuro\Network</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\Tools\XVectorize.cpp">
+      <Filter>Tools</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -48,6 +48,7 @@
     <ClInclude Include="..\..\lib\Tools\XCpu.hpp" />
     <ClInclude Include="..\..\lib\Tools\XDataEncodingTools.hpp" />
     <ClInclude Include="..\..\lib\Tools\XSseVectorTools.hpp" />
+    <ClInclude Include="..\..\lib\Tools\XVectorize.hpp" />
     <ClInclude Include="..\..\lib\Tools\XVectorTools.hpp" />
     <ClInclude Include="..\..\lib\Types\Types.hpp" />
     <ClInclude Include="..\..\lib\Types\XAlignedAllocator.hpp" />
@@ -62,6 +63,7 @@
     <ClCompile Include="..\..\lib\Tools\XCpu.cpp" />
     <ClCompile Include="..\..\lib\Tools\XDataEncodingTools.cpp" />
     <ClCompile Include="..\..\lib\Tools\XSseVectorTools.cpp" />
+    <ClCompile Include="..\..\lib\Tools\XVectorize.cpp" />
     <ClCompile Include="..\..\lib\Tools\XVectorTools.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
