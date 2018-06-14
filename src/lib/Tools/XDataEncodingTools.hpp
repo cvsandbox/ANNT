@@ -59,11 +59,17 @@ public:
                                  size_t srcWidth, size_t srcHeight, size_t dstWidth, size_t dstHeight,
                                  size_t depth );
 
-    //
+    // Builds input to output index mapping for pooling operator - one to one mapping
     static uvector_t BuildPoolingInToOutMap( size_t inputWidth, size_t inputHeight, size_t inputDepth,
                                              size_t poolSizeX, size_t poolSizeY,
                                              size_t horizontalStep, size_t verticalStep,
                                              BorderMode borderMode = BorderMode::Valid );
+
+    // Builds output index to input indexes mapping for pooling operator - 1 to many mapping
+    static std::vector<uvector_t> BuildPoolingOutToInMap( size_t inputWidth, size_t inputHeight, size_t inputDepth,
+                                                          size_t poolSizeX, size_t poolSizeY,
+                                                          size_t horizontalStep, size_t verticalStep,
+                                                          BorderMode borderMode = BorderMode::Valid );
 };
 
 } // namespace ANNT

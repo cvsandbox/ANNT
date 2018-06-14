@@ -23,6 +23,7 @@
 #define ANNT_XAVERAGE_POOLING_HPP
 
 #include "IProcessingLayer.hpp"
+#include "../../../Tools/XDataEncodingTools.hpp"
 
 namespace ANNT { namespace Neuro {
 
@@ -43,8 +44,8 @@ class XAveragePooling : public IProcessingLayer
 
     BorderMode  mBorderMode;
 
-    std::vector<std::vector<size_t>> mOutToInMap;
-    std::vector<size_t>              mInToOutMap;
+    std::vector<uvector_t> mOutToInMap;
+    uvector_t              mInToOutMap;
 
 public:
 
@@ -70,18 +71,11 @@ public:
     {
         size_t padWidth    = 0;
         size_t padHeight   = 0;
-        size_t leftPad     = 0;
-        size_t topPad      = 0;
-        size_t paddedWidth = mInputWidth;
 
         if ( mBorderMode == BorderMode::Same )
         {
             padWidth     = poolSizeX - 1;
             padHeight    = poolSizeY - 1;
-            leftPad      = padWidth  / 2;
-            topPad       = padHeight / 2;
-
-            paddedWidth += padWidth;
         }
 
         // calculation of output width/height as:
@@ -94,48 +88,15 @@ public:
                     mOutputWidth * mOutputHeight * mInputDepth );
 
         // build two maps:
-        //   1) first tells indexes of inputs for a specified output;
-        //   2) second tells output index for a specified input index.
+        //   1) first tells output index for the specified input index.
+        //   2) second tells indexes of inputs for the specified output;
         // An output will always have at least one input connected to it.
         // However, some inputs may not be connected at all to any of the outputs
         // (if step size is greater than pooling size).
-        mOutToInMap = std::vector<std::vector<size_t>>( mOutputsCount );
-        mInToOutMap = std::vector<size_t>( mInputsCount );
-        std::fill( mInToOutMap.begin( ), mInToOutMap.end( ), ANNT_NOT_CONNECTED );
-
-        for ( size_t depthIndex = 0, outputIndex = 0; depthIndex < mInputDepth; depthIndex++ )
-        {
-            for ( size_t outY = 0, inY = 0; outY < mOutputHeight; outY++, inY += mVerticalStep )
-            {
-                size_t inRowIndex = ( inY + depthIndex * mInputHeight ) * mInputWidth;
-
-                for ( size_t outX = 0, inX = 0; outX < mOutputWidth; outX++, inX += mHorizontalStep, outputIndex++ )
-                {
-                    std::vector<size_t>& outputMap    = mOutToInMap[outputIndex];
-                    size_t               inStartIndex = inRowIndex + inX;
-
-                    for ( size_t poolY = 0, i = 0; poolY < mPoolSizeY; poolY++ )
-                    {
-                        if ( ( inY + poolY >= topPad ) &&
-                             ( inY + poolY <  topPad + mInputHeight ) )
-                        {
-                            for ( size_t poolX = 0; poolX < mPoolSizeX; poolX++, i++ )
-                            {
-                                if ( ( inX + poolX >= leftPad ) &&
-                                     ( inX + poolX <  leftPad + mInputWidth ) )
-                                {
-                                    size_t inputIndex = inStartIndex + ( poolY - topPad ) * mInputWidth + poolX - leftPad;
-
-                                    outputMap.push_back( inputIndex );
-
-                                    mInToOutMap[inputIndex] = outputIndex;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        mInToOutMap = XDataEncodingTools::BuildPoolingInToOutMap( inputWidth, inputHeight, inputDepth, poolSizeX, poolSizeY,
+                                                                  horizontalStep, verticalStep, borderMode );
+        mOutToInMap = XDataEncodingTools::BuildPoolingOutToInMap( inputWidth, inputHeight, inputDepth, poolSizeX, poolSizeY,
+                                                                  horizontalStep, verticalStep, borderMode );
     }
 
     // Calculates outputs for the given inputs
