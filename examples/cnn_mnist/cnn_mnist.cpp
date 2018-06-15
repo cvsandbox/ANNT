@@ -107,14 +107,14 @@ int main( int /* argc */, char** /* argv */ )
             return -6;
         }
 
-        printf( "Loaded %u training data samples \n", trainLabels.size( )  );
-        printf( "Loaded %u test data samples \n\n", testLabels.size( ) );
+        printf( "Loaded %zu training data samples \n", trainLabels.size( )  );
+        printf( "Loaded %zu test data samples \n\n", testLabels.size( ) );
 
         // extract validation data set out of training set
         uvector_t         validationLabels = ExtractValidationSamples( trainLabels );
         vector<fvector_t> validationImages = ExtractValidationSamples( trainImages );
 
-        printf( "Samples usage: training = %u, validation = %u, test = %u \n\n",
+        printf( "Samples usage: training = %zu, validation = %zu, test = %zu \n\n",
                 trainLabels.size( ), validationLabels.size( ), testLabels.size( ) );
 
         // perform one hot encoding for all labels
@@ -151,7 +151,7 @@ int main( int /* argc */, char** /* argv */ )
 
         correct = netTraining.TestClassification( trainImages, trainLabels, encodedTrainLabels, &cost );
 
-        printf( "Before training: accuracy = %0.2f%% (%u/%u), cost = %0.4f \n", static_cast<float>( correct ) / trainImages.size( ) * 100,
+        printf( "Before training: accuracy = %0.2f%% (%zu/%zu), cost = %0.4f \n", static_cast<float>( correct ) / trainImages.size( ) * 100,
                 correct, trainImages.size( ), static_cast<float>( cost ) );
 
         //
@@ -161,7 +161,7 @@ int main( int /* argc */, char** /* argv */ )
         // train the neural network
         for ( size_t i = 0; i < 20; i++ )
         {
-            printf( "epoch %u \n", i + 1 );
+            printf( "epoch %zu \n", i + 1 );
 
             for ( size_t j = 0; j < 1000; j++ )
             {
@@ -189,7 +189,7 @@ int main( int /* argc */, char** /* argv */ )
 
             correct = netTraining.TestClassification( trainImages, trainLabels, encodedTrainLabels, &cost );
 
-            printf( "Epoch %3u : accuracy = %0.2f%% (%5u/%5u), cost = %0.4f \n", i + 1, static_cast<float>( correct ) / trainImages.size( ) * 100,
+            printf( "Epoch %3zu : accuracy = %0.2f%% (%5zu/%5zu), cost = %0.4f \n", i + 1, static_cast<float>( correct ) / trainImages.size( ) * 100,
                     correct, trainImages.size( ), static_cast<float>( cost ) );
         }
     }

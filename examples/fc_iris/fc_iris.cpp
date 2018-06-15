@@ -132,7 +132,7 @@ int main( int /* argc */, char** /* argv */ )
         return -1;
     }
 
-    printf( "Loaded %u data samples \n\n", trainAttributes.size( ) );
+    printf( "Loaded %zu data samples \n\n", trainAttributes.size( ) );
 
     // make sure we have expected number of samples
     if ( trainAttributes.size( ) != 150 )
@@ -145,7 +145,7 @@ int main( int /* argc */, char** /* argv */ )
     vector<fvector_t> testAttributes = ExtractTestSamples( trainAttributes );
     uvector_t         testLabels     = ExtractTestSamples( trainLabels );
 
-    printf( "Using %d samples for training and %d samples for test \n\n", trainAttributes.size( ), testAttributes.size( ) );
+    printf( "Using %zu samples for training and %zu samples for test \n\n", trainAttributes.size( ), testAttributes.size( ) );
 
     // perform one hot encoding of train/test labels
     vector<fvector_t> encodedTrainLabels = XDataEncodingTools::OneHotEncoding( trainLabels, 3 );
@@ -172,7 +172,7 @@ int main( int /* argc */, char** /* argv */ )
 
     correct = netTraining.TestClassification( trainAttributes, trainLabels, encodedTrainLabels, &cost );
 
-    printf( "Before training: accuracy = %0.2f%% (%u/%u), cost = %0.4f \n", static_cast<float>( correct ) / trainAttributes.size( ) * 100,
+    printf( "Before training: accuracy = %0.2f%% (%zu/%zu), cost = %0.4f \n", static_cast<float>( correct ) / trainAttributes.size( ) * 100,
             correct, trainAttributes.size( ), static_cast<float>( cost ) );
 
     // train the neural network
@@ -182,7 +182,7 @@ int main( int /* argc */, char** /* argv */ )
 
         correct = netTraining.TestClassification( trainAttributes, trainLabels, encodedTrainLabels, &cost );
 
-        printf( "Epoch %3u : accuracy = %0.2f%% (%3u/%3u), cost = %0.4f \n", i + 1, static_cast<float>( correct ) / trainAttributes.size( ) * 100,
+        printf( "Epoch %3zu : accuracy = %0.2f%% (%3zu/%3zu), cost = %0.4f \n", i + 1, static_cast<float>( correct ) / trainAttributes.size( ) * 100,
                 correct, trainAttributes.size( ), static_cast<float>( cost ) );
     }
     printf( "\n" );
@@ -190,7 +190,7 @@ int main( int /* argc */, char** /* argv */ )
     // check the trained ANN on the test data
     correct = netTraining.TestClassification( testAttributes, testLabels, encodedTestLabels, &cost );
 
-    printf( "Final test: accuracy = %0.2f%% (%u/%u), cost = %0.4f \n", static_cast<float>( correct ) / testAttributes.size( ) * 100,
+    printf( "Final test: accuracy = %0.2f%% (%zu/%zu), cost = %0.4f \n", static_cast<float>( correct ) / testAttributes.size( ) * 100,
             correct, testAttributes.size( ), static_cast<float>( cost ) );
 
     return 0;
