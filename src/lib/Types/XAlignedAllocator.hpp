@@ -143,6 +143,20 @@ public:
     inline bool operator!=( const XAlignedAllocator& rhs ) { return !operator==( rhs ); }
 };
 
+template <typename T, std::size_t Alignment>
+inline bool operator==( const XAlignedAllocator<T, Alignment> &,
+                        const XAlignedAllocator<T, Alignment> & )
+{
+    return true;
+}
+
+template <typename T, std::size_t Alignment>
+inline bool operator!=( const XAlignedAllocator<T, Alignment> &,
+                        const XAlignedAllocator<T, Alignment> & )
+{
+    return false;
+}
+
 } // namespace ANNT
 
 #endif // ANNT_XALLIGNED_ALLOCATOR_HPP
