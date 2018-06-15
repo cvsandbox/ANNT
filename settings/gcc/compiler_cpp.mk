@@ -22,3 +22,7 @@ else
 CFLAGS += -O3 -s -DNDEBUG
 endif
 
+# Include Open MP support
+CFLAGS += -fopenmp
+LDFLAGS += -fopenmp
+
