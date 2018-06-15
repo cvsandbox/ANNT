@@ -257,7 +257,7 @@ uvector_t XDataEncodingTools::BuildPoolingInToOutMap( size_t inputWidth, size_t 
                             {
                                 size_t inputIndex = inStartIndex + ( poolY - topPad ) * inputWidth + poolX - leftPad;
 
-                                inToOutMap[inputIndex] = static_cast<uint_t>( outputIndex );
+                                inToOutMap[inputIndex] = outputIndex;
                             }
                         }
                     }

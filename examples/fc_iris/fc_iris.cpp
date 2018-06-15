@@ -46,9 +46,9 @@ bool LoadData( vector<fvector_t>& attributes, uvector_t& labels )
     if ( file )
     {
         char     buff[256];
-        uint_t   labelsCounter = 0;
+        size_t   labelsCounter = 0;
 
-        map<string, uint_t> labelsMap;
+        map<string, size_t> labelsMap;
 
         while ( fgets( buff, 256, file ) != nullptr )
         {
@@ -68,7 +68,7 @@ bool LoadData( vector<fvector_t>& attributes, uvector_t& labels )
                 {
                     classNamePtr++;
 
-                    uint_t labelId = labelsCounter;
+                    size_t labelId = labelsCounter;
                     auto   labelIt = labelsMap.find( classNamePtr );
 
                     if ( labelIt != labelsMap.end( ) )
@@ -77,7 +77,7 @@ bool LoadData( vector<fvector_t>& attributes, uvector_t& labels )
                     }
                     else
                     {
-                        labelsMap.insert( pair<string, uint_t>( classNamePtr, labelsCounter ) );
+                        labelsMap.insert( pair<string, size_t>( classNamePtr, labelsCounter ) );
                         labelsCounter++;
                     }
 

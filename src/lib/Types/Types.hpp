@@ -39,15 +39,12 @@ typedef double float_t;
 typedef float  float_t;
 #endif
 
-// Preferred type for unsigned integers
-typedef size_t uint_t;
-
 // Vector type to use for network's input/output/error/gradient flow.
 // 32 bytes aligned to enable SIMD operations on those.
 typedef std::vector<float_t, XAlignedAllocator<float_t, 32>> fvector_t;
 
-// Vector type with unsigned integers as elements
-typedef std::vector<uint_t> uvector_t;
+// Vector type with unsigned integers (size_t) as elements
+typedef std::vector<size_t> uvector_t;
 
 // Border handling modes for convolution and pooling
 enum class BorderMode
@@ -59,7 +56,7 @@ enum class BorderMode
 };
 
 // A value to represent missing connection (between inputs/outputs, neurons, layers, etc)
-static const uint_t ANNT_NOT_CONNECTED = std::numeric_limits<uint_t>::max( );
+static const size_t ANNT_NOT_CONNECTED = std::numeric_limits<size_t>::max( );
 
 // Macro to suppress warnings caused by unreferenced parameter
 #define ANNT_UNREFERENCED_PARAMETER(param) (void)param

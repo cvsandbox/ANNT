@@ -103,8 +103,9 @@ public:
     {
         uvector_t workingMemSize = uvector_t( 1 );
 
-        // we don't really need this memory for inference only, but don't want to check that always when doing forward pass
-        workingMemSize[0] = mOutputsCount * sizeof( uint_t );
+        // we don't really need this memory when doing inference only,
+        // but don't want to check that always when doing forward pass
+        workingMemSize[0] = mOutputsCount * sizeof( size_t);
 
         return workingMemSize;
     }
@@ -118,7 +119,7 @@ public:
         {
             fvector_t& input      = *( inputs[i] );
             fvector_t& output     = *( outputs[i] );
-            uint_t*    maxIndexes = static_cast<uint_t*>( ctx.GetWorkingBuffer( 0, i ) );
+            size_t*    maxIndexes = static_cast<size_t*>( ctx.GetWorkingBuffer( 0, i ) );
 
             for ( size_t outputIndex = 0; outputIndex < mOutputsCount; outputIndex++ )
             {
@@ -152,7 +153,7 @@ public:
         {
             const fvector_t& delta      = *( deltas[i] );
             fvector_t&       prevDelta  = *( prevDeltas[i] );
-            uint_t*          maxIndexes = static_cast<uint_t*>( ctx.GetWorkingBuffer( 0, i ) );
+            size_t*          maxIndexes = static_cast<size_t*>( ctx.GetWorkingBuffer( 0, i ) );
 
             for ( size_t inputIndex = 0; inputIndex < mInputsCount; inputIndex++ )
             {
