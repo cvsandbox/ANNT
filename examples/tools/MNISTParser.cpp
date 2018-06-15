@@ -133,11 +133,11 @@ bool MNISTParser::LoadImages( const string& fileName, vector<fvector_t>& images,
                     {
                         fvector_t image( paddedSize, scaleMin );
 
-                        for ( uint32_t y = 0, i = 0; y < height; y++ )
+                        for ( uint32_t y = 0, j = 0; y < height; y++ )
                         {
-                            for ( uint32_t x = 0; x < width; x++, i++ )
+                            for ( uint32_t x = 0; x < width; x++, j++ )
                             {
-                                image[( y + yPad ) * paddedWidth + xPad + x] = ( static_cast<float_t>( buffer[i] ) / 255 ) *
+                                image[( y + yPad ) * paddedWidth + xPad + x] = ( static_cast<float_t>( buffer[j] ) / 255 ) *
                                                                                ( scaleMax - scaleMin ) + scaleMin;
                             }
                         }
