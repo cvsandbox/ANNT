@@ -149,7 +149,6 @@ int main( int /* argc */, char** /* argv */ )
         XClassificationTrainingHelper trainingHelper( netTraining );
         trainingHelper.SetValidationSamples( validationImages, encodedValidationLabels, validationLabels );
         trainingHelper.SetTestSamples( testImages, encodedTestLabels, testLabels );
-        trainingHelper.SetShowIntermediateBatchCosts( true );
 
         // 20 epochs, 50 samples in batch
         trainingHelper.RunTraining( 20, 50, trainImages, encodedTrainLabels, trainLabels );
