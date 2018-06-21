@@ -33,18 +33,6 @@
 
 namespace ANNT {
 
-/*
-  By default MSVC is trying to enable SSE instructions, which causes a mix of AVX and SSE.
-  Switching between those two is expensive without extra care and should be avoided. And so
-  MSVC generates warning when detects AVX/SSE mix.
-  warning C4752: found Intel(R) Advanced Vector Extensions; consider using /arch:AVX
-
-  Zeroing the upper bits of the YMM registers avoids the expense at the switch from AVX to SSE.
-  https://stackoverflow.com/questions/7839925/using-avx-cpu-instructions-poor-performance-without-archavx
-*/
-#define AVX_START _mm256_zeroupper( )
-#define AVX_END   _mm256_zeroupper( )
-
 // Helper class wrapping some AVX intrinsics
 class AvxTools
 {
@@ -182,12 +170,10 @@ private:
     // Initialize 8 single / 4 double precision numbers of AVX register with the specified value 
     static inline __m256 Set1( float value )
     {
-        AVX_START;
         return _mm256_set1_ps( value );
     }
     static inline __m256d Set1( double value )
     {
-        AVX_START;
         return _mm256_set1_pd( value );
     }
 
@@ -254,8 +240,6 @@ private:
         size_t blockIterations  = ( size - blockIterations4 * blockSize4 ) / blockSize;
         size_t remainIterations = size - blockIterations4 * blockSize4 - blockIterations * blockSize;
 
-        AVX_START;
-
         // large blocks of 4
         for ( size_t i = 0; i < blockIterations4; i++ )
         {
@@ -296,8 +280,6 @@ private:
             dst += blockSize;
         }
 
-        AVX_END;
-
         // remainder for compiler to decide
         for ( size_t i = 0; i < remainIterations; i++ )
         {
@@ -318,8 +300,6 @@ private:
         size_t blockIterations4 = size / blockSize4;
         size_t blockIterations  = ( size - blockIterations4 * blockSize4 ) / blockSize;
         size_t remainIterations = size - blockIterations4 * blockSize4 - blockIterations * blockSize;
-
-        AVX_START;
 
         // large blocks of 4
         for ( size_t i = 0; i < blockIterations4; i++ )
@@ -361,8 +341,6 @@ private:
             dst += blockSize;
         }
 
-        AVX_END;
-
         // remainder for compiler to decide
         for ( size_t i = 0; i < remainIterations; i++ )
         {
@@ -383,13 +361,11 @@ private:
         size_t blockIterations4 = size / blockSize4;
         size_t blockIterations  = ( size - blockIterations4 * blockSize4 ) / blockSize;
         size_t remainIterations = size - blockIterations4 * blockSize4 - blockIterations * blockSize;
-
-        AVX_START;
-
+        
         auto   sum0 = Set1( T( 0 ) );
-        auto   sum1 = sum0;
-        auto   sum2 = sum0;
-        auto   sum3 = sum0;
+        auto   sum1 = Set1( T( 0 ) );
+        auto   sum2 = Set1( T( 0 ) );
+        auto   sum3 = Set1( T( 0 ) );
 
         // large blocks of 4
         for ( size_t i = 0; i < blockIterations4; i++ )
@@ -428,8 +404,6 @@ private:
         sum0  = Add( sum0, sum2 );
         sum0  = Add( sum0, sum3 );
 
-        AVX_END;
-
         T sum = Sum( sum0 );
 
         for ( size_t i = 0; i < remainIterations; i++ )
@@ -453,8 +427,6 @@ private:
         size_t blockIterations4 = size / blockSize4;
         size_t blockIterations  = ( size - blockIterations4 * blockSize4 ) / blockSize;
         size_t remainIterations = size - blockIterations4 * blockSize4 - blockIterations * blockSize;
-
-        AVX_START;
 
         auto   alphaVec = Set1( alpha );
 
@@ -492,8 +464,6 @@ private:
             src += blockSize;
             dst += blockSize;
         }
-
-        AVX_END;
 
         // remainder for compiler to decide
         for ( size_t i = 0; i < remainIterations; i++ )
@@ -569,11 +539,7 @@ inline float AvxTools::Sum( __m256 value )
 {
     float mem[8];
 
-    AVX_START;
-
     Store<std::false_type>( value, mem );
-
-    AVX_END;
 
     return mem[0] + mem[1] + mem[2] + mem[3] + mem[4] + mem[5] + mem[6] + mem[7];
 }
@@ -581,11 +547,7 @@ inline double AvxTools::Sum( __m256d value )
 {
     double mem[4];
 
-    AVX_START;
-
     Store<std::false_type>( value, mem );
-
-    AVX_END;
 
     return mem[0] + mem[1] + mem[2] + mem[3];
 }

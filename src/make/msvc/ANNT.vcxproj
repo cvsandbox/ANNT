@@ -62,10 +62,14 @@
     <ClCompile Include="..\..\lib\Neuro\Network\XClassificationTrainingHelper.cpp" />
     <ClCompile Include="..\..\lib\Neuro\Network\XNetworkInference.cpp" />
     <ClCompile Include="..\..\lib\Neuro\Network\XNetworkTraining.cpp" />
-    <ClCompile Include="..\..\lib\Tools\XAvxVectorTools.cpp" />
+    <ClCompile Include="..\..\lib\Tools\XAvxVectorTools.cpp">
+      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
+    </ClCompile>
     <ClCompile Include="..\..\lib\Tools\XCpu.cpp" />
     <ClCompile Include="..\..\lib\Tools\XDataEncodingTools.cpp" />
-    <ClCompile Include="..\..\lib\Tools\XSseVectorTools.cpp" />
+    <ClCompile Include="..\..\lib\Tools\XSseVectorTools.cpp">
+      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+    </ClCompile>
     <ClCompile Include="..\..\lib\Tools\XVectorize.cpp" />
     <ClCompile Include="..\..\lib\Tools\XVectorTools.cpp" />
     <ClCompile Include="..\..\lib\Types\XAlignedAllocator.cpp" />
