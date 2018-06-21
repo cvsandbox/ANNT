@@ -2,6 +2,7 @@
 
 # search path for source files
 VPATH = ../../lib \
+        ../../lib/Types \
         ../../lib/Tools \
         ../../lib/Neuro/Layers \
         ../../lib/Neuro/Network
