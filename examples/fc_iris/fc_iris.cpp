@@ -162,36 +162,16 @@ int main( int /* argc */, char** /* argv */ )
     net->AddLayer( make_shared<XSigmoidActivation>( ) );
   
     // create training context with Nesterov optimizer and Binary Cross Entropy cost function
-    XNetworkTraining netTraining( net,
-                                  make_shared<XNesterovMomentumOptimizer>( 0.001f ),
-                                  make_shared<XBinaryCrossEntropyCost>( ) );
+    shared_ptr<XNetworkTraining> netTraining = make_shared<XNetworkTraining>( net,
+                                               make_shared<XNesterovMomentumOptimizer>( 0.001f ),
+                                               make_shared<XBinaryCrossEntropyCost>( ) );
 
-    // check classification error on the training data with random model
-    ANNT::float_t cost    = 0;
-    size_t        correct = 0;
+    // using the helper for training ANN to do classification
+    XClassificationTrainingHelper trainingHelper( netTraining );
+    trainingHelper.SetTestSamples( testAttributes, encodedTestLabels, testLabels );
 
-    correct = netTraining.TestClassification( trainAttributes, trainLabels, encodedTrainLabels, &cost );
-
-    printf( "Before training: accuracy = %0.2f%% (%zu/%zu), cost = %0.4f \n", static_cast<float>( correct ) / trainAttributes.size( ) * 100,
-            correct, trainAttributes.size( ), static_cast<float>( cost ) );
-
-    // train the neural network
-    for ( size_t i = 0; i < 32; i++ )
-    {
-        netTraining.TrainEpoch( trainAttributes, encodedTrainLabels, 5, true );
-
-        correct = netTraining.TestClassification( trainAttributes, trainLabels, encodedTrainLabels, &cost );
-
-        printf( "Epoch %3zu : accuracy = %0.2f%% (%3zu/%3zu), cost = %0.4f \n", i + 1, static_cast<float>( correct ) / trainAttributes.size( ) * 100,
-                correct, trainAttributes.size( ), static_cast<float>( cost ) );
-    }
-    printf( "\n" );
-
-    // check the trained ANN on the test data
-    correct = netTraining.TestClassification( testAttributes, testLabels, encodedTestLabels, &cost );
-
-    printf( "Final test: accuracy = %0.2f%% (%zu/%zu), cost = %0.4f \n", static_cast<float>( correct ) / testAttributes.size( ) * 100,
-            correct, testAttributes.size( ), static_cast<float>( cost ) );
+    // 40 epochs, 10 samples in batch
+    trainingHelper.RunTraining( 40, 10, trainAttributes, encodedTrainLabels, trainLabels );
 
     return 0;
 }

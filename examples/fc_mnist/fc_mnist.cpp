@@ -110,9 +110,9 @@ int main( int /* argc */, char** /* argv */ )
             trainLabels.size( ), validationLabels.size( ), testLabels.size( ) );
 
     // perform one hot encoding for all labels
-    vector<fvector_t> encodedTrainLabels      = XDataEncodingTools::OneHotEncoding( trainLabels, 10 );
+    vector<fvector_t> encodedTrainLabels      = XDataEncodingTools::OneHotEncoding( trainLabels,      10 );
     vector<fvector_t> encodedValidationLabels = XDataEncodingTools::OneHotEncoding( validationLabels, 10 );
-    vector<fvector_t> encodedTestLabels       = XDataEncodingTools::OneHotEncoding( testLabels, 10 );
+    vector<fvector_t> encodedTestLabels       = XDataEncodingTools::OneHotEncoding( testLabels,       10 );
 
     // prepare a 3 layer ANN
     shared_ptr<XNeuralNetwork> net = make_shared<XNeuralNetwork>( );
@@ -124,58 +124,19 @@ int main( int /* argc */, char** /* argv */ )
     net->AddLayer( make_shared<XFullyConnectedLayer>( 100, 10 ) );
     net->AddLayer( make_shared<XSoftMaxActivation>( ) );
 
-    // create training context with Nesterov optimizer and Binary Cross Entropy cost function
-    XNetworkTraining netTraining( net,
-                                  make_shared<XAdamOptimizer>( 0.001f ),
-                                  make_shared<XBinaryCrossEntropyCost>( ) );
+    // create training context with Adam optimizer and Binary Cross Entropy cost function
+    shared_ptr<XNetworkTraining> netTraining = make_shared<XNetworkTraining>( net,
+                                               make_shared<XAdamOptimizer>( 0.001 ),
+                                               make_shared<XBinaryCrossEntropyCost>( ) );
 
-    // check classification error on the training data with random model
-    ANNT::float_t cost    = 0;
-    size_t        correct = 0;
 
-    correct = netTraining.TestClassification( trainImages, trainLabels, encodedTrainLabels, &cost );
+    // using the helper for training ANN to do classification
+    XClassificationTrainingHelper trainingHelper( netTraining );
+    trainingHelper.SetValidationSamples( validationImages, encodedValidationLabels, validationLabels );
+    trainingHelper.SetTestSamples( testImages, encodedTestLabels, testLabels );
 
-    printf( "Before training: accuracy = %0.2f%% (%zu/%zu), cost = %0.4f \n", static_cast<float>( correct ) / trainImages.size( ) * 100,
-            correct, trainImages.size( ), static_cast<float>( cost ) );
+    // 20 epochs, 50 samples in batch
+    trainingHelper.RunTraining( 20, 50, trainImages, encodedTrainLabels, trainLabels );
 
-    //
-    vector<fvector_t*> inputs( 50 );
-    vector<fvector_t*> outputs( 50 );
-
-    // train the neural network
-    for ( size_t i = 0; i < 20; i++ )
-    {
-        printf( "epoch %zu \n", i + 1 );
-        for ( size_t j = 0; j < 1000; j++ )
-        {
-            for ( size_t k = 0; k < 50; k++ )
-            {
-                size_t s = rand( ) % trainImages.size( );
-
-                inputs[k]  = &( trainImages[s] );
-                outputs[k] = &( encodedTrainLabels[s] );
-            }
-
-            auto batchCost = netTraining.TrainBatch( inputs, outputs );
-
-            if ( ( j % 10 ) == 0 )
-            {
-                printf( "%0.4f ", static_cast<float>( batchCost ) );
-            }
-            if ( ( j % 80 ) == 0 )
-            {
-                printf( "\n" );
-            }
-        }
-
-        printf( "\n" );
-
-        correct = netTraining.TestClassification( trainImages, trainLabels, encodedTrainLabels, &cost );
-
-        printf( "Epoch %3zu : accuracy = %0.2f%% (%5zu/%5zu), cost = %0.4f \n", i + 1, static_cast<float>( correct ) / trainImages.size( ) * 100,
-                correct, trainImages.size( ), static_cast<float>( cost ) );
-
-    }
-
-	return 0;
+    return 0;
 }
