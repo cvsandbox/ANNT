@@ -118,9 +118,15 @@ public:
     float_t TrainBatch( const std::vector<fvector_t*>& inputs,
                         const std::vector<fvector_t*>& targetOutputs );
 
-    // Trains single epoch using batches of the specified size
+    // Trains single epoch using batches of the specified size (samples are provided as vectors)
     float_t TrainEpoch( const std::vector<fvector_t>& inputs, 
                         const std::vector<fvector_t>& targetOutputs,
+                        size_t batchSize,
+                        bool randomPickIntoBatch = false );
+
+    // Trains single epoch using batches of the specified size (samples are provided as pointers to vectors)
+    float_t TrainEpoch( const std::vector<fvector_t*>& inputs, 
+                        const std::vector<fvector_t*>& targetOutputs,
                         size_t batchSize,
                         bool randomPickIntoBatch = false );
 
@@ -134,6 +140,10 @@ public:
     size_t TestClassification( const std::vector<fvector_t>& inputs,
                                const uvector_t& targetLabels,
                                const std::vector<fvector_t>& targetOutputs,
+                               float_t* pAvgCost );
+    size_t TestClassification( const std::vector<fvector_t*>& inputs,
+                               const uvector_t& targetLabels,
+                               const std::vector<fvector_t*>& targetOutputs,
                                float_t* pAvgCost );
 
 private:

@@ -307,7 +307,7 @@ float_t XNetworkTraining::TrainBatch( const vector<fvector_t*>& inputs,
     return cost;
 }
 
-// Trains single epoch using batches of the specified size
+// Trains single epoch using batches of the specified size (samples are provided as vectors)
 float_t XNetworkTraining::TrainEpoch( const vector<fvector_t>& inputs,
                                       const vector<fvector_t>& targetOutputs,
                                       size_t batchSize, bool randomPickIntoBatch )
@@ -360,6 +360,56 @@ float_t XNetworkTraining::TrainEpoch( const vector<fvector_t>& inputs,
     return averageRunningCost;
 }
 
+// Trains single epoch using batches of the specified size (samples are provided as pointers to vectors)
+float_t XNetworkTraining::TrainEpoch( const vector<fvector_t*>& inputs,
+                                      const vector<fvector_t*>& targetOutputs,
+                                      size_t batchSize, bool randomPickIntoBatch )
+{
+    float_t averageRunningCost = 0;
+    size_t  samplesCount       = inputs.size( );
+
+    if ( samplesCount != 0 )
+    {
+        AllocateTrainVectors( batchSize );
+
+        if ( ( inputs.size( ) == batchSize ) && ( !randomPickIntoBatch ) )
+        {
+            averageRunningCost = TrainBatch( inputs, targetOutputs );
+        }
+        else
+        {
+            size_t iterations = ( inputs.size( ) - 1 ) / batchSize + 1;
+            
+            for ( size_t i = 0; i < iterations; i++ )
+            {
+                // prepare inputs vectors and target ouputs
+                for ( size_t j = 0; j < batchSize; j++ )
+                {
+                    size_t sampleIndex;
+
+                    if ( !randomPickIntoBatch )
+                    {
+                        sampleIndex = ( i * batchSize + j ) % samplesCount;
+                    }
+                    else
+                    {
+                        sampleIndex = rand( ) % samplesCount;
+                    }
+
+                    mTrainInputs[j]  = const_cast<fvector_t*>( inputs[sampleIndex] );
+                    mTargetOuputs[j] = const_cast<fvector_t*>( targetOutputs[sampleIndex] );
+                }
+
+                averageRunningCost += RunTraining( );
+            }
+
+            averageRunningCost /= iterations;
+        }
+    }
+
+    return averageRunningCost;
+}
+
 
 // Tests sample - calculates real output and provides error cost
 float_t XNetworkTraining::TestSample( const fvector_t& input,
@@ -397,6 +447,38 @@ size_t XNetworkTraining::TestClassification( const std::vector<fvector_t>& input
             DoCompute( mComputeInputs, mComputeOutputs, mComputeMemoryBuffers );
 
             cost += mCostFunction->Cost( mComputeOutputsStorage.back( )[0], targetOutputs[i] );
+
+            if ( XDataEncodingTools::MaxIndex( mComputeOutputsStorage.back( )[0] ) == targetLabels[i] )
+            {
+                correctLabelsCounter++;
+            }
+        }
+
+        cost /= inputs.size( );
+    }
+
+    if ( pAvgCost )
+    {
+        *pAvgCost = cost;
+    }
+
+    return correctLabelsCounter;
+}
+
+size_t XNetworkTraining::TestClassification( const std::vector<fvector_t*>& inputs, const uvector_t& targetLabels,
+                                             const std::vector<fvector_t*>& targetOutputs, float_t* pAvgCost )
+{
+    size_t  correctLabelsCounter = 0;
+    float_t cost = 0;
+
+    if ( ( mNetwork->LayersCount( ) != 0 ) && ( inputs.size( ) != 0 ) )
+    {
+        for ( size_t i = 0, n = inputs.size( ); i < n; i++ )
+        {
+            mComputeInputs[0] = inputs[i];
+            DoCompute( mComputeInputs, mComputeOutputs, mComputeMemoryBuffers );
+
+            cost += mCostFunction->Cost( mComputeOutputsStorage.back( )[0], *( targetOutputs[i] ) );
 
             if ( XDataEncodingTools::MaxIndex( mComputeOutputsStorage.back( )[0] ) == targetLabels[i] )
             {

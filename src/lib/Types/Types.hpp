@@ -50,9 +50,19 @@ typedef std::vector<size_t> uvector_t;
 enum class BorderMode
 {
     Valid,  // Output is smaller than input, since convolution is only computed
-            // where input and filter fully overlap
+            // where input and filter fully overlap.
 
     Same    // Output is of the same size as input. To get this input is padded.
+};
+
+// Modes of selecting training samples into batches while running training epch.
+enum class EpochSelectionMode
+{
+    Sequential,     // Samples are not shuffled and are chosen sequentially one after another in the provided order.
+
+    RandomPick,     // Samples are not shuffled (order is kept), but individual items are chosed randomly into batches.
+
+    Shuffle,        // Training samples are shuffled at the start of each epoch. Then chosen sequentially into batches.
 };
 
 // A value to represent missing connection (between inputs/outputs, neurons, layers, etc)

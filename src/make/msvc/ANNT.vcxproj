@@ -32,6 +32,7 @@
     <ClInclude Include="..\..\lib\Neuro\Layers\Processing\XMaxPooling.hpp" />
     <ClInclude Include="..\..\lib\Neuro\Layers\XConvolutionLayer.hpp" />
     <ClInclude Include="..\..\lib\Neuro\Layers\XFullyConnectedLayer.hpp" />
+    <ClInclude Include="..\..\lib\Neuro\Network\XClassificationTrainingHelper.hpp" />
     <ClInclude Include="..\..\lib\Neuro\Network\XNetworkContext.hpp" />
     <ClInclude Include="..\..\lib\Neuro\Network\XNetworkInference.hpp" />
     <ClInclude Include="..\..\lib\Neuro\Network\XNetworkTraining.hpp" />
@@ -58,6 +59,7 @@
     <ClCompile Include="..\..\lib\ANNT.cpp" />
     <ClCompile Include="..\..\lib\Neuro\Layers\XConvolutionLayer.cpp" />
     <ClCompile Include="..\..\lib\Neuro\Layers\XFullyConnectedLayer.cpp" />
+    <ClCompile Include="..\..\lib\Neuro\Network\XClassificationTrainingHelper.cpp" />
     <ClCompile Include="..\..\lib\Neuro\Network\XNetworkInference.cpp" />
     <ClCompile Include="..\..\lib\Neuro\Network\XNetworkTraining.cpp" />
     <ClCompile Include="..\..\lib\Tools\XAvxVectorTools.cpp" />

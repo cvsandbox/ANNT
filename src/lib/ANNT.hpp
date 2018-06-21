@@ -55,3 +55,5 @@
 #include "Neuro/Optimizers/XRMSpropOptimizer.hpp"
 
 #include "Neuro/Network/XNetworkTraining.hpp"
+
+#include "Neuro/Network/XClassificationTrainingHelper.hpp"

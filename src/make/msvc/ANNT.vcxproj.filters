@@ -28,6 +28,9 @@
     <Filter Include="Neuro\Layers\Processing">
       <UniqueIdentifier>{b6c2a90c-ed30-474a-83a5-2269e22c884c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Neuro\Network\Training Helpers">
+      <UniqueIdentifier>{c79abf40-a3eb-4c93-9a4f-54086b6285a2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\lib\Neuro\CostFunctions\ICostFunction.hpp">
@@ -152,6 +155,9 @@
     <ClInclude Include="..\..\lib\Tools\XParallel.hpp">
       <Filter>Tools</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\lib\Neuro\Network\XClassificationTrainingHelper.hpp">
+      <Filter>Neuro\Network\Training Helpers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\lib\Neuro\Layers\XFullyConnectedLayer.cpp">
@@ -184,6 +190,9 @@
     </ClCompile>
     <ClCompile Include="..\..\lib\Tools\XVectorize.cpp">
       <Filter>Tools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\Neuro\Network\XClassificationTrainingHelper.cpp">
+      <Filter>Neuro\Network\Training Helpers</Filter>
     </ClCompile>
     <ClCompile Include="..\..\lib\Types\XAlignedAllocator.cpp">
       <Filter>Types</Filter>

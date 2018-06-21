@@ -18,6 +18,7 @@ SRC = ANNT.cpp \
       XFullyConnectedLayer.cpp \
       XConvolutionLayer.cpp \
       XNetworkInference.cpp \
-      XNetworkTraining.cpp
+      XNetworkTraining.cpp \
+      XClassificationTrainingHelper.cpp
 
 OBJ = $(SRC:.cpp=.o)
