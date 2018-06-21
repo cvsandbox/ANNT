@@ -126,7 +126,7 @@ void XConvolutionLayer::ForwardCompute( const vector<fvector_t*>& inputs,
         fill( outputData, outputData + mOutputsCount, float_t( 0 ) );
 
         // go through all kernels to build output feature maps
-        for ( size_t kernelIndex = 0; kernelIndex < mKernelsCount; kernelIndex++ )
+        XParallel::For( mKernelsCount, !ctx.IsTraining( ), [&]( size_t kernelIndex )
         {
             float_t* outputBase = outputData + kernelIndex * mOutputWidth * mOutputHeight;
             float_t  biasValue  = mKernelsBiases[kernelIndex];
@@ -174,7 +174,7 @@ void XConvolutionLayer::ForwardCompute( const vector<fvector_t*>& inputs,
                     }
                 }
             }
-        }
+        } );
     } );
 }
 
