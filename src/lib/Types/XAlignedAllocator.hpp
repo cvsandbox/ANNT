@@ -23,6 +23,7 @@
 #define ANNT_XALLIGNED_ALLOCATOR_HPP
 
 #include <cstdlib>
+#include <memory>
 
 namespace ANNT {
 
