@@ -126,7 +126,7 @@ int main( int /* argc */, char** /* argv */ )
 
     // create training context with Adam optimizer and Binary Cross Entropy cost function
     shared_ptr<XNetworkTraining> netTraining = make_shared<XNetworkTraining>( net,
-                                               make_shared<XAdamOptimizer>( 0.001 ),
+                                               make_shared<XAdamOptimizer>( 0.001f ),
                                                make_shared<XBinaryCrossEntropyCost>( ) );
 
 
