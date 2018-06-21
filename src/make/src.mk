@@ -8,6 +8,7 @@ VPATH = ../../lib \
 
 # source files
 SRC = ANNT.cpp \
+      XAlignedAllocator.cpp \
       XCpu.cpp \
       XAvxVectorTools.cpp \
       XSseVectorTools.cpp \

@@ -24,46 +24,11 @@
 
 #include <cstdlib>
 
-#ifdef _WIN32
-    #include <malloc.h>
-#endif
-
-#ifdef __MINGW32__
-    #include <mm_malloc.h>
-#endif
-
 namespace ANNT {
 
-// Allocate aligned memory
-static void* AlignedAlloc( std::size_t align, std::size_t size )
-{
-#if defined(_MSC_VER)
-    return ::_aligned_malloc( size, align );
-#elif defined(__MINGW32__)
-    return ::_mm_malloc( size, align );
-#else  // posix assumed
-    void* p;
-
-    if ( ::posix_memalign( &p, align, size ) != 0 )
-    {
-        p = 0;
-    }
-
-    return p;
-#endif
-}
-
-// Free aligned memory
-static void AlignedFree( void* ptr )
-{
-#if defined(_MSC_VER)
-    ::_aligned_free( ptr );
-#elif defined(__MINGW32__)
-    ::_mm_free( ptr );
-#else
-    ::free( ptr );
-#endif
-}
+// Allocate/free aligned memory
+void* AlignedAlloc( std::size_t align, std::size_t size );
+void AlignedFree( void* ptr );
     
 // Aligned allocator for standard containers
 template <typename T, std::size_t Alignment>
