@@ -48,6 +48,26 @@ public:
         return mBiases.size( );
     }
 
+    // Get/set layer's weights
+    fvector_t Weights( ) const override
+    {
+        return mWeights;
+    }
+    void SetWeights( const fvector_t& weights ) override
+    {
+        mWeights = weights;
+    }
+
+    // Get/set layer's biases
+    fvector_t Biases( ) const override
+    {
+        return mBiases;
+    }
+    void SetBiases( const fvector_t& biases ) override
+    {
+        mBiases = biases;
+    }
+
     // Randomizes layer's weights, clears biases
     void Randomize( ) override;
 

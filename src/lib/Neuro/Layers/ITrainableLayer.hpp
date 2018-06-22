@@ -46,6 +46,14 @@ public:
     // Reports number of bias coefficients the layer has
     virtual size_t BiasesCount( ) const = 0;
 
+    // Get/set layer's weights
+    virtual fvector_t Weights( ) const = 0;
+    virtual void SetWeights( const fvector_t& weights ) = 0;
+
+    // Get/set layer's biases
+    virtual fvector_t Biases( ) const = 0;
+    virtual void SetBiases( const fvector_t& biases ) = 0;
+
     // Randomizes layer's weights/biases
     virtual void Randomize( ) = 0;
 

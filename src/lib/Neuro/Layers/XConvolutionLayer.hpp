@@ -66,6 +66,26 @@ public:
         return mKernelsBiases.size( );
     }
 
+    // Get/set layer's weights
+    fvector_t Weights( ) const override
+    {
+        return mKernelsWeights;
+    }
+    void SetWeights( const fvector_t& weights ) override
+    {
+        mKernelsWeights = weights;
+    }
+
+    // Get/set layer's biases
+    fvector_t Biases( ) const override
+    {
+        return mKernelsBiases;
+    }
+    void SetBiases( const fvector_t& biases ) override
+    {
+        mKernelsBiases = biases;
+    }
+
     // Tells that we may need some extra memory for padding/unpadding
     uvector_t WorkingMemSize( bool /* trainingMode */ ) const override
     {
