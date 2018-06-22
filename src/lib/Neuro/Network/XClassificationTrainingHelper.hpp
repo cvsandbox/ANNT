@@ -48,6 +48,16 @@ private:
 public:
     XClassificationTrainingHelper( const std::shared_ptr<XNetworkTraining>& networkTraining );
 
+    // Get/set the mode of selecting data samples while running training epoch
+    EpochSelectionMode SamplesSelectionMode( ) const
+    {
+        return mEpochSelectionMode;
+    }
+    void SetSamplesSelectionMode( EpochSelectionMode selectionMode )
+    {
+        mEpochSelectionMode = selectionMode;
+    }
+
     // Run or not pre training test on training data to see the initial classification error
     bool RunPreTrainingTest( ) const
     {
