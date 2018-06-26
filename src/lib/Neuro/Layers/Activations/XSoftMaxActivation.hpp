@@ -23,6 +23,7 @@
 #define ANNT_XSOFT_MAX_ACTIVATION_HPP
 
 #include "IActivationLayer.hpp"
+#include <algorithm>
 
 namespace ANNT { namespace Neuro {
 
@@ -35,11 +36,12 @@ public:
     {
         size_t  len = input.size( );
         float_t sum = 0;
+        float_t max = *std::max_element( input.begin( ), input.end( ) );
 
         for ( size_t i = 0; i < len; i++ )
         {
-            output[i] = std::exp( input[i] );
-            sum += output[i];
+            output[i] = std::exp( input[i] - max );
+            sum      += output[i];
         }
 
         for ( size_t i = 0; i < len; i++ )
@@ -58,7 +60,7 @@ public:
         {
             for ( size_t j = 0; j < len; j++ )
             {
-                der[j] = ( j == i ) ? output[j] * ( float_t( 1 ) - output[j] ) : -output[j] * output[i];
+                der[j] = ( j == i ) ? output[i] * ( float_t( 1 ) - output[j] ) : -output[i] * output[j];
             }
 
             float_t sum = 0;
