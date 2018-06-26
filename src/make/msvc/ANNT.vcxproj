@@ -18,9 +18,11 @@
     <ClInclude Include="..\..\lib\Neuro\CostFunctions\XBinaryCrossEntropyCost.hpp" />
     <ClInclude Include="..\..\lib\Neuro\CostFunctions\XCrossEntropyCost.hpp" />
     <ClInclude Include="..\..\lib\Neuro\CostFunctions\XMSECost.hpp" />
+    <ClInclude Include="..\..\lib\Neuro\CostFunctions\XNegativeLogLikelihoodCost.hpp" />
     <ClInclude Include="..\..\lib\Neuro\Layers\Activations\IActivationLayer.hpp" />
     <ClInclude Include="..\..\lib\Neuro\Layers\Activations\XEluActivation.hpp" />
     <ClInclude Include="..\..\lib\Neuro\Layers\Activations\XLeakyReLuActivation.hpp" />
+    <ClInclude Include="..\..\lib\Neuro\Layers\Activations\XLogSoftMaxActivation.hpp" />
     <ClInclude Include="..\..\lib\Neuro\Layers\Activations\XReLuActivation.hpp" />
     <ClInclude Include="..\..\lib\Neuro\Layers\Activations\XSigmoidActivation.hpp" />
     <ClInclude Include="..\..\lib\Neuro\Layers\Activations\XSoftMaxActivation.hpp" />

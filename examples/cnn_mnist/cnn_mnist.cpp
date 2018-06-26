@@ -137,13 +137,12 @@ int main( int /* argc */, char** /* argv */ )
         net->AddLayer( make_shared<XReLuActivation>( ) );
 
         net->AddLayer( make_shared<XFullyConnectedLayer>( 120, 10 ) );
-        net->AddLayer( make_shared<XSigmoidActivation>( ) );
-        net->AddLayer( make_shared<XSoftMaxActivation>( ) );
+        net->AddLayer( make_shared<XLogSoftMaxActivation>( ) );
 
-        // create training context with Adam optimizer and Binary Cross Entropy cost function
+        // create training context with Adam optimizer and Negative Log Likelihood cost function (since we use Log-Softmax)
         shared_ptr<XNetworkTraining> netTraining = make_shared<XNetworkTraining>( net,
                                                    make_shared<XAdamOptimizer>( 0.002f ),
-                                                   make_shared<XBinaryCrossEntropyCost>( ) );
+                                                   make_shared<XNegativeLogLikelihoodCost>( ) );
 
         // using the helper for training ANN to do classification
         XClassificationTrainingHelper trainingHelper( netTraining );

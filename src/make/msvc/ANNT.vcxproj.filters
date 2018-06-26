@@ -158,6 +158,12 @@
     <ClInclude Include="..\..\lib\Neuro\Network\XClassificationTrainingHelper.hpp">
       <Filter>Neuro\Network\Training Helpers</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\lib\Neuro\Layers\Activations\XLogSoftMaxActivation.hpp">
+      <Filter>Neuro\Layers\Activations</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\Neuro\CostFunctions\XNegativeLogLikelihoodCost.hpp">
+      <Filter>Neuro\Cost Functions</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\lib\Neuro\Layers\XFullyConnectedLayer.cpp">

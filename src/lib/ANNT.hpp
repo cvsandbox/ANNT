@@ -33,6 +33,7 @@
 #include "Neuro/Layers/Activations/XLeakyReLuActivation.hpp"
 #include "Neuro/Layers/Activations/XEluActivation.hpp"
 #include "Neuro/Layers/Activations/XSoftMaxActivation.hpp"
+#include "Neuro/Layers/Activations/XLogSoftMaxActivation.hpp"
 
 #include "Neuro/Layers/Processing/XAveragePooling.hpp"
 #include "Neuro/Layers/Processing/XMaxPooling.hpp"
@@ -45,6 +46,7 @@
 #include "Neuro/CostFunctions/XMSECost.hpp"
 #include "Neuro/CostFunctions/XAbsoluteCost.hpp"
 #include "Neuro/CostFunctions/XCrossEntropyCost.hpp"
+#include "Neuro/CostFunctions/XNegativeLogLikelihoodCost.hpp"
 #include "Neuro/CostFunctions/XBinaryCrossEntropyCost.hpp"
 
 #include "Neuro/Optimizers/XGradientDescentOptimizer.hpp"
