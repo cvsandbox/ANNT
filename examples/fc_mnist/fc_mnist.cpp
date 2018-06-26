@@ -124,11 +124,10 @@ int main( int /* argc */, char** /* argv */ )
     net->AddLayer( make_shared<XFullyConnectedLayer>( 100, 10 ) );
     net->AddLayer( make_shared<XSoftMaxActivation>( ) );
 
-    // create training context with Adam optimizer and Binary Cross Entropy cost function
+    // create training context with Adam optimizer and Cross Entropy cost function
     shared_ptr<XNetworkTraining> netTraining = make_shared<XNetworkTraining>( net,
                                                make_shared<XAdamOptimizer>( 0.001f ),
-                                               make_shared<XBinaryCrossEntropyCost>( ) );
-
+                                               make_shared<XCrossEntropyCost>( ) );
 
     // using the helper for training ANN to do classification
     XClassificationTrainingHelper trainingHelper( netTraining );
