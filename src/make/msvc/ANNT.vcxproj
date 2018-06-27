@@ -31,6 +31,7 @@
     <ClInclude Include="..\..\lib\Neuro\Layers\ITrainableLayer.hpp" />
     <ClInclude Include="..\..\lib\Neuro\Layers\Processing\IProcessingLayer.hpp" />
     <ClInclude Include="..\..\lib\Neuro\Layers\Processing\XAveragePooling.hpp" />
+    <ClInclude Include="..\..\lib\Neuro\Layers\Processing\XDropOutLayer.hpp" />
     <ClInclude Include="..\..\lib\Neuro\Layers\Processing\XMaxPooling.hpp" />
     <ClInclude Include="..\..\lib\Neuro\Layers\XConvolutionLayer.hpp" />
     <ClInclude Include="..\..\lib\Neuro\Layers\XFullyConnectedLayer.hpp" />

@@ -164,6 +164,9 @@
     <ClInclude Include="..\..\lib\Neuro\CostFunctions\XNegativeLogLikelihoodCost.hpp">
       <Filter>Neuro\Cost Functions</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\lib\Neuro\Layers\Processing\XDropOutLayer.hpp">
+      <Filter>Neuro\Layers\Processing</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\lib\Neuro\Layers\XFullyConnectedLayer.cpp">

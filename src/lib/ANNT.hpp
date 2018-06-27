@@ -37,6 +37,7 @@
 
 #include "Neuro/Layers/Processing/XAveragePooling.hpp"
 #include "Neuro/Layers/Processing/XMaxPooling.hpp"
+#include "Neuro/Layers/Processing/XDropOutLayer.hpp"
 
 #include "Neuro/Network/XNeuralNetwork.hpp"
 #include "Neuro/Network/XNetworkInference.hpp"
