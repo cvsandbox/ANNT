@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="..\..\cnn_cifar10.cpp" />
+    <ClCompile Include="..\..\..\tools\CIFARParser.cpp">
+      <Filter>CIFAR Parser</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CIFAR Parser">
+      <UniqueIdentifier>{b8769f49-7630-4bcd-896f-eaa46b04648f}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\tools\CIFARParser.hpp">
+      <Filter>CIFAR Parser</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
