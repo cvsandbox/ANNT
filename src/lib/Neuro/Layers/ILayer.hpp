@@ -74,6 +74,8 @@ public:
     // it may return something like this: uvector_t( { inputsCount * sizeof( float ), outputsCount * sizeof( float ) } ).
     //
     // Each individual memory buffer is 32 byte aligned, so AVX friendly.
+    //
+    // Number of allocated buffers equals to number of samples in a batch.
     // 
     virtual uvector_t WorkingMemSize( bool /* trainingMode */ ) const { return uvector_t( 0 ); }
 
