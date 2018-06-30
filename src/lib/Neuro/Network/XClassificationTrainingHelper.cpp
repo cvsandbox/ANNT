@@ -72,7 +72,7 @@ void XClassificationTrainingHelper::SetTestSamples( const std::vector<fvector_t>
     }
 }
 
-// Help function to show some progress bar on stdout
+// Helper function to show some progress bar on stdout
 static void UpdatePogressBar( size_t lastProgress, size_t currentProgress, size_t totalSteps, size_t barLength, char barChar )
 {
     size_t barsDone = lastProgress    * barLength / totalSteps;
@@ -82,6 +82,20 @@ static void UpdatePogressBar( size_t lastProgress, size_t currentProgress, size_
     {
         putchar( barChar );
     }
+}
+
+// Helper function to show/erase training epoch progress (%)
+static void EraseProgress( int stringLength )
+{
+    while ( stringLength > 0 )
+    {
+        printf( "\b \b" );
+        stringLength--;
+    }
+}
+static int ShowProgress( size_t currentProgress, size_t totalSteps )
+{
+    return printf( "<%d%%>", static_cast<int>( currentProgress * 100 / totalSteps ) );
 }
 
 // Runs training loop providing progress to stdout
@@ -106,6 +120,8 @@ void XClassificationTrainingHelper::RunTraining( size_t epochs, size_t batchSize
     long long                timeTaken;
 
     size_t             batchCostOutputFreq = iterationsPerEpoch / 80;
+
+    int                progressStringLength = 0;
 
     if ( batchCostOutputFreq == 0 )
     {
@@ -184,7 +200,10 @@ void XClassificationTrainingHelper::RunTraining( size_t epochs, size_t batchSize
 
             float_t batchCost = mNetworkTraining->TrainBatch( trainingInputsBatch, trainingOutputsBatch );
 
-            /* show cost of some batches or progress bar only */
+            // erase previous progress if any 
+            EraseProgress( progressStringLength );
+
+            // show cost of some batches or progress bar only
             if ( !mShowIntermediateBatchCosts )
             {
                 UpdatePogressBar( iteration, iteration + 1, iterationsPerEpoch, 50, '=' );
@@ -201,7 +220,13 @@ void XClassificationTrainingHelper::RunTraining( size_t epochs, size_t batchSize
                     }
                 }
             }
+
+            // show current progress of the epoch
+            progressStringLength = ShowProgress( iteration + 1, iterationsPerEpoch );
         }
+
+        EraseProgress( progressStringLength );
+        progressStringLength = 0;
 
         // end of epoch timing
         timeTaken = duration_cast<milliseconds>( steady_clock::now( ) - timeStart ).count( );
