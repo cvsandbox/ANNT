@@ -58,7 +58,7 @@ public:
                                   const std::vector<fvector_t*>& outputs,
                                   const std::vector<fvector_t*>& deltas,
                                   std::vector<fvector_t*>& prevDeltas,
-                                  const XNetworkContext& ctx ) const = 0;
+                                  const XNetworkContext& ctx ) = 0;
 };
 
 } } // namespace ANNT::Neuro

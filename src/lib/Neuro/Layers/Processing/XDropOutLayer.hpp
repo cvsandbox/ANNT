@@ -90,11 +90,11 @@ public:
     }
 
     // Propagates error to the previous layer
-    void BackwardProcess( const std::vector<fvector_t*>& /* input  */,
-                          const std::vector<fvector_t*>& /* output */,
+    void BackwardProcess( const std::vector<fvector_t*>& /* inputs  */,
+                          const std::vector<fvector_t*>& /* outputs */,
                           const std::vector<fvector_t*>& deltas,
                           std::vector<fvector_t*>& prevDeltas,
-                          const XNetworkContext& ctx ) const override
+                          const XNetworkContext& ctx ) override
     {
         XParallel::For( deltas.size( ), ctx.IsTraining( ), [&]( size_t i )
         {
