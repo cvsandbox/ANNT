@@ -70,7 +70,14 @@ void XNetworkInference::AllocateWorkingBuffers( std::vector<std::vector<std::vec
 
             for ( size_t j = 0; j < batchSize; j++ )
             {
-                workingBuffer.back( )[i].push_back( AlignedAlloc( 32, workingMemSize[i] ) );
+                void* memBuffer = AlignedAlloc( 32, workingMemSize[i] );
+
+                if ( memBuffer )
+                {
+                    memset( memBuffer, 0, workingMemSize[i] );
+                }
+
+                workingBuffer.back( )[i].push_back( memBuffer );
             }
         }
     }
