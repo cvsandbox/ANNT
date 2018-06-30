@@ -25,6 +25,7 @@
 #include "IProcessingLayer.hpp"
 #include "../../../Tools/XParallel.hpp"
 #include "../../../Tools/XVectorize.hpp"
+#include <cstring>
 #include <numeric>
 
 namespace ANNT { namespace Neuro {
@@ -261,4 +262,5 @@ private:
 
 } } // ANNT::Neuro
 
-#endif ANNT_XBATCH_NORMALIZATION_HPP
+#endif // ANNT_XBATCH_NORMALIZATION_HPP
+

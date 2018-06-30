@@ -21,6 +21,7 @@
 #include "XNetworkInference.hpp"
 #include "XNetworkContext.hpp"
 #include "../../Tools/XDataEncodingTools.hpp"
+#include "cstring"
 
 using namespace std;
 

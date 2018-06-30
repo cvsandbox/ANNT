@@ -120,4 +120,5 @@ public:
 
 } } // ANNT::Neuro
 
-#endif ANNT_XDROP_OUT_LAYER_HPP
+#endif // ANNT_XDROP_OUT_LAYER_HPP
+
