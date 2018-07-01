@@ -82,6 +82,7 @@ static void UpdatePogressBar( size_t lastProgress, size_t currentProgress, size_
     {
         putchar( barChar );
     }
+    fflush( stdout );
 }
 
 // Helper function to show/erase training epoch progress (%)
@@ -95,7 +96,9 @@ static void EraseProgress( int stringLength )
 }
 static int ShowProgress( size_t currentProgress, size_t totalSteps )
 {
-    return printf( "<%d%%>", static_cast<int>( currentProgress * 100 / totalSteps ) );
+    int printed = printf( "<%d%%>", static_cast<int>( currentProgress * 100 / totalSteps ) );
+    fflush( stdout );
+    return printed;
 }
 
 // Runs training loop providing progress to stdout
