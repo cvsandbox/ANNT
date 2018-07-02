@@ -27,11 +27,125 @@ using namespace std::chrono;
 
 namespace ANNT { namespace Neuro { namespace Training {
 
-XClassificationTrainingHelper::XClassificationTrainingHelper( const shared_ptr<XNetworkTraining>& networkTraining ) :
+// Structure to keep some training parameters. All of those are specified by application's code, but can be overridden
+// from command line to make testing simpler without rebuild.
+typedef struct
+{
+    float  LearningRate;
+    size_t EpochsCount;
+    size_t BatchSize;
+    bool   ShowIntermediateBatchCosts;
+    bool   RunPreTrainingTest;
+    bool   RunValidationOnly;
+}
+TrainingParams;
+
+static void ParseCommandLine( int argc, char** argv, TrainingParams* trainingParams )
+{
+    bool showUsage = false;
+
+    if ( argv == nullptr )
+    {
+        return;
+    }
+
+    for ( int i = 1; i < argc; i++ )
+    {
+        bool   parsed   = false;
+        size_t paramLen = strlen( argv[i] );
+
+        if ( paramLen >= 2 )
+        {
+            char* paramStart = &( argv[i][1] );
+
+            if ( ( argv[i][0] == '-' ) || ( argv[i][0] == '/' ) )
+            {
+                if ( ( strstr( paramStart, "bs:" ) == paramStart ) && ( paramLen > 4 ) )
+                {
+                    if ( sscanf( &( argv[i][4] ), "%zu", &trainingParams->BatchSize ) == 1 )
+                    {
+                        if ( trainingParams->BatchSize == 0 )
+                        {
+                            trainingParams->BatchSize = 1;
+                        }
+                        parsed = true;
+                    }
+                }
+                else if ( ( strstr( paramStart, "ec:" ) == paramStart ) && ( paramLen > 4 ) )
+                {
+                    if ( sscanf( &( argv[i][4] ), "%zu", &trainingParams->EpochsCount) == 1 )
+                    {
+                        if ( trainingParams->EpochsCount == 0 )
+                        {
+                            trainingParams->EpochsCount = 1;
+                        }
+                        parsed = true;
+                    }
+                }
+                else if ( ( strstr( paramStart, "lr:" ) == paramStart ) && ( paramLen > 4 ) )
+                {
+                    if ( sscanf( &( argv[i][4] ), "%f", &trainingParams->LearningRate ) == 1 )
+                    {
+                        parsed = true;
+                    }
+                }
+                else if ( ( strstr( paramStart, "showBatch:" ) == paramStart ) && ( paramLen == 12 ) )
+                {
+                    if ( ( argv[i][11] == '0' ) || ( argv[i][11] == '1' ) )
+                    {
+                        trainingParams->ShowIntermediateBatchCosts = ( argv[i][11] == '1' );
+                        parsed = true;
+                    }
+                }
+                else if ( ( strstr( paramStart, "runPreTrain:" ) == paramStart ) && ( paramLen == 14 ) )
+                {
+                    if ( ( argv[i][13] == '0' ) || ( argv[i][13] == '1' ) )
+                    {
+                        trainingParams->RunPreTrainingTest = ( argv[i][13] == '1' );
+                        parsed = true;
+                    }
+                }
+                else if ( ( strstr( paramStart, "validateOnly:" ) == paramStart ) && ( paramLen == 15 ) )
+                {
+                    if ( ( argv[i][14] == '0' ) || ( argv[i][14] == '1' ) )
+                    {
+                        trainingParams->RunValidationOnly = ( argv[i][14] == '1' );
+                        parsed = true;
+                    }
+                }
+            }
+        }
+
+        if ( !parsed )
+        {
+            showUsage = true;
+        }
+    }
+
+    if ( showUsage )
+    {
+        printf( "Failed parsing some of the parameters \n\n" );
+
+        printf( "Available parameters are:\n" );
+        printf( "  -ec:<> - epochs count; \n" );
+        printf( "  -bs:<> - batch size; \n" );
+        printf( "  -lr:<> - learning rate; \n" );
+        printf( "  -showBatch:<0|1> - show or not intermediate batch cost; \n" );
+        printf( "  -runPreTrain:<0|1> - run or not pre training test on training data; \n" );
+        printf( "  -validateOnly:<0|1> - run test on validation data only or on test data as well after each epoch. \n" );
+        printf( "\n" );
+    }
+}
+
+// ========================================================================================================================
+
+XClassificationTrainingHelper::XClassificationTrainingHelper( const shared_ptr<XNetworkTraining>& networkTraining,
+                                                              int argc, char** argv ) :
     mNetworkTraining( networkTraining ),
     mEpochSelectionMode( EpochSelectionMode::Shuffle ),
     mRunPreTrainingTest( true ), mRunValidationOnly( false ),
-    mShowIntermediateBatchCosts( false )
+    mShowIntermediateBatchCosts( false ),
+    mArgc( argc ), mArgv( argv )
 {
 
 }
@@ -107,13 +221,35 @@ void XClassificationTrainingHelper::RunTraining( size_t epochs, size_t batchSize
                                                  const vector<fvector_t>& trainingOutputs,
                                                  const uvector_t& trainingLabels )
 {
+    // default training parameters
+    TrainingParams     trainingParams;
+
+    trainingParams.EpochsCount  = epochs;
+    trainingParams.BatchSize    = batchSize;
+    trainingParams.LearningRate = mNetworkTraining->Optimizer( )->LearningRate( );
+
+    trainingParams.ShowIntermediateBatchCosts = mShowIntermediateBatchCosts;
+    trainingParams.RunPreTrainingTest         = mRunPreTrainingTest;
+    trainingParams.RunValidationOnly          = mRunValidationOnly;
+
+    // parse command line for any overrides
+    ParseCommandLine( mArgc, mArgv, &trainingParams );
+
+    // set some of the new parameters
+    mNetworkTraining->Optimizer( )->SetLearningRate( trainingParams.LearningRate );
+
+    // log current settings
+    printf( "Learning rate: %0.4f, Epochs: %zu, Batch Size: %zu \n", trainingParams.LearningRate, trainingParams.EpochsCount, trainingParams.BatchSize );
+    printf( "\n" );
+
+    // 
     vector<fvector_t*> trainingInputsPtr( trainingInputs.size( ) );
     vector<fvector_t*> trainingOutputsPtr( trainingOutputs.size( ) );
-    vector<fvector_t*> trainingInputsBatch( batchSize );
-    vector<fvector_t*> trainingOutputsBatch( batchSize );
+    vector<fvector_t*> trainingInputsBatch( trainingParams.BatchSize );
+    vector<fvector_t*> trainingOutputsBatch( trainingParams.BatchSize );
 
     size_t             samplesCount       = trainingInputs.size( );
-    size_t             iterationsPerEpoch = ( samplesCount - 1 ) / batchSize + 1;
+    size_t             iterationsPerEpoch = ( samplesCount - 1 ) / trainingParams.BatchSize + 1;
 
     float_t            cost;
     size_t             correct;
@@ -122,8 +258,7 @@ void XClassificationTrainingHelper::RunTraining( size_t epochs, size_t batchSize
     steady_clock::time_point timeStart;
     long long                timeTaken;
 
-    size_t             batchCostOutputFreq = iterationsPerEpoch / 80;
-
+    size_t             batchCostOutputFreq  = iterationsPerEpoch / 80;
     int                progressStringLength = 0;
 
     if ( batchCostOutputFreq == 0 )
@@ -139,7 +274,7 @@ void XClassificationTrainingHelper::RunTraining( size_t epochs, size_t batchSize
     }
 
     // check classification error before starting training
-    if ( mRunPreTrainingTest )
+    if ( trainingParams.RunPreTrainingTest )
     {
         timeStart = steady_clock::now( );
         correct   = mNetworkTraining->TestClassification( trainingInputs, trainingLabels, trainingOutputs, &cost );
@@ -152,10 +287,10 @@ void XClassificationTrainingHelper::RunTraining( size_t epochs, size_t batchSize
     }
 
     // run the specified number of epochs
-    for ( size_t epoch = 0; epoch < epochs; epoch++ )
+    for ( size_t epoch = 0; epoch < trainingParams.EpochsCount; epoch++ )
     {
         printf( "Epoch %3zu : ", epoch + 1 );
-        if ( !mShowIntermediateBatchCosts )
+        if ( !trainingParams.ShowIntermediateBatchCosts )
         {
             // show progress bar only
             putchar( '[' );
@@ -184,7 +319,7 @@ void XClassificationTrainingHelper::RunTraining( size_t epochs, size_t batchSize
         for ( size_t iteration = 0; iteration < iterationsPerEpoch; iteration++ )
         {
             // prepare batch inputs and ouputs
-            for ( size_t i = 0; i < batchSize; i++ )
+            for ( size_t i = 0; i < trainingParams.BatchSize; i++ )
             {
                 size_t sampleIndex;
 
@@ -194,7 +329,7 @@ void XClassificationTrainingHelper::RunTraining( size_t epochs, size_t batchSize
                 }
                 else
                 {
-                    sampleIndex = ( iteration * batchSize + i ) % samplesCount;
+                    sampleIndex = ( iteration * trainingParams.BatchSize + i ) % samplesCount;
                 }
 
                 trainingInputsBatch[i]  = trainingInputsPtr[sampleIndex];
@@ -207,7 +342,7 @@ void XClassificationTrainingHelper::RunTraining( size_t epochs, size_t batchSize
             EraseProgress( progressStringLength );
 
             // show cost of some batches or progress bar only
-            if ( !mShowIntermediateBatchCosts )
+            if ( !trainingParams.ShowIntermediateBatchCosts )
             {
                 UpdatePogressBar( iteration, iteration + 1, iterationsPerEpoch, 50, '=' );
             }
@@ -235,7 +370,7 @@ void XClassificationTrainingHelper::RunTraining( size_t epochs, size_t batchSize
         timeTaken = duration_cast<milliseconds>( steady_clock::now( ) - timeStart ).count( );
 
         // output time spent on training
-        if ( !mShowIntermediateBatchCosts )
+        if ( !trainingParams.ShowIntermediateBatchCosts )
         {
             printf( "] " );
         }
@@ -246,7 +381,7 @@ void XClassificationTrainingHelper::RunTraining( size_t epochs, size_t batchSize
         printf( "%0.3fs\n", static_cast<float>( timeTaken ) / 1000 );
 
         // get classification error on training data after completion of an epoch
-        if ( ( !mRunValidationOnly ) || ( mValidationInputs.size( ) == 0 ) )
+        if ( ( !trainingParams.RunValidationOnly ) || ( mValidationInputs.size( ) == 0 ) )
         {
             timeStart = steady_clock::now( );
             correct   = mNetworkTraining->TestClassification( trainingInputs, trainingLabels, trainingOutputs, &cost );

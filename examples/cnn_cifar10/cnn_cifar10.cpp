@@ -54,7 +54,7 @@ template <typename T> vector<T> ExtractValidationSamples( vector<T>& allSamples 
 }
 
 // Example application's entry point
-int main( int /* argc */, char** /* argv */ )
+int main( int argc, char** argv )
 {
     printf( "CIFAR-10 dataset classification example with Convolution ANN \n\n" );
 
@@ -127,7 +127,7 @@ int main( int /* argc */, char** /* argv */ )
 
 
     // using the helper for training ANN to do classification
-    XClassificationTrainingHelper trainingHelper( netTraining );
+    XClassificationTrainingHelper trainingHelper( netTraining, argc, argv );
     trainingHelper.SetValidationSamples( validationImages, encodedValidationLabels, validationLabels );
     trainingHelper.SetTestSamples( testImages, encodedTestLabels, testLabels );
 

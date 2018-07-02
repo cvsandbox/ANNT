@@ -45,8 +45,12 @@ private:
     std::vector<fvector_t*>            mTestOutputs;
     uvector_t                          mTestLabels;
 
+    int    mArgc;
+    char** mArgv;
+
 public:
-    XClassificationTrainingHelper( const std::shared_ptr<XNetworkTraining>& networkTraining );
+    XClassificationTrainingHelper( const std::shared_ptr<XNetworkTraining>& networkTraining,
+                                   int argc = 0, char** argv = nullptr );
 
     // Get/set the mode of selecting data samples while running training epoch
     EpochSelectionMode SamplesSelectionMode( ) const

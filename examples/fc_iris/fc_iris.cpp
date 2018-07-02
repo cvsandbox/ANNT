@@ -119,7 +119,7 @@ template <typename T> vector<T> ExtractTestSamples( vector<T>& allSamples )
 }
 
 // Example application's entry point
-int main( int /* argc */, char** /* argv */ )
+int main( int argc, char** argv )
 {
     printf( "Iris classification example with Fully Connected ANN \n\n" );
 
@@ -167,7 +167,7 @@ int main( int /* argc */, char** /* argv */ )
                                                make_shared<XCrossEntropyCost>( ) );
 
     // using the helper for training ANN to do classification
-    XClassificationTrainingHelper trainingHelper( netTraining );
+    XClassificationTrainingHelper trainingHelper( netTraining, argc, argv );
     trainingHelper.SetTestSamples( testAttributes, encodedTestLabels, testLabels );
 
     // 40 epochs, 10 samples in batch
