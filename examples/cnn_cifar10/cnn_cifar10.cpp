@@ -101,24 +101,28 @@ int main( int /* argc */, char** /* argv */ )
     net->AddLayer( make_shared<XConvolutionLayer>( 32, 32, 3, 5, 5, 32, BorderMode::Same ) );
     net->AddLayer( make_shared<XMaxPooling>( 32, 32, 32, 2 ) );
     net->AddLayer( make_shared<XReLuActivation>( ) );
+    net->AddLayer( make_shared<XBatchNormalization>( 16, 16, 32 ) );
 
     net->AddLayer( make_shared<XConvolutionLayer>( 16, 16, 32, 5, 5, 32, BorderMode::Same ) );
     net->AddLayer( make_shared<XMaxPooling>( 16, 16, 32, 2 ) );
     net->AddLayer( make_shared<XReLuActivation>( ) );
+    net->AddLayer( make_shared<XBatchNormalization>( 8, 8, 32 ) );
 
     net->AddLayer( make_shared<XConvolutionLayer>( 8, 8, 32, 5, 5, 64, BorderMode::Same ) );
     net->AddLayer( make_shared<XMaxPooling>( 8, 8, 64, 2 ) );
     net->AddLayer( make_shared<XReLuActivation>( ) );
+    net->AddLayer( make_shared<XBatchNormalization>( 4, 4, 64 ) );
 
     net->AddLayer( make_shared<XFullyConnectedLayer>( 4 * 4 * 64, 64 ) );
     net->AddLayer( make_shared<XReLuActivation>( ) );
 
+    net->AddLayer( make_shared<XBatchNormalization>( 64, 1, 1 ) );
     net->AddLayer( make_shared<XFullyConnectedLayer>( 64, 10 ) );
     net->AddLayer( make_shared<XLogSoftMaxActivation>( ) );
 
     // create training context with Adam optimizer and Negative Log Likelihood cost function (since we use Log-Softmax)
     shared_ptr<XNetworkTraining> netTraining = make_shared<XNetworkTraining>( net,
-                                               make_shared<XAdamOptimizer>( 0.002f ),
+                                               make_shared<XAdamOptimizer>( 0.001f ),
                                                make_shared<XNegativeLogLikelihoodCost>( ) );
 
 
