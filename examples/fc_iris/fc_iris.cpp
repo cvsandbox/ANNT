@@ -161,10 +161,10 @@ int main( int /* argc */, char** /* argv */ )
     net->AddLayer( make_shared<XFullyConnectedLayer>( 10, 3 ) );
     net->AddLayer( make_shared<XSigmoidActivation>( ) );
   
-    // create training context with Nesterov optimizer and Binary Cross Entropy cost function
+    // create training context with Nesterov optimizer and Cross Entropy cost function
     shared_ptr<XNetworkTraining> netTraining = make_shared<XNetworkTraining>( net,
-                                               make_shared<XNesterovMomentumOptimizer>( 0.001f ),
-                                               make_shared<XBinaryCrossEntropyCost>( ) );
+                                               make_shared<XNesterovMomentumOptimizer>( 0.01f ),
+                                               make_shared<XCrossEntropyCost>( ) );
 
     // using the helper for training ANN to do classification
     XClassificationTrainingHelper trainingHelper( netTraining );
