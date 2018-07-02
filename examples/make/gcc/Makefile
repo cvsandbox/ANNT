@@ -5,7 +5,8 @@ SELF_DIR := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 EXAMPLES = fc_xor \
            fc_iris \
            fc_mnist \
-           cnn_mnist
+           cnn_mnist \
+           cnn_cifar10
 
 all:
 	$(foreach ex,$(EXAMPLES), cd "$(SELF_DIR)../../$(ex)/make/gcc"; make ; cd "$(SELF_DIR)" ;)
@@ -15,4 +16,3 @@ debug:
 
 clean:
 	$(foreach ex,$(EXAMPLES), cd "$(SELF_DIR)../../$(ex)/make/gcc"; make clean ; cd "$(SELF_DIR)" ;)
-
