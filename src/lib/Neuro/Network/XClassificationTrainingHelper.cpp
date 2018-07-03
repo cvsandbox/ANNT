@@ -20,6 +20,7 @@
 
 #include "XClassificationTrainingHelper.hpp"
 
+#include <cstring>
 #include <chrono>
 
 using namespace std;
