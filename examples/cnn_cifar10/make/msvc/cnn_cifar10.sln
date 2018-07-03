@@ -4,6 +4,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cnn_cifar10", "cnn_cifar10.vcxproj", "{C8D9F1BE-0A4D-4032-9F2C-AB5B4CBF3531}"
+	ProjectSection(ProjectDependencies) = postProject
+		{428D26A1-BC29-4CB6-8B9A-8FEF53D1BCAD} = {428D26A1-BC29-4CB6-8B9A-8FEF53D1BCAD}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ANNT", "..\..\..\..\src\make\msvc\ANNT.vcxproj", "{428D26A1-BC29-4CB6-8B9A-8FEF53D1BCAD}"
 EndProject
