@@ -52,11 +52,46 @@ private:
     fvector_t   mKernelsBiases;
 
 public:
+
+    XConvolutionLayer( size_t inputWidth, size_t inputHeight, size_t inputDepth,
+                       size_t kernelWidth, size_t kernelHeight, size_t kernelsCount ) :
+        XConvolutionLayer( inputWidth, inputHeight, inputDepth,
+                           kernelWidth, kernelHeight, kernelsCount,
+                           std::vector<bool>( ) , BorderMode::Valid, 1, 1 )
+    {
+    }
+
+    XConvolutionLayer( size_t inputWidth, size_t inputHeight, size_t inputDepth,
+                       size_t kernelWidth, size_t kernelHeight, size_t kernelsCount,
+                       BorderMode borderMode ) :
+        XConvolutionLayer( inputWidth, inputHeight, inputDepth,
+                           kernelWidth, kernelHeight, kernelsCount,
+                           std::vector<bool>( ) , borderMode, 1, 1 )
+    {
+    }
+
+    XConvolutionLayer( size_t inputWidth, size_t inputHeight, size_t inputDepth,
+                       size_t kernelWidth, size_t kernelHeight, size_t kernelsCount,
+                       BorderMode borderMode, size_t horizontalStep, size_t verticalStep ) :
+        XConvolutionLayer( inputWidth, inputHeight, inputDepth,
+                           kernelWidth, kernelHeight, kernelsCount,
+                           std::vector<bool>( ) , borderMode, horizontalStep, verticalStep )
+    {
+    }
+
+    XConvolutionLayer( size_t inputWidth, size_t inputHeight, size_t inputDepth,
+                       size_t kernelWidth, size_t kernelHeight, size_t kernelsCount,
+                       const std::vector<bool>& connectionTable ) :
+        XConvolutionLayer( inputWidth, inputHeight, inputDepth,
+                           kernelWidth, kernelHeight, kernelsCount,
+                           connectionTable, BorderMode::Valid, 1, 1 )
+    {
+    }
+
     XConvolutionLayer( size_t inputWidth,  size_t inputHeight,  size_t inputDepth,
                        size_t kernelWidth, size_t kernelHeight, size_t kernelsCount,
-                       const std::vector<bool>& connectionTable = std::vector<bool>( ),
-                       BorderMode borderMode = BorderMode::Valid,
-                       size_t horizontalStep = 1, size_t verticalStep = 1 );
+                       const std::vector<bool>& connectionTable,
+                       BorderMode borderMode, size_t horizontalStep, size_t verticalStep );
 
     // Reports number of weight coefficients the layer has
     size_t WeightsCount( ) const override
