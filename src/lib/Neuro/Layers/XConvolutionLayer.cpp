@@ -28,12 +28,14 @@ namespace ANNT { namespace Neuro {
 
 XConvolutionLayer::XConvolutionLayer( size_t inputWidth, size_t inputHeight, size_t inputDepth,
                                       size_t kernelWidth, size_t kernelHeight, size_t kernelsCount,
+                                      const vector<bool>& connectionTable,
                                       BorderMode borderMode, size_t horizontalStep, size_t verticalStep ) :
                                       ITrainableLayer( 0, 0 ),
     mInputWidth( inputWidth ), mInputHeight( inputHeight ), mInputDepth( inputDepth ),
     mOutputWidth( 0 ), mOutputHeight( 0 ),
     mKernelWidth( kernelWidth ), mKernelHeight( kernelHeight ), mKernelsCount( kernelsCount ),
-    mHorizontalStep( horizontalStep ), mVerticalStep( verticalStep ), mBorderMode( borderMode ), 
+    mHorizontalStep( horizontalStep ), mVerticalStep( verticalStep ), mBorderMode( borderMode ),
+    mConnectionTable( connectionTable ), mKernelOffsets( mInputDepth * mKernelsCount ),
     mPaddedWidth( inputWidth ), mPaddedHeight( inputHeight )
 {
     size_t padWidth = 0, padHeight = 0;
@@ -58,7 +60,29 @@ XConvolutionLayer::XConvolutionLayer( size_t inputWidth, size_t inputHeight, siz
     Initialize( mInputWidth  * mInputHeight  * mInputDepth,
                 mOutputWidth * mOutputHeight * mKernelsCount );
 
-    mKernelsWeights = fvector_t( mKernelWidth * mKernelHeight * mInputDepth * mKernelsCount );
+    // invalid or missing connections - assume all output feature maps are built using all input maps
+    if ( mConnectionTable.size( ) != mInputDepth * mKernelsCount )
+    {
+        mConnectionTable = vector<bool>( mInputDepth * mKernelsCount, true );
+    }
+
+    // check number of kernels' weights and set offsets
+    size_t totalConnectionsCount = 0;
+
+    for ( size_t kernelIndex = 0, connectionIndex = 0; kernelIndex < mKernelsCount; kernelIndex++ )
+    {
+        for ( size_t inputDepthIndex = 0; inputDepthIndex < mInputDepth; inputDepthIndex++, connectionIndex++ )
+        {
+            mKernelOffsets[connectionIndex] = totalConnectionsCount * mKernelWidth * mKernelHeight;
+
+            if ( mConnectionTable[connectionIndex] )
+            {
+                totalConnectionsCount++;
+            }
+        }
+    }
+
+    mKernelsWeights = fvector_t( mKernelWidth * mKernelHeight * totalConnectionsCount );
     mKernelsBiases  = fvector_t( mKernelsCount );
 
     Randomize( );
@@ -85,10 +109,6 @@ void XConvolutionLayer::ForwardCompute( const vector<fvector_t*>& inputs,
                                         const XNetworkContext& ctx )
 {
     const float_t* kernelsData  = mKernelsWeights.data( );
-
-    // kernel size in 2D and 3D spaces
-    size_t  kernelSize2D = mKernelWidth * mKernelHeight;
-    size_t  kernelSize3D = kernelSize2D * mInputDepth;
 
     // will be using either original input width/heigh or padded
     size_t  inputWidth   = mInputWidth;
@@ -134,9 +154,15 @@ void XConvolutionLayer::ForwardCompute( const vector<fvector_t*>& inputs,
             // go through all input layers (or feature maps produced by previous layers)
             for ( size_t inputDepthIndex = 0; inputDepthIndex < mInputDepth; inputDepthIndex++ )
             {
+                if ( !mConnectionTable[kernelIndex * mInputDepth + inputDepthIndex] )
+                {
+                    // the input map is not used for the output feature map
+                    continue;
+                }
+
                 const float_t* inputBase  = inputData + inputDepthIndex * inputWidth * inputHeight;
                 // get the 2D kernel for current input/output map combination
-                const float_t* kernelBase = kernelsData + kernelIndex * kernelSize3D + inputDepthIndex * kernelSize2D;
+                const float_t* kernelBase = kernelsData + mKernelOffsets[kernelIndex * mInputDepth + inputDepthIndex];
 
                 // calculate output contributions for the current input map
                 for ( size_t oy = 0; oy < mOutputHeight; oy++ )
@@ -187,18 +213,12 @@ void XConvolutionLayer::BackwardCompute( const vector<fvector_t*>& inputs,
                                          fvector_t& gradBiases,
                                          const XNetworkContext& ctx )
 {
-    const float_t* kernelsData = mKernelsWeights.data( );
+    const float_t* kernelsData     = mKernelsWeights.data( );
     float_t*       gradWeightsData = gradWeights.data( );
-
-    size_t       outputSize      = mOutputWidth * mOutputHeight;
-
-    // kernel size if 2D and 3D spaces
-    size_t       kernelSize2D  = mKernelWidth * mKernelHeight;
-    size_t       kernelSize3D  = kernelSize2D * mInputDepth;
-
+    size_t         outputSize      = mOutputWidth * mOutputHeight;
     // will be using either original input width/heigh or padded
-    size_t       inputWidth    = mInputWidth;
-    size_t       inputHeight   = mInputHeight;
+    size_t        inputWidth       = mInputWidth;
+    size_t        inputHeight      = mInputHeight;
 
     // decide if raw data to be used or padded
     if ( mBorderMode == BorderMode::Same )
@@ -233,9 +253,15 @@ void XConvolutionLayer::BackwardCompute( const vector<fvector_t*>& inputs,
             // go through all kernels, which were applied to the feature map
             for ( size_t kernelIndex = 0; kernelIndex < mKernelsCount; kernelIndex++ )
             {
+                if ( !mConnectionTable[kernelIndex * mInputDepth + inputDepthIndex] )
+                {
+                    // the input map is not used for the output feature map
+                    continue;
+                }
+
                 const float_t* deltaBase  = deltaData + kernelIndex * outputSize;
                 // get the 2D kernel for then current input/output map combination
-                const float_t* kernelBase = kernelsData + kernelIndex * kernelSize3D + inputDepthIndex * kernelSize2D;
+                const float_t* kernelBase = kernelsData + mKernelOffsets[kernelIndex * mInputDepth + inputDepthIndex];
 
                 // go through the current deltas of the output produced by the current kernel
                 for ( size_t oy = 0; oy < mOutputHeight; oy++ )
@@ -299,9 +325,15 @@ void XConvolutionLayer::BackwardCompute( const vector<fvector_t*>& inputs,
             // go through all kernels, which were applied to the feature map
             for ( size_t kernelIndex = 0; kernelIndex < mKernelsCount; kernelIndex++ )
             {
+                if ( !mConnectionTable[kernelIndex * mInputDepth + inputDepthIndex] )
+                {
+                    // the input map is not used for the output feature map
+                    continue;
+                }
+
                 const float_t* deltaBase = deltaData + kernelIndex * outputSize;
                 // get the 2D portion of weights' gradients for the current input/output map combination
-                float_t* gradWeightsPtr  = gradWeightsData + kernelIndex * kernelSize3D + inputDepthIndex * kernelSize2D;
+                float_t* gradWeightsPtr  = gradWeightsData + mKernelOffsets[kernelIndex * mInputDepth + inputDepthIndex];
 
                 // calculate gradients for each weight (kernel element)
                 for ( size_t ky = 0; ky < mKernelHeight; ky++ )

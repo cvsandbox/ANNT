@@ -122,6 +122,27 @@ int main( int argc, char** argv )
         vector<fvector_t> encodedValidationLabels = XDataEncodingTools::OneHotEncoding( validationLabels, 10 );
         vector<fvector_t> encodedTestLabels       = XDataEncodingTools::OneHotEncoding( testLabels, 10 );
 
+        // connection table to specify wich feature maps of the first convolution layer
+        // to use for feature maps produced by the second layer
+        vector<bool> connectionTable( {
+            true,  true,  true,  false, false, false,
+            false, true,  true,  true,  false, false,
+            false, false, true,  true,  true,  false,
+            false, false, false, true,  true,  true,
+            true,  false, false, false, true,  true,
+            true,  true,  false, false, false, true,
+            true,  true,  true,  true,  false, false,
+            false, true,  true,  true,  true,  false,
+            false, false, true,  true,  true,  true,
+            true,  false, false, true,  true,  true,
+            true,  true,  false, false, true,  true,
+            true,  true,  true,  false, false, true,
+            true,  true,  false, true,  true,  false,
+            false, true,  true,  false, true,  true,
+            true,  false, true,  true,  false, true,
+            true,  true,  true,  true,  true,  true
+        } );
+
         // prepare a convolutional ANN
         shared_ptr<XNeuralNetwork> net = make_shared<XNeuralNetwork>( );
 
@@ -129,7 +150,7 @@ int main( int argc, char** argv )
         net->AddLayer( make_shared<XReLuActivation>( ) );
         net->AddLayer( make_shared<XAveragePooling>( 28, 28, 6, 2 ) );
 
-        net->AddLayer( make_shared<XConvolutionLayer>( 14, 14, 6, 5, 5, 16 ) );
+        net->AddLayer( make_shared<XConvolutionLayer>( 14, 14, 6, 5, 5, 16, connectionTable ) );
         net->AddLayer( make_shared<XReLuActivation>( ) );
         net->AddLayer( make_shared<XAveragePooling>( 10, 10, 16, 2 ) );
 
