@@ -202,6 +202,56 @@ public:
         } );
     }
 
+    // Saves layer's learnt parameters/weights
+    bool SaveLearnedParams( FILE* file ) const override
+    {
+        bool     ret = false;
+        uint32_t layerID = static_cast<uint32_t>( LayerID::BatchNormalization );
+
+        if ( fwrite( &layerID, sizeof( layerID ), 1, file ) == 1 )
+        {
+            uint32_t inputDepth = static_cast<uint32_t>( mInputDepth );
+
+            if ( fwrite( &inputDepth, sizeof( inputDepth ), 1, file ) == 1 )
+            {
+                if ( ( fwrite( mMean.data( ), sizeof( float_t ), mMean.size( ), file ) == mMean.size( ) ) &&
+                     ( fwrite( mStdDev.data( ), sizeof( float_t ), mStdDev.size( ), file ) == mStdDev.size( ) ) )
+                {
+                    ret = true;
+                }
+            }
+        }
+
+        return ret;
+    }
+
+    // Loads layer's learnt parameters
+    bool LoadLearnedParams( FILE* file ) override
+    {
+        bool     ret = false;
+        uint32_t layerID;
+
+        if ( ( fread( &layerID, sizeof( layerID ), 1, file ) == 1 ) &&
+             ( layerID == static_cast<uint32_t>( LayerID::BatchNormalization ) ) )
+        {
+            uint32_t inputDepth;
+
+            if ( ( fread( &inputDepth, sizeof( inputDepth ), 1, file ) == 1 ) &&
+                 ( inputDepth == static_cast<uint32_t>( mInputDepth ) ) )
+            {
+                size_t read1 = fread( mMean.data( ), sizeof( float_t ), mMean.size( ), file );
+                size_t read2 = fread( mStdDev.data( ), sizeof( float_t ), mStdDev.size( ), file );
+
+                if ( ( read1 == mMean.size( ) ) && ( read2 == mStdDev.size( ) ) )
+                {
+                    ret = true;
+                }
+            }
+        }
+
+        return ret;
+    }
+
 private:
 
     void CalculateMean( const std::vector<fvector_t*>& inputs, float_t* mean ) const

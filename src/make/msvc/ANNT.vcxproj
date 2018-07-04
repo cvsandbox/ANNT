@@ -29,6 +29,7 @@
     <ClInclude Include="..\..\lib\Neuro\Layers\Activations\XTanhActivation.hpp" />
     <ClInclude Include="..\..\lib\Neuro\Layers\ILayer.hpp" />
     <ClInclude Include="..\..\lib\Neuro\Layers\ITrainableLayer.hpp" />
+    <ClInclude Include="..\..\lib\Neuro\Layers\LayerIDs.hpp" />
     <ClInclude Include="..\..\lib\Neuro\Layers\Processing\IProcessingLayer.hpp" />
     <ClInclude Include="..\..\lib\Neuro\Layers\Processing\XAveragePooling.hpp" />
     <ClInclude Include="..\..\lib\Neuro\Layers\Processing\XBatchNormalization.hpp" />

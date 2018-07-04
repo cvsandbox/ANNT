@@ -170,6 +170,9 @@
     <ClInclude Include="..\..\lib\Neuro\Layers\Processing\XBatchNormalization.hpp">
       <Filter>Neuro\Layers\Processing</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\lib\Neuro\Layers\LayerIDs.hpp">
+      <Filter>Neuro\Layers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\lib\Neuro\Layers\XFullyConnectedLayer.cpp">

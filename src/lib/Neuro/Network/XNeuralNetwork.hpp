@@ -116,6 +116,67 @@ public:
             assert( false );
         }
     }
+
+    // Saves network's learned parameters only.
+    // Network structure is not saved and so same network must be constructed before loading parameters
+    bool SaveLearnedParams( const std::string& fileName ) const
+    {
+        FILE* file = fopen( fileName.c_str( ), "wb" );
+        bool  ret  = false;
+
+        if ( file != nullptr )
+        {
+            // float_t can be defined to other than "float", so need to save its size and stop loading
+            // saves produced by incompatible builds
+            uint8_t floatTypeSize = static_cast<uint8_t>( sizeof( float_t ) );
+
+            if ( ( fwrite( "ANNT", sizeof( char ), 4, file ) == 4 ) &&
+                 ( fwrite( &floatTypeSize, sizeof( floatTypeSize ), 1, file ) == 1 ) )
+            {
+                ret = true;
+
+                for ( const_iterator layersIt = mLayers.begin( ); ( ret ) && ( layersIt != mLayers.end( ) ); layersIt++ )
+                {
+                    ret = (*layersIt)->SaveLearnedParams( file );
+                }
+            }
+
+            fclose( file );
+        }
+
+        return ret;
+    }
+
+    // Loads network's learned parameters.
+    // A network of the same structure as saved must be created first, since this method loads only parameters/weights/biases.
+    bool LoadLearnedParams( const std::string& fileName )
+    {
+        FILE* file = fopen( fileName.c_str( ), "rb" );
+        bool  ret  = false;
+
+        if ( file != nullptr )
+        {
+            char    anntMagic[4];
+            uint8_t floatTypeSize;
+
+            if ( ( fread( anntMagic, sizeof( char ), 4, file ) == 4 ) &&
+                 ( fread( &floatTypeSize, sizeof( floatTypeSize ), 1, file ) == 1 ) && 
+                 ( anntMagic[0] == 'A' ) && ( anntMagic[1] == 'N' ) && ( anntMagic[2] == 'N' ) && ( anntMagic[3] == 'T' ) &&
+                 ( floatTypeSize == static_cast<uint8_t>( sizeof( float_t ) ) ) )
+            {
+                ret = true;
+
+                for ( const_iterator layersIt = mLayers.begin( ); ( ret ) && ( layersIt != mLayers.end( ) ); layersIt++ )
+                {
+                    ret = (*layersIt)->LoadLearnedParams( file );
+                }
+            }
+
+            fclose( file );
+        }
+
+        return ret;
+    }
 };
 
 } } // namespace ANNT::Neuro

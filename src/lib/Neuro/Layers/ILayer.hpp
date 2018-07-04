@@ -24,6 +24,7 @@
 
 #include "../../Types/Types.hpp"
 #include "../Network/XNetworkContext.hpp"
+#include "LayerIDs.hpp"
 
 namespace ANNT { namespace Neuro {
 
@@ -96,6 +97,11 @@ public:
                                   fvector_t& gradWeights,
                                   fvector_t& gradBiases,
                                   const XNetworkContext& ctx ) = 0;
+
+    // Saves layer's learnt parameters/weights
+    virtual bool SaveLearnedParams( FILE* /* file */ ) const { return true; }
+    // Loads layer's learnt parameters
+    virtual bool LoadLearnedParams( FILE* /* file */ ) { return true; }
 };
 
 } } // namespace ANNT::Neuro

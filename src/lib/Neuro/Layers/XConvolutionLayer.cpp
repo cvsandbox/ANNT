@@ -399,4 +399,57 @@ void XConvolutionLayer::UpdateWeights( const fvector_t& weightsUpdate,
     }
 }
 
+// Saves layer's learnt parameters/weights
+bool XConvolutionLayer::SaveLearnedParams( FILE* file ) const
+{
+    bool     ret     = false;
+    uint32_t layerID = static_cast<uint32_t>( LayerID::Convolution );
+
+    if ( fwrite( &layerID, sizeof( layerID ), 1, file ) == 1 )
+    {
+        uint32_t weightsCount = static_cast<uint32_t>( mKernelsWeights.size( ) );
+        uint32_t biasesCount  = static_cast<uint32_t>( mKernelsBiases.size( ) );
+
+        if ( ( fwrite( &weightsCount, sizeof( weightsCount ), 1, file ) == 1 ) &&
+             ( fwrite( &biasesCount, sizeof( biasesCount ), 1, file ) == 1 ) )
+        {
+            if ( ( fwrite( mKernelsWeights.data( ), sizeof( float_t ), mKernelsWeights.size( ), file ) == mKernelsWeights.size( ) ) &&
+                 ( fwrite( mKernelsBiases.data( ), sizeof( float_t ), mKernelsBiases.size( ), file ) == mKernelsBiases.size( ) ) )
+            {
+                ret = true;
+            }
+        }
+    }
+
+    return ret;
+}
+
+// Loads layer's learnt parameters
+bool XConvolutionLayer::LoadLearnedParams( FILE* file )
+{
+    bool     ret = false;
+    uint32_t layerID;
+
+    if ( ( fread( &layerID, sizeof( layerID ), 1, file ) == 1 ) &&
+         ( layerID == static_cast<uint32_t>( LayerID::Convolution ) ) )
+    {
+        uint32_t weightsCount, biasesCount;
+
+        if ( ( fread( &weightsCount, sizeof( weightsCount ), 1, file ) == 1 ) &&
+             ( fread( &biasesCount, sizeof( biasesCount ), 1, file ) == 1 ) &&
+             ( weightsCount == static_cast<uint32_t>( mKernelsWeights.size( ) ) ) &&
+             ( biasesCount == static_cast<uint32_t>( mKernelsBiases.size( ) ) ) )
+        {
+            size_t read1 = fread( mKernelsWeights.data( ), sizeof( float_t ), mKernelsWeights.size( ), file );
+            size_t read2 = fread( mKernelsBiases.data( ), sizeof( float_t ), mKernelsBiases.size( ), file );
+
+            if ( ( read1 == mKernelsWeights.size( ) ) && ( read2 == mKernelsBiases.size( ) ) )
+            {
+                ret = true;
+            }
+        }
+    }
+
+    return ret;
+}
 } } // namespace ANNT::Neuro
