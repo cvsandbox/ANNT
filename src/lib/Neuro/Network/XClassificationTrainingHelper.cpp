@@ -32,12 +32,15 @@ namespace ANNT { namespace Neuro { namespace Training {
 // from command line to make testing simpler without rebuild.
 typedef struct
 {
-    float  LearningRate;
-    size_t EpochsCount;
-    size_t BatchSize;
-    bool   ShowIntermediateBatchCosts;
-    bool   RunPreTrainingTest;
-    bool   RunValidationOnly;
+    float   LearningRate;
+    size_t  EpochsCount;
+    size_t  BatchSize;
+    bool    ShowIntermediateBatchCosts;
+    bool    RunPreTrainingTest;
+    bool    RunValidationOnly;
+    string  NetworkOutputFileName;
+    string  NetworkInputFileName;
+    XClassificationTrainingHelper::SaveMode NetworkSaveMode;
 }
 TrainingParams;
 
@@ -114,6 +117,26 @@ static void ParseCommandLine( int argc, char** argv, TrainingParams* trainingPar
                         parsed = true;
                     }
                 }
+                else if ( ( strstr( paramStart, "fin:" ) == paramStart ) && ( paramLen > 5 ) )
+                {
+                    trainingParams->NetworkInputFileName = string( &( argv[i][5] ) );
+                    parsed = true;
+                }
+                else if ( ( strstr( paramStart, "fout:" ) == paramStart ) && ( paramLen > 6 ) )
+                {
+                    trainingParams->NetworkOutputFileName = string( &( argv[i][6] ) );
+                    parsed = true;
+                }
+                else if ( ( strstr( paramStart, "sm:" ) == paramStart ) && ( paramLen == 5 ) )
+                {
+                    int saveMode = argv[i][4] - '0';
+
+                    if ( ( saveMode >= 1 ) && ( saveMode <= 3 ) )
+                    {
+                        trainingParams->NetworkSaveMode = static_cast< XClassificationTrainingHelper::SaveMode >( saveMode );
+                        parsed = true;
+                    }
+                }
             }
         }
 
@@ -133,7 +156,12 @@ static void ParseCommandLine( int argc, char** argv, TrainingParams* trainingPar
         printf( "  -lr:<> - learning rate; \n" );
         printf( "  -showBatch:<0|1> - show or not intermediate batch cost; \n" );
         printf( "  -runPreTrain:<0|1> - run or not pre training test on training data; \n" );
-        printf( "  -validateOnly:<0|1> - run test on validation data only or on test data as well after each epoch. \n" );
+        printf( "  -validateOnly:<0|1> - run test on validation data only or on test data as well after each epoch; \n" );
+        printf( "  -fin:<file name> - file to load network's parameters from; " );
+        printf( "  -fout:<file name> - file to save network's parameters to; " );
+        printf( "  -sm:<> - save mode: 1 - on validation improvement (default);" );
+        printf( "                      2 - at the end of each epoch;" );
+        printf( "                      3 - at the end of training." );
         printf( "\n" );
     }
 }
@@ -146,6 +174,7 @@ XClassificationTrainingHelper::XClassificationTrainingHelper( const shared_ptr<X
     mEpochSelectionMode( EpochSelectionMode::Shuffle ),
     mRunPreTrainingTest( true ), mRunValidationOnly( false ),
     mShowIntermediateBatchCosts( false ),
+    mNetworkSaveMode( SaveMode::OnValidationImprovement ), mNetworkOutputFileName( ), mNetworkInputFileName( ),
     mArgc( argc ), mArgv( argv )
 {
 
@@ -233,15 +262,41 @@ void XClassificationTrainingHelper::RunTraining( size_t epochs, size_t batchSize
     trainingParams.RunPreTrainingTest         = mRunPreTrainingTest;
     trainingParams.RunValidationOnly          = mRunValidationOnly;
 
+    trainingParams.NetworkSaveMode       = mNetworkSaveMode;
+    trainingParams.NetworkOutputFileName = mNetworkOutputFileName;
+    trainingParams.NetworkInputFileName  = mNetworkInputFileName;
+
     // parse command line for any overrides
     ParseCommandLine( mArgc, mArgv, &trainingParams );
 
     // set some of the new parameters
     mNetworkTraining->Optimizer( )->SetLearningRate( trainingParams.LearningRate );
 
+    if ( trainingParams.NetworkOutputFileName.empty( ) )
+    {
+        trainingParams.NetworkSaveMode = SaveMode::NoSaving;
+    }
+
     // log current settings
     printf( "Learning rate: %0.4f, Epochs: %zu, Batch Size: %zu \n", trainingParams.LearningRate, trainingParams.EpochsCount, trainingParams.BatchSize );
+    if ( !trainingParams.NetworkInputFileName.empty( ) )
+    {
+        printf( "Network input file: %s \n", trainingParams.NetworkInputFileName.c_str( ) );
+    }
+    if ( ( !trainingParams.NetworkOutputFileName.empty( ) ) && ( trainingParams.NetworkSaveMode != SaveMode::NoSaving ) )
+    {
+        printf( "Network output file: %s \n", trainingParams.NetworkOutputFileName.c_str( ) );
+    }
     printf( "\n" );
+
+    // load network parameters from the previous save file
+    if ( !trainingParams.NetworkInputFileName.empty( ) )
+    {
+        if ( !mNetworkTraining->Network( )->LoadLearnedParams( trainingParams.NetworkInputFileName ) )
+        {
+            printf( "Failed loading network's parameters \n\n" );
+        }
+    }
 
     // 
     vector<fvector_t*> trainingInputsPtr( trainingInputs.size( ) );
@@ -252,6 +307,7 @@ void XClassificationTrainingHelper::RunTraining( size_t epochs, size_t batchSize
     size_t             samplesCount       = trainingInputs.size( );
     size_t             iterationsPerEpoch = ( samplesCount - 1 ) / trainingParams.BatchSize + 1;
 
+    float              lastValidationAccuracy = 0.0f;
     float_t            cost;
     size_t             correct;
 
@@ -381,6 +437,8 @@ void XClassificationTrainingHelper::RunTraining( size_t epochs, size_t batchSize
         }
         printf( "%0.3fs\n", static_cast<float>( timeTaken ) / 1000 );
 
+        float validationAccuracy = 0.0f;
+
         // get classification error on training data after completion of an epoch
         if ( ( !trainingParams.RunValidationOnly ) || ( mValidationInputs.size( ) == 0 ) )
         {
@@ -392,6 +450,12 @@ void XClassificationTrainingHelper::RunTraining( size_t epochs, size_t batchSize
                     static_cast<float>( correct ) / trainingInputs.size( ) * 100,
                     correct, trainingInputs.size( ), static_cast<float>( cost ),
                     static_cast<float>( timeTaken ) / 1000 );
+
+            // use training accuracy, if validation data set is not provided
+            if ( mValidationInputs.size( ) == 0 )
+            {
+                validationAccuracy = static_cast<float>( correct ) / trainingInputs.size( );
+            }
         }
 
         // use validation set to check classification error on data not included into training
@@ -405,6 +469,20 @@ void XClassificationTrainingHelper::RunTraining( size_t epochs, size_t batchSize
                     static_cast<float>( correct ) / mValidationInputs.size( ) * 100,
                     correct, mValidationInputs.size( ), static_cast<float>( cost ),
                     static_cast<float>( timeTaken ) / 1000 );
+
+            validationAccuracy = static_cast<float>( correct ) / mValidationInputs.size( );
+        }
+
+        // save network at the end of epoch
+        if ( trainingParams.NetworkSaveMode == SaveMode::OnEpochEnd )
+        {
+            mNetworkTraining->Network( )->SaveLearnedParams( trainingParams.NetworkOutputFileName );
+        }
+        else if ( ( trainingParams.NetworkSaveMode == SaveMode::OnValidationImprovement ) &&
+                  ( validationAccuracy > lastValidationAccuracy ) )
+        {
+            mNetworkTraining->Network( )->SaveLearnedParams( trainingParams.NetworkOutputFileName );
+            lastValidationAccuracy = validationAccuracy;
         }
     }
 
@@ -424,6 +502,12 @@ void XClassificationTrainingHelper::RunTraining( size_t epochs, size_t batchSize
     // total time taken by the training
     timeTaken = duration_cast<seconds>( steady_clock::now( ) - timeStartForAll ).count( );
     printf( "\nTotal time taken : %ds (%0.2fmin) \n", static_cast<int>( timeTaken ), static_cast<float>( timeTaken ) / 60 );
+
+    // save network when training is done
+    if ( trainingParams.NetworkSaveMode == SaveMode::OnTrainingEnd )
+    {
+        mNetworkTraining->Network( )->SaveLearnedParams( trainingParams.NetworkOutputFileName );
+    }
 }
 
 } } } // namespace ANNT::Neuro::Training

@@ -85,6 +85,12 @@ public:
                       const std::shared_ptr<ICostFunction>& costFunction );
     ~XNetworkTraining( );
 
+    // Provides access to the ANN
+    std::shared_ptr<XNeuralNetwork> Network( ) const
+    {
+        return mNetwork;
+    }
+
     // Provides access to the weights/biases optimizer
     std::shared_ptr<INetworkOptimizer> Optimizer( ) const
     {

@@ -29,6 +29,15 @@ namespace ANNT { namespace Neuro { namespace Training {
 // A helper class which encapsulates training task of a classification problem
 class XClassificationTrainingHelper
 {
+public:
+    enum class SaveMode
+    {
+        NoSaving                = 0,
+        OnValidationImprovement = 1,
+        OnEpochEnd              = 2,
+        OnTrainingEnd           = 3
+    };
+
 private:
     std::shared_ptr<XNetworkTraining>  mNetworkTraining;
     EpochSelectionMode                 mEpochSelectionMode;
@@ -36,6 +45,10 @@ private:
     bool                               mRunPreTrainingTest;
     bool                               mRunValidationOnly;
     bool                               mShowIntermediateBatchCosts;
+
+    SaveMode                           mNetworkSaveMode;
+    std::string                        mNetworkOutputFileName;
+    std::string                        mNetworkInputFileName;
 
     std::vector<fvector_t*>            mValidationInputs;
     std::vector<fvector_t*>            mValidationOutputs;
@@ -90,6 +103,36 @@ public:
     void SetShowIntermediateBatchCosts( bool showBatchCost )
     {
         mShowIntermediateBatchCosts = showBatchCost;
+    }
+
+    // Mode of saving network's learnt parameters
+    SaveMode NetworkSaveMode( ) const
+    {
+        return mNetworkSaveMode;
+    }
+    void SetNetworkSaveMode( SaveMode saveMode )
+    {
+        mNetworkSaveMode = saveMode;
+    }
+
+    // File name to save learnt paramters
+    std::string OutputFileName( ) const
+    {
+        return mNetworkOutputFileName;
+    }
+    void SetOutputFileName( const std::string outputFileName )
+    {
+        mNetworkOutputFileName = outputFileName;
+    }
+
+    // File name to load learnt paramters from
+    std::string InputFileName( ) const
+    {
+        return mNetworkInputFileName;
+    }
+    void SetInputFileName( const std::string inputFileName )
+    {
+        mNetworkInputFileName = inputFileName;
     }
 
     // Sets validation samples to use for validating classification after each training epch
