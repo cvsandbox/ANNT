@@ -102,6 +102,84 @@ public:
     virtual bool SaveLearnedParams( FILE* /* file */ ) const { return true; }
     // Loads layer's learnt parameters
     virtual bool LoadLearnedParams( FILE* /* file */ ) { return true; }
+
+protected:
+
+    // Default implementation of saving layer's learned parameter, which are represented as fvector_t
+    bool SaveLearnedParamsHelper( FILE* file, LayerID id, const std::vector<const fvector_t*>& params ) const
+    {
+        bool     ret     = false;
+        uint32_t layerID = static_cast<uint32_t>( id );
+
+        if ( fwrite( &layerID, sizeof( layerID ), 1, file ) == 1 )
+        {
+            size_t i;
+
+            for ( i = 0; i < params.size( ); i++ )
+            {
+                uint32_t paramsCount = static_cast<uint32_t>( params[i]->size( ) );
+
+                if ( fwrite( &paramsCount, sizeof( paramsCount ), 1, file ) != 1 )
+                {
+                    break;
+                }
+            }
+
+            if ( i == params.size( ) )
+            {
+                for ( i = 0; i < params.size( ); i++ )
+                {
+                    if ( fwrite( params[i]->data( ), sizeof( float_t ), params[i]->size( ), file ) != params[i]->size( ) )
+                    {
+                        break;
+                    }
+                }
+
+                ret = ( i == params.size( ) );
+            }
+        }
+
+        return ret;
+    }
+
+    // Default implementation of loading layer's learned parameter, which are represented as fvector_t
+    bool LoadLearnedParamsHelper( FILE* file, LayerID id, std::vector<fvector_t*>& params )
+    {
+        bool     ret = false;
+        uint32_t layerID;
+
+        if ( ( fread( &layerID, sizeof( layerID ), 1, file ) == 1 ) &&
+             ( layerID == static_cast<uint32_t>( id ) ) )
+        {
+            size_t i;
+
+            for ( i = 0; i < params.size( ); i++ )
+            {
+                uint32_t paramsCount;
+
+                if ( ( fread( &paramsCount, sizeof( paramsCount ), 1, file ) != 1 ) ||
+                     ( paramsCount != static_cast<uint32_t>( params[i]->size( ) ) ) )
+                {
+                    break;
+                }
+            }
+
+            if ( i == params.size( ) )
+            {
+                for ( i = 0; i < params.size( ); i++ )
+                {
+                    if ( fread( params[i]->data( ), sizeof( float_t ), params[i]->size( ), file ) != params[i]->size( ) )
+                    {
+                        break;
+                    }
+                }
+
+                ret = ( i == params.size( ) );
+            }
+        }
+
+        return ret;
+    }
 };
 
 } } // namespace ANNT::Neuro
