@@ -79,10 +79,6 @@ static void ParseCommandLine( int argc, char** argv, TrainingParams* trainingPar
                 {
                     if ( sscanf( &( argv[i][4] ), "%zu", &trainingParams->EpochsCount) == 1 )
                     {
-                        if ( trainingParams->EpochsCount == 0 )
-                        {
-                            trainingParams->EpochsCount = 1;
-                        }
                         parsed = true;
                     }
                 }
