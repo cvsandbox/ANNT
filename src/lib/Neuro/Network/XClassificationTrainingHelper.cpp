@@ -157,11 +157,11 @@ static void ParseCommandLine( int argc, char** argv, TrainingParams* trainingPar
         printf( "  -showBatch:<0|1> - show or not intermediate batch cost; \n" );
         printf( "  -runPreTrain:<0|1> - run or not pre training test on training data; \n" );
         printf( "  -validateOnly:<0|1> - run test on validation data only or on test data as well after each epoch; \n" );
-        printf( "  -fin:<file name> - file to load network's parameters from; " );
-        printf( "  -fout:<file name> - file to save network's parameters to; " );
-        printf( "  -sm:<> - save mode: 1 - on validation improvement (default);" );
-        printf( "                      2 - at the end of each epoch;" );
-        printf( "                      3 - at the end of training." );
+        printf( "  -fin:<file name> - file to load network's parameters from; \n" );
+        printf( "  -fout:<file name> - file to save network's parameters to; \n" );
+        printf( "  -sm:<> - save mode: 1 - on validation improvement (default); \n" );
+        printf( "                      2 - at the end of each epoch; \n" );
+        printf( "                      3 - at the end of training. \n" );
         printf( "\n" );
     }
 }
