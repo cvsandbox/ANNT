@@ -48,6 +48,25 @@ public:
             prevDelta[i] = delta[i] * ( float_t( 1 ) - output[i] * output[i] );
         }
     }
+
+    // Pointer versions of the forward/backward function
+
+    void ForwardActivate( const float_t* input, float_t* output, size_t len )
+    {
+        for ( size_t i = 0; i < len; i++ )
+        {
+            output[i] = std::tanh( input[i] );
+        }
+    }
+
+    void BackwardActivate( const float_t* output, const float_t* delta, float_t* prevDelta, size_t len )
+    {
+        for ( size_t i = 0; i < len; i++ )
+        {
+            // derivative(Tanh) = 1 - y^2
+            prevDelta[i] = delta[i] * ( float_t( 1 ) - output[i] * output[i] );
+        }
+    }
 };
 
 } } // namespace ANNT::Neuro

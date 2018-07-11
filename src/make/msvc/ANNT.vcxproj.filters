@@ -173,6 +173,9 @@
     <ClInclude Include="..\..\lib\Neuro\Layers\LayerIDs.hpp">
       <Filter>Neuro\Layers</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\lib\Neuro\Layers\XRecurrentLayer.hpp">
+      <Filter>Neuro\Layers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\lib\Neuro\Layers\XFullyConnectedLayer.cpp">
@@ -211,6 +214,12 @@
     </ClCompile>
     <ClCompile Include="..\..\lib\Types\XAlignedAllocator.cpp">
       <Filter>Types</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\Neuro\Layers\XRecurrentLayer.cpp">
+      <Filter>Neuro\Layers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\Neuro\Network\XNetworkContext.cpp">
+      <Filter>Neuro\Network</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

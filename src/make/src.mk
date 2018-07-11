@@ -18,6 +18,7 @@ SRC = ANNT.cpp \
       XDataEncodingTools.cpp \
       XFullyConnectedLayer.cpp \
       XConvolutionLayer.cpp \
+      XNetworkContext.cpp \
       XNetworkInference.cpp \
       XNetworkTraining.cpp \
       XClassificationTrainingHelper.cpp

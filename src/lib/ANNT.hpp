@@ -18,14 +18,18 @@
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "Types/Types.hpp"
+#pragma once
+#ifndef ANNT_HPP
+#define ANNT_HPP
 
+#include "Types/Types.hpp"
 #include "Tools/XDataEncodingTools.hpp"
 
 /* Classes used for artificial neural networks inference */
 
 #include "Neuro/Layers/XFullyConnectedLayer.hpp"
 #include "Neuro/Layers/XConvolutionLayer.hpp"
+#include "Neuro/Layers/XRecurrentLayer.hpp"
 
 #include "Neuro/Layers/Activations/XSigmoidActivation.hpp"
 #include "Neuro/Layers/Activations/XTanhActivation.hpp"
@@ -61,3 +65,5 @@
 #include "Neuro/Network/XNetworkTraining.hpp"
 
 #include "Neuro/Network/XClassificationTrainingHelper.hpp"
+
+#endif // ANNT_HPP
