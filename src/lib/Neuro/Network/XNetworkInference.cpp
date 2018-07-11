@@ -28,7 +28,8 @@ using namespace std;
 namespace ANNT { namespace Neuro {
 
 XNetworkInference::XNetworkInference( const shared_ptr<XNeuralNetwork>& network ) :
-    mNetwork( network )
+    mNetwork( network ),
+    mInferenceContext( false )
 {
     mComputeInputs.resize( 1 );
 
@@ -39,64 +40,7 @@ XNetworkInference::XNetworkInference( const shared_ptr<XNeuralNetwork>& network 
         mComputeOutputs.push_back( vector<fvector_t*>( { &( mComputeOutputsStorage.back( )[0] ) } ) );
     }
 
-    AllocateWorkingBuffers( mComputeMemoryBuffers, 1, false );
-}
-
-XNetworkInference::~XNetworkInference( )
-{
-    FreeWorkingBuffers( mComputeMemoryBuffers );
-}
-
-// Allocate working buffers for layer needing them
-void XNetworkInference::AllocateWorkingBuffers( std::vector<std::vector<std::vector<void*>>>& workingBuffer, size_t batchSize, bool trainingMode )
-{
-    for ( auto layer : *mNetwork )
-    {
-        uvector_t workingMemSize = layer->WorkingMemSize( trainingMode );
-
-        // filling this nice vector
-        //
-        //       -- for each layer
-        //       |           -- for each requested buffer
-        //       |           |           -- for each sample
-        //       |           |           |       -- requested memory buffer
-        //       |           |           |       |
-        // std::vector<std::vector<std::vector<void*>>>
-
-        workingBuffer.push_back( std::vector<std::vector<void*>>( workingMemSize.size( ) ) );
-
-        for ( size_t i = 0; i < workingMemSize.size( ); i++ )
-        {
-            workingBuffer.back( )[i] = std::vector<void*>( );
-
-            for ( size_t j = 0; j < batchSize; j++ )
-            {
-                void* memBuffer = AlignedAlloc( 32, workingMemSize[i] );
-
-                if ( memBuffer )
-                {
-                    memset( memBuffer, 0, workingMemSize[i] );
-                }
-
-                workingBuffer.back( )[i].push_back( memBuffer );
-            }
-        }
-    }
-}
-
-// Free layers' working buffers
-void XNetworkInference::FreeWorkingBuffers( std::vector<std::vector<std::vector<void*>>>& workingBuffer )
-{
-    for ( size_t i = 0; i < workingBuffer.size( ); i++ )
-    {
-        for ( size_t j = 0; j < workingBuffer[i].size( ); j++ )
-        {
-            for ( size_t k = 0; k < workingBuffer[i][j].size( ); k++ )
-            {
-                AlignedFree( workingBuffer[i][j][k] );
-            }
-        }
-    }
+    mInferenceContext.AllocateWorkingBuffers( network, 1 );
 }
 
 // Computes output vector for the given input vector
@@ -106,7 +50,7 @@ void XNetworkInference::Compute( const fvector_t& input, fvector_t& output )
     {
         mComputeInputs[0] = const_cast<fvector_t*>( &input );
 
-        DoCompute( mComputeInputs, mComputeOutputs, mComputeMemoryBuffers );
+        DoCompute( mComputeInputs, mComputeOutputs, mInferenceContext );
 
         // copy output produced by the last layer
         output = mComputeOutputsStorage.back( )[0];
@@ -122,7 +66,7 @@ size_t XNetworkInference::Classify( const fvector_t& input )
     {
         mComputeInputs[0] = const_cast<fvector_t*>( &input );
 
-        DoCompute( mComputeInputs, mComputeOutputs, mComputeMemoryBuffers );
+        DoCompute( mComputeInputs, mComputeOutputs, mInferenceContext );
 
         classIndex = XDataEncodingTools::MaxIndex( mComputeOutputsStorage.back( )[0] );
     }
@@ -141,7 +85,7 @@ size_t XNetworkInference::TestClassification( const vector<fvector_t>& inputs, c
         {
             mComputeInputs[0] = const_cast<fvector_t*>( &( inputs[i] ) );
 
-            DoCompute( mComputeInputs, mComputeOutputs, mComputeMemoryBuffers );
+            DoCompute( mComputeInputs, mComputeOutputs, mInferenceContext );
 
             if ( XDataEncodingTools::MaxIndex( mComputeOutputsStorage.back( )[0] ) == targetLabels[i] )
             {
@@ -155,18 +99,15 @@ size_t XNetworkInference::TestClassification( const vector<fvector_t>& inputs, c
 
 // Helper method to compute output vectors for the given input vectors
 void XNetworkInference::DoCompute( const vector<fvector_t*>& inputs,
-                                     vector<vector<fvector_t*>>& outputs,
-                                     vector<vector<vector<void*>>> workingBuffer,
-                                     bool trainingMode )
+                                   vector<vector<fvector_t*>>& outputs,
+                                   XNetworkContext& ctx )
 {
-    XNetworkContext ctx( trainingMode );
-
-    ctx.SetWorkingBuffers( &( workingBuffer[0] ) );
+    ctx.SetCurrentLayerIndex( 0 );
     mNetwork->LayerAt( 0 )->ForwardCompute( inputs, outputs[0], ctx );
 
     for ( size_t i = 1, layersCount = mNetwork->LayersCount( ); i < layersCount; i++ )
     {
-        ctx.SetWorkingBuffers( &( workingBuffer[i] ) );
+        ctx.SetCurrentLayerIndex( i );
         mNetwork->LayerAt( i )->ForwardCompute( outputs[i - 1], outputs[i], ctx );
     }
 }

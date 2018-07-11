@@ -22,11 +22,12 @@
 #ifndef ANNT_XNETWORK_CONTEXT_HPP
 #define ANNT_XNETWORK_CONTEXT_HPP
 
-#include <vector>
+#include "../../Types/Types.hpp"
 
 namespace ANNT { namespace Neuro {
 
-class XNetworkComputation;
+class XNeuralNetwork;
+class XNetworkInference;
 
 namespace Training
 {
@@ -41,31 +42,60 @@ class XNetworkContext
 
 private:
 
-    bool                             mTrainingMode;
-    std::vector<std::vector<void*>>* mBuffers;
+    bool    mTrainingMode;
+    size_t  mTrainingSequenceLength;   // length of sequences used to train recurrent networks
+    size_t  mCurrentLayer;
+
+
+    std::vector<std::vector<std::vector<void*>>> mLayersMemoryBuffers;
+    std::vector<uvector_t>                       mLayersMemorySize;
 
 public:
 
     XNetworkContext( bool trainingMode ) :
-        mTrainingMode( trainingMode ), mBuffers( nullptr )
+        XNetworkContext( trainingMode, 1 )
     { }
+
+    XNetworkContext( bool trainingMode, size_t sequenceLength );
+    ~XNetworkContext( );
 
     // Checks if network is being trained
     bool IsTraining( ) const { return mTrainingMode; }
 
+    // Get/set length of training sequences used for recurrent networks
+    size_t TrainingSequenceLength( ) const
+    {
+        return mTrainingSequenceLength;
+    }
+    void SetTrainingSequenceLength( size_t sequenceLength )
+    {
+        mTrainingSequenceLength = sequenceLength;
+    }
+
     // Provides specified working buffer for the sample index
     void* GetWorkingBuffer( size_t buffer, size_t sample ) const
     {
-        return (*mBuffers)[buffer][sample];
+        return mLayersMemoryBuffers[mCurrentLayer][buffer][sample];
     }
 
 protected:
 
-    // Set working buffers for the layer this context is to be used with
-    void SetWorkingBuffers( std::vector<std::vector<void*>>* buffers )
+    // Allocate working buffer for laters of the network
+    void AllocateWorkingBuffers( const std::shared_ptr<XNeuralNetwork>& net, size_t batchSize );
+
+    // Clear layers' working buffers (memset zero)
+    void ResetWorkingBuffers( );
+
+    // Set current layer index, so that correct working buffer could be provided
+    void SetCurrentLayerIndex( size_t currentLayer )
     {
-        mBuffers = buffers;
+        mCurrentLayer = currentLayer;
     }
+
+private:
+
+    // Free layers' working buffers
+    void FreeWorkingBuffers( );
 };
 
 } } // namespace ANNT::Neuro

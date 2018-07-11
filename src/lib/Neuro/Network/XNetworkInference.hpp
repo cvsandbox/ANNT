@@ -26,6 +26,7 @@
 #include <vector>
 
 #include "XNeuralNetwork.hpp"
+#include "XNetworkContext.hpp"
 
 namespace ANNT { namespace Neuro {
 
@@ -42,12 +43,17 @@ protected:
     std::vector<std::vector<fvector_t*>> mComputeOutputs;
     std::vector<fvector_t*>              mComputeInputs;
 
-    std::vector<std::vector<std::vector<void*>>> mComputeMemoryBuffers;
+    XNetworkContext                      mInferenceContext;
 
 public:
     // The passed network must be fully constructed at this point - no adding new layers
     XNetworkInference( const std::shared_ptr<XNeuralNetwork>& network );
-    virtual ~XNetworkInference( );
+
+    // Reset working buffers for all layers
+    virtual void ResetState( )
+    {
+        mInferenceContext.ResetWorkingBuffers( );
+    }
 
     // Computes output vector for the given input vector
     void Compute( const fvector_t& input, fvector_t& output );
@@ -67,14 +73,7 @@ protected:
     // the provided storage for the intermediate outputs of all layers
     void DoCompute( const std::vector<fvector_t*>& inputs,
                     std::vector<std::vector<fvector_t*>>& outputs,
-                    std::vector<std::vector<std::vector<void*>>> workingBuffer,
-                    bool trainingMode = false );
-
-protected:
-
-    // Allocate/free working buffers for layer needing them
-    void AllocateWorkingBuffers( std::vector<std::vector<std::vector<void*>>>& workingBuffer, size_t batchSize, bool trainingMode );
-    void FreeWorkingBuffers( std::vector<std::vector<std::vector<void*>>>& workingBuffer );
+                    XNetworkContext& ctx );
 };
 
 } } // namespace ANNT::Neuro

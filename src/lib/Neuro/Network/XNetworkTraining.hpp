@@ -75,15 +75,14 @@ private:
     std::vector<fvector_t>               mWeightsLayerVariables;
     std::vector<fvector_t>               mBiasesLayerVariables;
 
-    // layers' working buffers for training
-    std::vector<std::vector<std::vector<void*>>> mTrainingMemoryBuffers;
+    // layers' working buffers and context for training
+    XNetworkContext                      mTrainingContext;
 
 public:
 
     XNetworkTraining( const std::shared_ptr<XNeuralNetwork>& network,
                       const std::shared_ptr<INetworkOptimizer>& optimizer,
                       const std::shared_ptr<ICostFunction>& costFunction );
-    ~XNetworkTraining( );
 
     // Provides access to the ANN
     std::shared_ptr<XNeuralNetwork> Network( ) const
@@ -111,6 +110,23 @@ public:
     void SetAverageWeightGradients( bool average )
     {
         mAverageWeightGradients = average;
+    }
+
+    // Get/set length of training sequences used for recurrent networks
+    size_t TrainingSequenceLength( ) const
+    {
+        return mTrainingContext.TrainingSequenceLength( );
+    }
+    void SetTrainingSequenceLength( size_t sequenceLength )
+    {
+        mTrainingContext.SetTrainingSequenceLength( sequenceLength );
+    }
+
+    // Reset working buffers for all layers
+    virtual void ResetState( )
+    {
+        XNetworkInference::ResetState( );
+        mTrainingContext.ResetWorkingBuffers( );
     }
 
     // Trains single input/output sample
