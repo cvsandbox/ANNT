@@ -21,6 +21,7 @@
 #include "XRecurrentLayer.hpp"
 #include "../../Tools/XParallel.hpp"
 #include "../../Tools/XVectorize.hpp"
+#include <cstring>
 
 using namespace std;
 

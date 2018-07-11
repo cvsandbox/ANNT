@@ -132,8 +132,8 @@ int main( int argc, char** argv )
 
         shared_ptr<XNeuralNetwork> net = make_shared<XNeuralNetwork>( );
 
-        net->AddLayer( make_shared<XRecurrentLayer>( 10, 25, 10 ) );
-        net->AddLayer( make_shared<XRecurrentLayer>( 25, 50, 10 ) );
+        net->AddLayer( make_shared<XRecurrentLayer>( 10, 25 ) );
+        net->AddLayer( make_shared<XRecurrentLayer>( 25, 50 ) );
         net->AddLayer( make_shared<XFullyConnectedLayer>( 50, 10 ) );
         net->AddLayer( make_shared<XSoftMaxActivation>( ) );
 

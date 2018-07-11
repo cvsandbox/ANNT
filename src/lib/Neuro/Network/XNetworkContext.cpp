@@ -20,6 +20,7 @@
 
 #include "XNetworkContext.hpp"
 #include "XNeuralNetwork.hpp"
+#include "cstring"
 
 using namespace std;
 
