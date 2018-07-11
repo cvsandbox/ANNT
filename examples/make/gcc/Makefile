@@ -6,7 +6,8 @@ EXAMPLES = fc_xor \
            fc_iris \
            fc_mnist \
            cnn_mnist \
-           cnn_cifar10
+           cnn_cifar10 \
+           rnn_sequence
 
 all:
 	$(foreach ex,$(EXAMPLES), cd "$(SELF_DIR)../../$(ex)/make/gcc"; make ; cd "$(SELF_DIR)" ;)
