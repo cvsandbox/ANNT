@@ -55,6 +55,12 @@ public:
         mInferenceContext.ResetWorkingBuffers( );
     }
 
+    // Reset working buffers for the specified layers
+    virtual void ResetLayersState( uvector_t layersIndexes )
+    {
+        mInferenceContext.ResetWorkingBuffers( layersIndexes );
+    }
+
     // Computes output vector for the given input vector
     void Compute( const fvector_t& input, fvector_t& output );
 

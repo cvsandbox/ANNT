@@ -108,5 +108,18 @@ void XNetworkContext::ResetWorkingBuffers( )
         }
     }
 }
+void XNetworkContext::ResetWorkingBuffers( uvector_t layersIndexes )
+{
+    for ( size_t i : layersIndexes )
+    {
+        for ( size_t j = 0; j < mLayersMemoryBuffers[i].size( ); j++ )
+        {
+            for ( size_t k = 0; k < mLayersMemoryBuffers[i][j].size( ); k++ )
+            {
+                memset( mLayersMemoryBuffers[i][j][k], 0, mLayersMemorySize[i][j] );
+            }
+        }
+    }
+}
 
 } } // namespace ANNT::Neuro

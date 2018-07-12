@@ -123,10 +123,16 @@ public:
     }
 
     // Reset working buffers for all layers
-    virtual void ResetState( )
+    void ResetState( ) override
     {
         XNetworkInference::ResetState( );
         mTrainingContext.ResetWorkingBuffers( );
+    }
+    // Reset working buffers for the specified layers
+    void ResetLayersState( uvector_t layersIndexes ) override
+    {
+        XNetworkInference::ResetLayersState( layersIndexes );
+        mTrainingContext.ResetWorkingBuffers( layersIndexes );
     }
 
     // Trains single input/output sample

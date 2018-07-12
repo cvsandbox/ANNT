@@ -85,6 +85,7 @@ protected:
 
     // Clear layers' working buffers (memset zero)
     void ResetWorkingBuffers( );
+    void ResetWorkingBuffers( uvector_t layersIndexes );
 
     // Set current layer index, so that correct working buffer could be provided
     void SetCurrentLayerIndex( size_t currentLayer )
