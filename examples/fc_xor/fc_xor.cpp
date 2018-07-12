@@ -103,7 +103,7 @@ int main( int /* argc */, char** /* argv */ )
     for ( size_t i = 0; i < 120; i++ )
     {
         size_t sample = rand( ) % inputs.size( );
-        auto   cost   = netCtx.TrainSample( inputs[sample], targetOutputs[sample] );
+        auto   cost   = netTraining.TrainSample( inputs[sample], targetOutputs[sample] );
 
         printf( "%.04f ", static_cast<float>( cost ) );
 
