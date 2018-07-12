@@ -20,7 +20,7 @@
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER) && defined(_DEBUG)
 #define _CRTDBG_MAP_ALLOC
 #include <crtdbg.h>
 #endif
@@ -59,6 +59,11 @@ template <typename T> vector<T> ExtractValidationSamples( vector<T>& allSamples 
 // Example application's entry point
 int main( int argc, char** argv )
 {
+#if defined(_MSC_VER) && defined(_DEBUG)
+    _CrtMemState memState;
+    _CrtMemCheckpoint( &memState );
+#endif
+
     printf( "MNIST handwritten digits classification example with Convolution ANN \n\n" );
 
     //_CrtSetBreakAlloc( 11021 );
@@ -174,8 +179,8 @@ int main( int argc, char** argv )
         trainingHelper.RunTraining( 20, 50, trainImages, encodedTrainLabels, trainLabels );
     }
 
-#ifdef _MSC_VER
-    _CrtDumpMemoryLeaks( );
+#if defined(_MSC_VER) && defined(_DEBUG)
+    _CrtMemDumpAllObjectsSince( &memState );
 #endif
 
     return 0;
