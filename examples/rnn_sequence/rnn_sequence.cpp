@@ -20,7 +20,7 @@
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER) && defined(_DEBUG)
 #define _CRTDBG_MAP_ALLOC
 #include <crtdbg.h>
 #endif
@@ -77,8 +77,13 @@ void ShowPredictedSequences( shared_ptr<XNeuralNetwork>& net, const vector<fvect
 }
 
 // Example application's entry point
-int main( int argc, char** argv )
+int main( int /* argc */, char** /* argv */ )
 {
+#if defined(_MSC_VER) && defined(_DEBUG)
+    _CrtMemState memState;
+    _CrtMemCheckpoint( &memState );
+#endif
+
     printf( "Sequence prediction with Recurrent ANN \n\n" );
 
     //_CrtSetBreakAlloc( 159 );
@@ -130,6 +135,7 @@ int main( int argc, char** argv )
             }
         }
 
+        // prepare a recurrent ANN
         shared_ptr<XNeuralNetwork> net = make_shared<XNeuralNetwork>( );
 
         net->AddLayer( make_shared<XRecurrentLayer>( 10, 25 ) );
@@ -137,20 +143,31 @@ int main( int argc, char** argv )
         net->AddLayer( make_shared<XFullyConnectedLayer>( 50, 10 ) );
         net->AddLayer( make_shared<XSoftMaxActivation>( ) );
 
-        XNetworkTraining netTraining( net, make_shared<XAdamOptimizer>( 0.02f ), make_shared<XCrossEntropyCost>( ) );
+        // create training context with Adam optimizer and Cross Entropy cost function
+        XNetworkTraining netTraining( net,
+                                      make_shared<XAdamOptimizer>( 0.02f ),
+                                      make_shared<XCrossEntropyCost>( ) );
 
         netTraining.SetAverageWeightGradients( false );
-        netTraining.SetTrainingSequenceLength( 10 );
+        // since we are dealing with recurrent network, we need to tell trainer the length of time series
+        netTraining.SetTrainingSequenceLength( STEPS_PER_SEQUENCE );
 
+        // show target and predicted sequnces before training
         printf( "Before training: \n" );
         ShowPredictedSequences( net, inputs, outputs, sequences.size( ) );
 
-        for ( size_t i = 0; i < 100 * 1; i++ )
+        // run training epochs providing all data as single batch
+        for ( size_t i = 1; i <= 100; i++ )
         {
             auto cost = netTraining.TrainBatch( inputs, outputs );
             printf( "%0.4f ", static_cast<float>( cost ) );
 
+            // we can reset individual layers, however just reset all so we don't need to think about
+            // layers' indexes and network structure (we expect to have only recurrent layers with state
+            // for this sample)
             netTraining.ResetState( );
+            // or reset only recurrent layers
+            // netTraining.ResetLayersState( { 0, 1 } );
 
             if ( ( i % 10 ) == 0 )
             {
@@ -159,14 +176,14 @@ int main( int argc, char** argv )
         }
         printf( "\n\n" );
 
+        // show target and predicted sequnces after training completes
         printf( "After training: \n" );
         ShowPredictedSequences( net, inputs, outputs, sequences.size( ) );
     }
 
-#ifdef _MSC_VER
-    _CrtDumpMemoryLeaks( );
+#if defined(_MSC_VER) && defined(_DEBUG)
+    _CrtMemDumpAllObjectsSince( &memState );
 #endif
 
     return 0;
 }
-
