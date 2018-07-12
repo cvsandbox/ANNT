@@ -30,6 +30,9 @@ enum class LayerID
 
     FullyConnected     = 1,
     Convolution        = 2,
+    RecurrentBasic     = 3,
+    RecurrentLSTM      = 4,
+    RecurrentGRU       = 5,
 
     Sigmoid            = 1000,
     Tanh               = 1001,
