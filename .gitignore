@@ -6,4 +6,4 @@ build
 *.o
 *.vcxproj.user
 *.a
-
+*.VC.db
