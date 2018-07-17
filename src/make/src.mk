@@ -19,6 +19,7 @@ SRC = ANNT.cpp \
       XFullyConnectedLayer.cpp \
       XConvolutionLayer.cpp \
       XRecurrentLayer.cpp \
+      XLSTMLayer.cpp \
       XNeuralNetwork.cpp \
       XNetworkContext.cpp \
       XNetworkInference.cpp \
