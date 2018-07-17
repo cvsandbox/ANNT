@@ -23,7 +23,6 @@
 #define ANNT_XLOG_SOFT_MAX_ACTIVATION_HPP
 
 #include "IActivationLayer.hpp"
-#include <algorithm>
 
 namespace ANNT { namespace Neuro {
 
@@ -38,11 +37,15 @@ class XLogSoftMaxActivation : public IActivationLayer
 {
 public:
 
-    void ForwardActivate( const fvector_t& input, fvector_t& output ) override
+    void ForwardActivate( const float_t* input, float_t* output, size_t len ) override
     {
-        size_t  len = input.size( );
         float_t sum = 0;
-        float_t max = *std::max_element( input.begin( ), input.end( ) );
+        float_t max = input[0];
+
+        for ( size_t i = 1; i < len; i++ )
+        {
+            if ( input[i] > max ) max = input[i];
+        }
 
         for ( size_t i = 0; i < len; i++ )
         {
@@ -58,11 +61,9 @@ public:
         }
     }
 
-    void BackwardActivate( const fvector_t& input, const fvector_t& output,
-                           const fvector_t& delta, fvector_t& prevDelta ) override
+    void BackwardActivate( const float_t* /* input */, const float_t* output,
+                           const float_t* delta, float_t* prevDelta, size_t len ) override
     {
-        size_t len = input.size( );
-
         for ( size_t i = 0; i < len; i++ )
         {
             prevDelta[i] = std::exp( output[i] ) +  delta[i];

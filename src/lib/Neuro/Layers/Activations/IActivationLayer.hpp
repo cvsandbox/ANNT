@@ -47,7 +47,7 @@ public:
     {
         XParallel::For( inputs.size( ), ctx.IsTraining( ), [&]( size_t i )
         {
-            ForwardActivate( *( inputs[i] ), *( outputs[i] ) );
+            ForwardActivate( inputs[i]->data( ), outputs[i]->data( ), inputs[i]->size( ) );
         } );
     }
 
@@ -62,16 +62,16 @@ public:
     {
         XParallel::For( inputs.size( ), ctx.IsTraining( ), [&]( size_t i )
         {
-            BackwardActivate( *( inputs[i] ), *( outputs[i] ), *( deltas[i] ), *( prevDeltas[i] ) );
+            BackwardActivate( inputs[i]->data( ), outputs[i]->data( ), deltas[i]->data( ), prevDeltas[i]->data( ), inputs[i]->size( ) );
         } );
     }
 
     // Applies activation function to the input vector
-    virtual void ForwardActivate( const fvector_t& input, fvector_t& output ) = 0;
+    virtual void ForwardActivate( const float_t* input, float_t* output, size_t len ) = 0;
 
     // Propagates error back to previous layer by multiplying delta with activation function's derivative
-    virtual void BackwardActivate( const fvector_t& input, const fvector_t& output,
-                                   const fvector_t& delta, fvector_t& prevDelta ) = 0;
+    virtual void BackwardActivate( const float_t* input, const float_t* output,
+                                   const float_t* delta, float_t* prevDelta, size_t len ) = 0;
 };
 
 } } // namespace ANNT::Neuro

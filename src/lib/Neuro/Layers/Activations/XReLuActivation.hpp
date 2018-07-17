@@ -32,15 +32,15 @@ class XReLuActivation : public IActivationLayer
 {
 public:
 
-    void ForwardActivate( const fvector_t& input, fvector_t& output ) override
+    void ForwardActivate( const float_t* input, float_t* output, size_t len ) override
     {
-        XVectorize::Max( input.data( ), float_t( 0 ), output.data( ), input.size( ) );
+        XVectorize::Max( input, float_t( 0 ), output, len );
     }
 
-    void BackwardActivate( const fvector_t& input, const fvector_t& output,
-                           const fvector_t& delta, fvector_t& prevDelta ) override
+    void BackwardActivate( const float_t* /* input */, const float_t* output,
+                           const float_t* delta, float_t* prevDelta, size_t len ) override
     {
-        for ( size_t i = 0, len = input.size( ); i < len; i++ )
+        for ( size_t i = 0; i < len; i++ )
         {
             // derivative(ReLU) = 1, y > 0
             //                  = 0, otherwise
