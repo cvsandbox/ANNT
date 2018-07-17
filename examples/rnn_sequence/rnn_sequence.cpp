@@ -138,14 +138,20 @@ int main( int /* argc */, char** /* argv */ )
         // prepare a recurrent ANN
         shared_ptr<XNeuralNetwork> net = make_shared<XNeuralNetwork>( );
 
-        net->AddLayer( make_shared<XRecurrentLayer>( 10, 25 ) );
-        net->AddLayer( make_shared<XRecurrentLayer>( 25, 50 ) );
-        net->AddLayer( make_shared<XFullyConnectedLayer>( 50, 10 ) );
+        // basic recurrent network
+        net->AddLayer( make_shared<XRecurrentLayer>( 10, 20 ) );
+        net->AddLayer( make_shared<XRecurrentLayer>( 20, 30 ) );
+        net->AddLayer( make_shared<XFullyConnectedLayer>( 30, 10 ) );
         net->AddLayer( make_shared<XSoftMaxActivation>( ) );
+
+        // similar result using LSTM layer - one recurrent layer is enough as it is more complex
+        // net->AddLayer( make_shared<XLSTMLayer>( 10, 20 ) );
+        // net->AddLayer( make_shared<XFullyConnectedLayer>( 20, 10 ) );
+        // net->AddLayer( make_shared<XSoftMaxActivation>( ) );
 
         // create training context with Adam optimizer and Cross Entropy cost function
         XNetworkTraining netTraining( net,
-                                      make_shared<XAdamOptimizer>( 0.02f ),
+                                      make_shared<XAdamOptimizer>( 0.05f ),
                                       make_shared<XCrossEntropyCost>( ) );
 
         netTraining.SetAverageWeightGradients( false );
