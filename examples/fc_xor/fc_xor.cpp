@@ -27,7 +27,7 @@
 
 // If defined, batch training is used - all samples are given to network before updating it.
 // If commented, on-line training is done - samples are provided randomly one by one.
-#define USE_BATCH_TRAINING
+//#define USE_BATCH_TRAINING
 
 using namespace std;
 using namespace ANNT;
@@ -69,14 +69,14 @@ int main( int /* argc */, char** /* argv */ )
 {
     printf( "XOR example with Fully Connected ANN \n\n" );
 
-    // prepare XOR training data encoded as -1, 1
+    // prepare XOR training data, inputs encoded as -1 and 1, while outputs as 0, 1
     vector<fvector_t> inputs;
     vector<fvector_t> targetOutputs;
 
-    inputs.push_back( { -1.0f, -1.0f } ); /* -> */ targetOutputs.push_back( { -1.0f } );
-    inputs.push_back( {  1.0f, -1.0f } ); /* -> */ targetOutputs.push_back( {  1.0f } );
-    inputs.push_back( { -1.0f,  1.0f } ); /* -> */ targetOutputs.push_back( {  1.0f } );
-    inputs.push_back( {  1.0f,  1.0f } ); /* -> */ targetOutputs.push_back( { -1.0f } );
+    inputs.push_back( { -1.0f, -1.0f } ); /* -> */ targetOutputs.push_back( { 0.0f } );
+    inputs.push_back( {  1.0f, -1.0f } ); /* -> */ targetOutputs.push_back( { 1.0f } );
+    inputs.push_back( { -1.0f,  1.0f } ); /* -> */ targetOutputs.push_back( { 1.0f } );
+    inputs.push_back( {  1.0f,  1.0f } ); /* -> */ targetOutputs.push_back( { 0.0f } );
 
     // Prepare 2 layer ANN.
     // A single layer/neuron is enough for AND or OR functions, but XOR needs two layers.
@@ -85,14 +85,15 @@ int main( int /* argc */, char** /* argv */ )
     net->AddLayer( make_shared<XFullyConnectedLayer>( 2, 2 ) );
     net->AddLayer( make_shared<XTanhActivation>( ) );
     net->AddLayer( make_shared<XFullyConnectedLayer>( 2, 1 ) );
-  
-    // create training context with Nesterov optimizer and MSE cost function
+    net->AddLayer( make_shared<XSigmoidActivation>( ) );
+
+    // create training context with Nesterov optimizer and Binary Cross Entropy cost function
     XNetworkTraining netTraining( net,
-                                  make_shared<XNesterovMomentumOptimizer>( 0.05f ),
-                                  make_shared<XMSECost>( ) );
+                                  make_shared<XNesterovMomentumOptimizer>( 0.5f ),
+                                  make_shared<XBinaryCrossEntropyCost>( ) );
 
     // don't average weight/bias gradients over batch
-    netTraining.SetAverageWeightGradients( false );
+    netTraining.SetAverageWeightGradients( true );
 
     printf( "Network output before training: \n" );
     TestNetwork( net, inputs );
@@ -100,7 +101,7 @@ int main( int /* argc */, char** /* argv */ )
     // train the neural network
 #ifndef USE_BATCH_TRAINING
     printf( "Cost of each sample: \n" );
-    for ( size_t i = 0; i < 120; i++ )
+    for ( size_t i = 0; i < 80 * 2; i++ )
     {
         size_t sample = rand( ) % inputs.size( );
         auto   cost   = netTraining.TrainSample( inputs[sample], targetOutputs[sample] );
@@ -112,7 +113,7 @@ int main( int /* argc */, char** /* argv */ )
     }
 #else
     printf( "Cost of each batch: \n" );
-    for ( size_t i = 0; i < 64; i++ )
+    for ( size_t i = 0; i < 80; i++ )
     {
         auto cost = netTraining.TrainBatch( inputs, targetOutputs );
 
