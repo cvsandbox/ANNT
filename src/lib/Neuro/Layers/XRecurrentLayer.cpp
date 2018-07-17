@@ -157,7 +157,7 @@ void XRecurrentLayer::BackwardCompute( const vector<fvector_t*>& inputs,
     for ( size_t batchIndex = 0; batchIndex < batchSize; batchIndex++ )
     {
         // accumulated state delta
-        float_t* stateDelta = static_cast<float_t*>( ctx.GetWorkingBuffer( BUFFER_INDEX_STATE_DELTA, batchIndex ) );
+        float_t* stateGrad = static_cast<float_t*>( ctx.GetWorkingBuffer( BUFFER_INDEX_STATE_GRAD, batchIndex ) );
 
         for ( int sequenceIndex = (int) sequenceLen - 1; sequenceIndex >= 0; sequenceIndex-- )
         {
@@ -184,14 +184,14 @@ void XRecurrentLayer::BackwardCompute( const vector<fvector_t*>& inputs,
                 stateDeltaCurrnet[outputIndex2] = sum;
             }
 
-            // add delta from the future
+            // add state gradient from the future
             for ( size_t outputIndex = 0; outputIndex < mOutputsCount; outputIndex++ )
             {
-                stateDeltaCurrnet[outputIndex] += stateDelta[outputIndex];
+                stateDeltaCurrnet[outputIndex] += stateGrad[outputIndex];
             }
 
             // backward pass through Tanh activation to get final state delta for current sample
-            mTanh.BackwardActivate( stateCurrent, stateDeltaCurrnet.data( ), stateDeltaCurrnet.data( ), mOutputsCount );
+            mTanh.BackwardActivate( stateCurrent, stateCurrent, stateDeltaCurrnet.data( ), stateDeltaCurrnet.data( ), mOutputsCount );
 
             // input deltas for the previous layer
             for ( size_t inputIndex = 0; inputIndex < mInputsCount; inputIndex++ )
@@ -207,7 +207,7 @@ void XRecurrentLayer::BackwardCompute( const vector<fvector_t*>& inputs,
                 prevDelta[inputIndex] = sum;
             }
 
-            // state deltas for the previous sequence of this layer
+            // state gradients for the previous sample in the time series
             for ( size_t outputIndex2 = 0; outputIndex2 < mOutputsCount; outputIndex2++ )
             {
                 size_t  weightIndex = outputIndex2;
@@ -218,7 +218,7 @@ void XRecurrentLayer::BackwardCompute( const vector<fvector_t*>& inputs,
                     sum += stateDeltaCurrnet[outputIndex] * mWeightsW[weightIndex];
                 }
 
-                stateDelta[outputIndex2] = sum;
+                stateGrad[outputIndex2] = sum;
             }
 
             // calculate weights/biases updates

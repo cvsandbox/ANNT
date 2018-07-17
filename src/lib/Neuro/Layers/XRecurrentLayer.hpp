@@ -27,7 +27,6 @@
 
 namespace ANNT { namespace Neuro {
 
-
 // Implementation of simple recurent layer, which perform calculations as:
 //
 //  Internal activation:  A(t) = U * X(t) + W * H(t-1) + B
@@ -57,7 +56,7 @@ private:
     enum
     {
         BUFFER_INDEX_STATE          = 0,            // per batch
-        BUFFER_INDEX_STATE_DELTA    = 1,            // per batch
+        BUFFER_INDEX_STATE_GRAD     = 1,            // per batch
         BUFFER_INDEX_STATE_PREV     = 2, // H(t-1)  // per sample
         BUFFER_INDEX_STATE_CURRENT  = 3, // H(t)    // per sample
     };
@@ -125,7 +124,7 @@ public:
 
     // Applies updates to the layer's weights and biases
     void UpdateWeights( const fvector_t& weightsUpdate,
-                       const fvector_t& biasesUpdate ) override;
+                        const fvector_t& biasesUpdate ) override;
 
     // Saves layer's learnt parameters/weights
     bool SaveLearnedParams( FILE* file ) const override;
