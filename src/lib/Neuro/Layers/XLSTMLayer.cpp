@@ -18,7 +18,7 @@
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "XLstmLayer.hpp"
+#include "XLSTMLayer.hpp"
 #include "../../Tools/XParallel.hpp"
 #include "../../Tools/XVectorize.hpp"
 #include <cstring>
