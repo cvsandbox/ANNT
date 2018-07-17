@@ -70,6 +70,7 @@
     <ClCompile Include="..\..\lib\Neuro\Network\XNetworkContext.cpp" />
     <ClCompile Include="..\..\lib\Neuro\Network\XNetworkInference.cpp" />
     <ClCompile Include="..\..\lib\Neuro\Network\XNetworkTraining.cpp" />
+    <ClCompile Include="..\..\lib\Neuro\Network\XNeuralNetwork.cpp" />
     <ClCompile Include="..\..\lib\Tools\XAvxVectorTools.cpp">
       <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
       <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>

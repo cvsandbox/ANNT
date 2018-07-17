@@ -221,5 +221,8 @@
     <ClCompile Include="..\..\lib\Neuro\Network\XNetworkContext.cpp">
       <Filter>Neuro\Network</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\lib\Neuro\Network\XNeuralNetwork.cpp">
+      <Filter>Neuro\Network</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
