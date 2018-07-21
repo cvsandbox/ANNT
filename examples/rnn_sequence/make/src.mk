@@ -5,6 +5,3 @@ VPATH = ../../
 
 # source files
 SRC = rnn_sequence.cpp
-
-OBJ = $(SRC:.cpp=.o)
-

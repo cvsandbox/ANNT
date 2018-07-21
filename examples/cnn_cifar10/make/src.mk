@@ -10,6 +10,3 @@ SRC = cnn_cifar10.cpp \
 
 # additional include folders
 INCLUDES += -I../../../tools
-
-OBJ = $(SRC:.cpp=.o)
-

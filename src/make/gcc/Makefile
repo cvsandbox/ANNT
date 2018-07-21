@@ -1,7 +1,7 @@
 # ANNT makefile
 
-include ../../../settings/gcc/compiler_cpp.mk
 include ../src.mk
+include ../../../settings/gcc/compiler_cpp.mk
 
 OUT = libannt.a
 

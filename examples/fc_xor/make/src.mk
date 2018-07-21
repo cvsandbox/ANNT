@@ -5,6 +5,3 @@ VPATH = ../../
 
 # source files
 SRC = fc_xor.cpp
-
-OBJ = $(SRC:.cpp=.o)
-

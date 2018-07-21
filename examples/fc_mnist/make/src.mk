@@ -10,6 +10,3 @@ SRC = fc_mnist.cpp \
 
 # additional include folders
 INCLUDES += -I../../../tools
-
-OBJ = $(SRC:.cpp=.o)
-

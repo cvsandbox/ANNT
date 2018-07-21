@@ -1,7 +1,7 @@
 # fc_xor example makefile
 
-include ../../../../settings/gcc/compiler_cpp.mk
 include ../src.mk
+include ../../../../settings/gcc/compiler_cpp.mk
 
 OUT = fc_xor
 

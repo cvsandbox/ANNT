@@ -25,5 +25,3 @@ SRC = ANNT.cpp \
       XNetworkInference.cpp \
       XNetworkTraining.cpp \
       XClassificationTrainingHelper.cpp
-
-OBJ = $(SRC:.cpp=.o)

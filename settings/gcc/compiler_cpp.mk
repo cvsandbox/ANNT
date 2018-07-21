@@ -2,6 +2,9 @@
 
 TARGET = gcc
 
+# list of object files
+OBJ = $(SRC:.cpp=.o)
+
 # compiler
 COMPILER = g++
 # lib archiver

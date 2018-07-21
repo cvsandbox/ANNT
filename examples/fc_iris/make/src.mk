@@ -5,6 +5,3 @@ VPATH = ../../
 
 # source files
 SRC = fc_iris.cpp
-
-OBJ = $(SRC:.cpp=.o)
-
