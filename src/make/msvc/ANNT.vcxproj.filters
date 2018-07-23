@@ -179,6 +179,9 @@
     <ClInclude Include="..\..\lib\Neuro\Layers\XLSTMLayer.hpp">
       <Filter>Neuro\Layers</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\lib\Neuro\Layers\XGRULayer.hpp">
+      <Filter>Neuro\Layers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\lib\Neuro\Layers\XFullyConnectedLayer.cpp">
@@ -228,6 +231,9 @@
       <Filter>Neuro\Network</Filter>
     </ClCompile>
     <ClCompile Include="..\..\lib\Neuro\Layers\XLSTMLayer.cpp">
+      <Filter>Neuro\Layers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\Neuro\Layers\XGRULayer.cpp">
       <Filter>Neuro\Layers</Filter>
     </ClCompile>
   </ItemGroup>

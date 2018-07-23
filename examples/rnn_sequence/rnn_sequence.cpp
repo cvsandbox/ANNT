@@ -145,9 +145,18 @@ int main( int /* argc */, char** /* argv */ )
         net->AddLayer( make_shared<XSoftMaxActivation>( ) );
 
         // similar result using LSTM layer - one recurrent layer is enough as it is more complex
-        // net->AddLayer( make_shared<XLSTMLayer>( 10, 20 ) );
-        // net->AddLayer( make_shared<XFullyConnectedLayer>( 20, 10 ) );
-        // net->AddLayer( make_shared<XSoftMaxActivation>( ) );
+        /*
+        net->AddLayer( make_shared<XLSTMLayer>( 10, 20 ) );
+        net->AddLayer( make_shared<XFullyConnectedLayer>( 20, 10 ) );
+        net->AddLayer( make_shared<XSoftMaxActivation>( ) );
+        */
+
+        // or same can be done using GRU layer
+        /*
+        net->AddLayer( make_shared<XGRULayer>( 10, 20 ) );
+        net->AddLayer( make_shared<XFullyConnectedLayer>( 20, 10 ) );
+        net->AddLayer( make_shared<XSoftMaxActivation>( ) );
+        */
 
         // create training context with Adam optimizer and Cross Entropy cost function
         XNetworkTraining netTraining( net,
@@ -173,7 +182,8 @@ int main( int /* argc */, char** /* argv */ )
             // for this sample)
             netTraining.ResetState( );
             // or reset only recurrent layers
-            // netTraining.ResetLayersState( { 0, 1 } );
+            // netTraining.ResetLayersState( { 0, 1 } ); // for basic recurrent
+            // netTraining.ResetLayersState( { 0 } );    // for LSTM and GRU
 
             if ( ( i % 10 ) == 0 )
             {

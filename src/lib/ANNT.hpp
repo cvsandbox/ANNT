@@ -31,6 +31,7 @@
 #include "Neuro/Layers/XConvolutionLayer.hpp"
 #include "Neuro/Layers/XRecurrentLayer.hpp"
 #include "Neuro/Layers/XLSTMLayer.hpp"
+#include "Neuro/Layers/XGRULayer.hpp"
 
 #include "Neuro/Layers/Activations/XSigmoidActivation.hpp"
 #include "Neuro/Layers/Activations/XTanhActivation.hpp"
