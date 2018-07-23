@@ -83,9 +83,10 @@ void XLSTMLayer::Randomize( )
         mWeightsH2O[i] = ( static_cast<float_t>( rand( ) ) / RAND_MAX ) * ( float_t( 2 ) * halfRangeH ) - halfRangeH;
     }
 
+    // See "Model Parameters" explaining why biases for Forget Gate are set to 1.0
+    // https://danijar.com/tips-for-training-recurrent-neural-networks/
     for ( size_t i = 0; i < mOutputsCount; i++ )
     {
-        //mBiasesF[i] = 0.0f;
         mBiasesF[i] = 1.0f;
         mBiasesI[i] = 0.0f;
         mBiasesZ[i] = 0.0f;
@@ -316,7 +317,7 @@ void XLSTMLayer::BackwardCompute( const vector<fvector_t*>& inputs,
             for ( size_t outputIndex2 = 0; outputIndex2 < mOutputsCount; outputIndex2++ )
             {
                 size_t  weightIndex = outputIndex2;
-                float_t sum = 0;
+                float_t sum         = 0;
 
                 for ( size_t outputIndex = 0; outputIndex < mOutputsCount; outputIndex++, weightIndex += mOutputsCount )
                 {
