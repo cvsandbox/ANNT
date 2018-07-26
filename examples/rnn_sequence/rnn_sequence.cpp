@@ -37,11 +37,102 @@ using namespace ANNT;
 using namespace ANNT::Neuro;
 using namespace ANNT::Neuro::Training;
 
-// Number of steps in sequnces used in this example
+// Number of steps in sequences used in this example
 #define STEPS_PER_SEQUENCE (10)
 
+// Types of supported recurrent layers
+enum class RecurrentLayerType
+{
+    Basic = 0,
+    LSTM  = 1,
+    GRU   = 2
+};
+
+// Some training parameters for this example application
+typedef struct TrainingParamsStruct
+{
+    float              LearningRate;
+    size_t             EpochsCount;
+    RecurrentLayerType RecurrrentType;
+
+    TrainingParamsStruct( ) :
+        LearningRate( 0.05f ), EpochsCount( 100 ), RecurrrentType( RecurrentLayerType::Basic )
+    {
+    }
+}
+TrainingParams;
+
+// Parse command line to get some of the training parameters
+static void ParseCommandLine( int argc, char** argv, TrainingParams* trainingParams )
+{
+    bool showUsage = false;
+
+    if ( argv == nullptr )
+    {
+        return;
+    }
+
+    for ( int i = 1; i < argc; i++ )
+    {
+        bool   parsed = false;
+        size_t paramLen = strlen( argv[i] );
+
+        if ( paramLen >= 2 )
+        {
+            char* paramStart = &( argv[i][1] );
+
+            if ( ( argv[i][0] == '-' ) || ( argv[i][0] == '/' ) )
+            {
+                if ( ( strstr( paramStart, "ec:" ) == paramStart ) && ( paramLen > 4 ) )
+                {
+                    if ( sscanf( &( argv[i][4] ), "%zu", &trainingParams->EpochsCount ) == 1 )
+                    {
+                        parsed = true;
+                    }
+                }
+                else if ( ( strstr( paramStart, "lr:" ) == paramStart ) && ( paramLen > 4 ) )
+                {
+                    if ( sscanf( &( argv[i][4] ), "%f", &trainingParams->LearningRate ) == 1 )
+                    {
+                        parsed = true;
+                    }
+                }
+                else if ( ( strstr( paramStart, "type:" ) == paramStart ) && ( paramLen == 7 ) )
+                {
+                    int layerType = argv[i][6] - '0';
+
+                    if ( ( layerType >= 0 ) && ( layerType <= 2 ) )
+                    {
+                        trainingParams->RecurrrentType = static_cast<RecurrentLayerType>( layerType );
+                        parsed = true;
+                    }
+                }
+            }
+        }
+
+        if ( !parsed )
+        {
+            showUsage = true;
+        }
+    }
+
+    if ( showUsage )
+    {
+        printf( "Failed parsing some of the parameters \n\n" );
+
+        printf( "Available parameters are:\n" );
+        printf( "  -ec:<> - epochs count; \n" );
+        printf( "  -lr:<> - learning rate; \n" );
+        printf( "  -type:<> - recurrent layer type: \n" );
+        printf( "                 0 - basic ( default ); \n" );
+        printf( "                 1 - LSTM; \n" );
+        printf( "                 2 - GRU. \n" );
+        printf( "\n" );
+    }
+}
+
 // Helper function to show target sequence and the one predicted with the specified network
-void ShowPredictedSequences( shared_ptr<XNeuralNetwork>& net, const vector<fvector_t>& inputs, const vector<fvector_t>& outputs, size_t sequenceCount )
+static void ShowPredictedSequences( shared_ptr<XNeuralNetwork>& net, const vector<fvector_t>& inputs, const vector<fvector_t>& outputs, size_t sequenceCount )
 {
     XNetworkInference netInference( net );
     fvector_t         output( 10 );
@@ -77,7 +168,7 @@ void ShowPredictedSequences( shared_ptr<XNeuralNetwork>& net, const vector<fvect
 }
 
 // Example application's entry point
-int main( int /* argc */, char** /* argv */ )
+int main( int argc, char** argv )
 {
 #if defined(_MSC_VER) && defined(_DEBUG)
     _CrtMemState memState;
@@ -89,6 +180,17 @@ int main( int /* argc */, char** /* argv */ )
     //_CrtSetBreakAlloc( 159 );
 
     {
+        TrainingParams trainingParams;
+
+        // check if any of the defaults are overridden
+        ParseCommandLine( argc, argv, &trainingParams );
+
+        printf( "Learning rate  : %0.4f \n", trainingParams.LearningRate );
+        printf( "Epochs count   : %zu \n", trainingParams.EpochsCount );
+        printf( "Recurrent type : %s \n", ( trainingParams.RecurrrentType == RecurrentLayerType::GRU ) ? "GRU" :
+                                          ( trainingParams.RecurrrentType == RecurrentLayerType::LSTM ) ? "LSTM" : "basic" );
+        printf( "\n" );
+
         // 10 sequences to train
         vector<uvector_t> sequences(
         {
@@ -139,28 +241,34 @@ int main( int /* argc */, char** /* argv */ )
         shared_ptr<XNeuralNetwork> net = make_shared<XNeuralNetwork>( );
 
         // basic recurrent network
-        net->AddLayer( make_shared<XRecurrentLayer>( 10, 20 ) );
-        net->AddLayer( make_shared<XRecurrentLayer>( 20, 30 ) );
-        net->AddLayer( make_shared<XFullyConnectedLayer>( 30, 10 ) );
-        net->AddLayer( make_shared<XSoftMaxActivation>( ) );
+        switch ( trainingParams.RecurrrentType )
+        {
+        case RecurrentLayerType::Basic:
+        default:
+            net->AddLayer( make_shared<XRecurrentLayer>( 10, 20 ) );
+            net->AddLayer( make_shared<XRecurrentLayer>( 20, 30 ) );
+            net->AddLayer( make_shared<XFullyConnectedLayer>( 30, 10 ) );
+            break;
 
-        // similar result using LSTM layer - one recurrent layer is enough as it is more complex
-        /*
-        net->AddLayer( make_shared<XLSTMLayer>( 10, 20 ) );
-        net->AddLayer( make_shared<XFullyConnectedLayer>( 20, 10 ) );
-        net->AddLayer( make_shared<XSoftMaxActivation>( ) );
-        */
+        case RecurrentLayerType::LSTM:
+            // similar result using LSTM layer - one recurrent layer is enough as it is more complex
+            net->AddLayer( make_shared<XLSTMLayer>( 10, 20 ) );
+            net->AddLayer( make_shared<XFullyConnectedLayer>( 20, 10 ) );
+            break;
 
-        // or same can be done using GRU layer
-        /*
-        net->AddLayer( make_shared<XGRULayer>( 10, 20 ) );
-        net->AddLayer( make_shared<XFullyConnectedLayer>( 20, 10 ) );
+        case RecurrentLayerType::GRU:
+            // or same can be done using GRU layer
+            net->AddLayer( make_shared<XGRULayer>( 10, 20 ) );
+            net->AddLayer( make_shared<XFullyConnectedLayer>( 20, 10 ) );
+            break;
+        }
+
+        // add Soft Max layer for all recurrent types
         net->AddLayer( make_shared<XSoftMaxActivation>( ) );
-        */
 
         // create training context with Adam optimizer and Cross Entropy cost function
         XNetworkTraining netTraining( net,
-                                      make_shared<XAdamOptimizer>( 0.05f ),
+                                      make_shared<XAdamOptimizer>( trainingParams.LearningRate ),
                                       make_shared<XCrossEntropyCost>( ) );
 
         netTraining.SetAverageWeightGradients( false );
@@ -172,7 +280,7 @@ int main( int /* argc */, char** /* argv */ )
         ShowPredictedSequences( net, inputs, outputs, sequences.size( ) );
 
         // run training epochs providing all data as single batch
-        for ( size_t i = 1; i <= 100; i++ )
+        for ( size_t i = 1; i <= trainingParams.EpochsCount; i++ )
         {
             auto cost = netTraining.TrainBatch( inputs, outputs );
             printf( "%0.4f ", static_cast<float>( cost ) );
