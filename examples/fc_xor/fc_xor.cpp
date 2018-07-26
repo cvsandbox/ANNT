@@ -89,7 +89,7 @@ int main( int /* argc */, char** /* argv */ )
 
     // create training context with Nesterov optimizer and Binary Cross Entropy cost function
     XNetworkTraining netTraining( net,
-                                  make_shared<XNesterovMomentumOptimizer>( 0.5f ),
+                                  make_shared<XNesterovMomentumOptimizer>( 0.1f ),
                                   make_shared<XBinaryCrossEntropyCost>( ) );
 
     // don't average weight/bias gradients over batch
