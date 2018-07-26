@@ -50,32 +50,23 @@ XNetworkTraining::XNetworkTraining( const shared_ptr<XNeuralNetwork>& network,
     for ( auto layer : *mNetwork )
     {
         size_t weightsCount = 0;
-        size_t biasesCount  = 0;
 
         // allocate weight and bias gradients for trainable layers
         // (for each layer, but not for each sample, since those accumulated over samples)
         if ( layer->Trainable( ) )
         {
-            shared_ptr<ITrainableLayer> trainableLayer = static_pointer_cast<ITrainableLayer>( layer );
-
-            weightsCount = trainableLayer->WeightsCount( );
-            biasesCount  = trainableLayer->BiasesCount( );
+            weightsCount = static_pointer_cast<ITrainableLayer>( layer )->WeightsCount( );
         }
 
         mGradWeights.push_back( fvector_t( weightsCount ) );
-        mGradBiases.push_back( fvector_t( biasesCount ) );
 
         // optimizer's variables ...
-        mWeightsParameterVariables.push_back( vector<fvector_t>( optimizerParameterVariablesCount ) );
-        mBiasesParameterVariables.push_back( vector<fvector_t>( optimizerParameterVariablesCount ) );
-
-        mWeightsLayerVariables.push_back( fvector_t( optimizerLayerVariablesCount ) );
-        mBiasesLayerVariables.push_back( fvector_t( optimizerLayerVariablesCount ) );
+        mOptimizerParameterVariables.push_back( vector<fvector_t>( optimizerParameterVariablesCount ) );
+        mOptimizerLayerVariables.push_back( fvector_t( optimizerLayerVariablesCount ) );
 
         for ( size_t i = 0; i < optimizerParameterVariablesCount; i++ )
         {
-            mWeightsParameterVariables.back( )[i] = fvector_t( weightsCount );
-            mBiasesParameterVariables.back( )[i]  = fvector_t( biasesCount );
+            mOptimizerParameterVariables.back( )[i] = fvector_t( weightsCount );
         }
     }
 }
@@ -167,8 +158,7 @@ void XNetworkTraining::DoBackwardCompute( )
         mNetwork->LayerAt( layerIndex )->
             BackwardCompute( mTrainOutputs[layerIndex - 1], mTrainOutputs[layerIndex],
                              mDeltas[layerIndex], mDeltas[layerIndex - 1],
-                             mGradWeights[layerIndex], mGradBiases[layerIndex],
-                             mTrainingContext );
+                             mGradWeights[layerIndex], mTrainingContext );
     }
 
     // now same for the first layer
@@ -177,8 +167,7 @@ void XNetworkTraining::DoBackwardCompute( )
     mNetwork->LayerAt( 0 )->
         BackwardCompute( mTrainInputs, mTrainOutputs[0],
                          mDeltas[0], mInputDeltas,
-                         mGradWeights[0], mGradBiases[0],
-                         mTrainingContext );
+                         mGradWeights[0], mTrainingContext );
 }
 
 // Calculate weights/biases updates from gradients and apply them
@@ -200,18 +189,14 @@ void XNetworkTraining::UpdateWeights( )
             {
                 std::transform( mGradWeights[i].begin( ), mGradWeights[i].end( ), mGradWeights[i].begin( ),
                                 std::bind1st( std::multiplies<float_t>( ), batchUpdateFactor ) );
-                std::transform( mGradBiases[i].begin( ), mGradBiases[i].end( ), mGradBiases[i].begin( ),
-                                std::bind1st( std::multiplies<float_t>( ), batchUpdateFactor ) );
             }
 
-            mOptimizer->CalculateUpdatesFromGradients( mGradWeights[i], mWeightsParameterVariables[i], mWeightsLayerVariables[i] );
-            mOptimizer->CalculateUpdatesFromGradients( mGradBiases [i], mBiasesParameterVariables [i], mBiasesLayerVariables [i] );
+            mOptimizer->CalculateUpdatesFromGradients( mGradWeights[i], mOptimizerParameterVariables[i], mOptimizerLayerVariables[i] );
 
-            static_pointer_cast<ITrainableLayer>( *itLayers )->UpdateWeights( mGradWeights[i], mGradBiases[i] );
+            static_pointer_cast<ITrainableLayer>( *itLayers )->UpdateWeights( mGradWeights[i] );
 
             // reset gradients for the next training cycle
             fill( mGradWeights[i].begin( ), mGradWeights[i].end( ), float_t( 0 ) );
-            fill( mGradBiases[i].begin( ),  mGradBiases[i].end( ),  float_t( 0 ) );
         }
     }
 }

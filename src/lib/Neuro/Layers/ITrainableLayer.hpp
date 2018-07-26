@@ -43,23 +43,15 @@ public:
     // Reports number of weight coefficients the layer has
     virtual size_t WeightsCount( ) const = 0;
 
-    // Reports number of bias coefficients the layer has
-    virtual size_t BiasesCount( ) const = 0;
-
     // Get/set layer's weights
     virtual fvector_t Weights( ) const = 0;
     virtual void SetWeights( const fvector_t& weights ) = 0;
-
-    // Get/set layer's biases
-    virtual fvector_t Biases( ) const = 0;
-    virtual void SetBiases( const fvector_t& biases ) = 0;
 
     // Randomizes layer's weights/biases
     virtual void Randomize( ) = 0;
 
     // Applies updates to the layer's weights and biases
-    virtual void UpdateWeights( const fvector_t& weightsUpdate,
-                                const fvector_t& biasesUpdate ) = 0;
+    virtual void UpdateWeights( const fvector_t& updates ) = 0;
 };
 
 } } // namespace ANNT::Neuro

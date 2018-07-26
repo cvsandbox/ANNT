@@ -28,9 +28,12 @@ namespace ANNT { namespace Neuro {
 
 XFullyConnectedLayer::XFullyConnectedLayer( size_t inputsCount, size_t outputsCount ) :
     ITrainableLayer( inputsCount, outputsCount ),
-    mWeights( inputsCount * outputsCount ),
-    mBiases( outputsCount )
+    mAllWeights( inputsCount * outputsCount + outputsCount )
 {
+    // set up weights/biases pointers
+    mWeights = mAllWeights.data( );
+    mBiases  = mWeights + mInputsCount * mOutputsCount;
+
     Randomize( );
 }
 
@@ -39,13 +42,13 @@ void XFullyConnectedLayer::Randomize( )
 {
     float_t halfRange = sqrt( float_t( 3 ) / mInputsCount );
 
-    for ( auto& w : mWeights )
+    for ( size_t i = 0, n = mInputsCount * mOutputsCount; i < n; i++ )
     {
-        w = ( static_cast<float_t>( rand( ) ) / RAND_MAX ) * ( float_t( 2 ) * halfRange ) - halfRange;
+        mWeights[i] = ( static_cast<float_t>( rand( ) ) / RAND_MAX ) * ( float_t( 2 ) * halfRange ) - halfRange;
     }
-    for ( auto& b : mBiases )
+    for ( size_t i = 0; i < mOutputsCount; i++ )
     {
-        b = 0;
+        mBiases[i] = 0;
     }
 }
 
@@ -56,7 +59,7 @@ void XFullyConnectedLayer::ForwardCompute( const vector<fvector_t*>& inputs,
 {
     XParallel::For( inputs.size( ), ctx.IsTraining( ), [&]( size_t i )
     {
-        const float_t* weights = mWeights.data( );
+        const float_t* weights = mWeights;
         const float_t* input   = inputs[i]->data( );
         fvector_t&     output  = *( outputs[i] );
 
@@ -75,9 +78,12 @@ void XFullyConnectedLayer::BackwardCompute( const vector<fvector_t*>& inputs,
                                             const vector<fvector_t*>& deltas,
                                             vector<fvector_t*>& prevDeltas,
                                             fvector_t& gradWeights,
-                                            fvector_t& gradBiases,
                                             const XNetworkContext& ctx )
 {
+    // set up weights/biases gradients pointers
+    float_t*  gradWeightsData = gradWeights.data( );
+    float_t*  gradBiasesData  = gradWeightsData + mInputsCount * mOutputsCount;
+
     // 1 - first propagate deltas to the previous layer
     XParallel::For( inputs.size( ), ctx.IsTraining( ), [&]( size_t i )
     {
@@ -108,7 +114,7 @@ void XFullyConnectedLayer::BackwardCompute( const vector<fvector_t*>& inputs,
 
             for ( size_t inputIndex = 0, weightIndex = outputIndex * mInputsCount; inputIndex < mInputsCount; inputIndex++, weightIndex++ )
             {
-                gradWeights[weightIndex] += deltaValue * input[inputIndex];
+                gradWeightsData[weightIndex] += deltaValue * input[inputIndex];
             }
         }
     } );
@@ -120,29 +126,24 @@ void XFullyConnectedLayer::BackwardCompute( const vector<fvector_t*>& inputs,
 
         for ( size_t outputIndex = 0; outputIndex < mOutputsCount; outputIndex++ )
         {
-            gradBiases[outputIndex] += delta[outputIndex];
+            gradBiasesData[outputIndex] += delta[outputIndex];
         }
     }
 }
 
 // Applies updates to the layer's weights and biases
-void XFullyConnectedLayer::UpdateWeights( const fvector_t& weightsUpdate,
-                                          const fvector_t& biasesUpdate )
+void XFullyConnectedLayer::UpdateWeights( const fvector_t& updates )
 {
-    for ( size_t i = 0, n = mWeights.size( ); i < n; i++ )
+    for ( size_t i = 0, n = mAllWeights.size( ); i < n; i++ )
     {
-        mWeights[i] += weightsUpdate[i];
-    }
-    for ( size_t i = 0, n = mBiases.size( ); i < n; i++ )
-    {
-        mBiases[i] += biasesUpdate[i];
+        mAllWeights[i] += updates[i];
     }
 }
 
 // Saves layer's learnt parameters/weights
 bool XFullyConnectedLayer::SaveLearnedParams( FILE* file ) const
 {
-    vector<const fvector_t*> params( { &mWeights, &mBiases } );
+    vector<const fvector_t*> params( { &mAllWeights } );
 
     return SaveLearnedParamsHelper( file, LayerID::FullyConnected, params );
 }
@@ -150,7 +151,7 @@ bool XFullyConnectedLayer::SaveLearnedParams( FILE* file ) const
 // Loads layer's learnt parameters
 bool XFullyConnectedLayer::LoadLearnedParams( FILE* file )
 {
-    vector<fvector_t*> params( { &mWeights, &mBiases } );
+    vector<fvector_t*> params( { &mAllWeights } );
 
     return LoadLearnedParamsHelper( file, LayerID::FullyConnected, params );
 }

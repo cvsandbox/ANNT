@@ -30,14 +30,13 @@ namespace ANNT { namespace Neuro {
 XLSTMLayer::XLSTMLayer( size_t inputsCount, size_t outputsCount ) :
     ITrainableLayer( inputsCount, outputsCount ),
     mSigmoid( ), mTanh( ),
-    mWeights( ( inputsCount * outputsCount + outputsCount * outputsCount ) * 4 ),
-    mBiases( outputsCount * 4 )
+    mAllWeights( ( inputsCount * outputsCount + outputsCount * outputsCount ) * 4 + outputsCount * 4 )
 {
     size_t weightsCountInputs  = mInputsCount  * mOutputsCount;
     size_t weightsCountHistory = mOutputsCount * mOutputsCount;
 
     // set up weights pointers
-    mWeightsX2F = mWeights.data( );
+    mWeightsX2F = mAllWeights.data( );
     mWeightsH2F = mWeightsX2F + weightsCountInputs;
 
     mWeightsX2I = mWeightsH2F + weightsCountHistory;
@@ -50,7 +49,7 @@ XLSTMLayer::XLSTMLayer( size_t inputsCount, size_t outputsCount ) :
     mWeightsH2O = mWeightsX2O + weightsCountInputs;
 
     // set up biases pointers
-    mBiasesF = mBiases.data( );
+    mBiasesF = mWeightsH2O + weightsCountHistory;
     mBiasesI = mBiasesF + mOutputsCount;
     mBiasesZ = mBiasesI + mOutputsCount;
     mBiasesO = mBiasesZ + mOutputsCount;
@@ -176,7 +175,6 @@ void XLSTMLayer::BackwardCompute( const vector<fvector_t*>& inputs,
                                   const vector<fvector_t*>& deltas,
                                   vector<fvector_t*>& prevDeltas,
                                   fvector_t& gradWeights,
-                                  fvector_t& gradBiases,
                                   const XNetworkContext& ctx )
 {
     size_t sequenceLen = ctx.TrainingSequenceLength( );
@@ -199,7 +197,7 @@ void XLSTMLayer::BackwardCompute( const vector<fvector_t*>& inputs,
     float_t* gradWeightsH2O = gradWeightsX2O + weightsCountInputs;
 
     // set up biases gradient pointers
-    float_t* gradBiasesF = gradBiases.data( );
+    float_t* gradBiasesF = gradWeightsH2O + weightsCountHistory;
     float_t* gradBiasesI = gradBiasesF + mOutputsCount;
     float_t* gradBiasesZ = gradBiasesI + mOutputsCount;
     float_t* gradBiasesO = gradBiasesZ + mOutputsCount;
@@ -374,22 +372,18 @@ void XLSTMLayer::BackwardCompute( const vector<fvector_t*>& inputs,
 }
 
 // Applies updates to the layer's weights and biases
-void XLSTMLayer::UpdateWeights( const fvector_t& weightsUpdate, const fvector_t& biasesUpdate )
+void XLSTMLayer::UpdateWeights( const fvector_t& updates )
 {
-    for ( size_t i = 0, n = mWeights.size( ); i < n; i++ )
+    for ( size_t i = 0, n = mAllWeights.size( ); i < n; i++ )
     {
-        mWeights[i] += weightsUpdate[i];
-    }
-    for ( size_t i = 0, n = mBiases.size( ); i < n; i++ )
-    {
-        mBiases[i] += biasesUpdate[i];
+        mAllWeights[i] += updates[i];
     }
 }
 
 // Saves layer's learnt parameters/weights
 bool XLSTMLayer::SaveLearnedParams( FILE* file ) const
 {
-    vector<const fvector_t*> params( { &mWeights, &mBiases } );
+    vector<const fvector_t*> params( { &mAllWeights } );
 
     return SaveLearnedParamsHelper( file, LayerID::RecurrentLSTM, params );
 }
@@ -397,7 +391,7 @@ bool XLSTMLayer::SaveLearnedParams( FILE* file ) const
 // Loads layer's learnt parameters
 bool XLSTMLayer::LoadLearnedParams( FILE* file )
 {
-    vector<fvector_t*> params( { &mWeights, &mBiases } );
+    vector<fvector_t*> params( { &mAllWeights } );
 
     return LoadLearnedParamsHelper( file, LayerID::RecurrentLSTM, params );
 }

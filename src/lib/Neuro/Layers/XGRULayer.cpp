@@ -30,14 +30,13 @@ namespace ANNT { namespace Neuro {
 XGRULayer::XGRULayer( size_t inputsCount, size_t outputsCount ) :
     ITrainableLayer( inputsCount, outputsCount ),
     mSigmoid( ), mTanh( ),
-    mWeights( ( inputsCount * outputsCount + outputsCount * outputsCount ) * 3 ),
-    mBiases( outputsCount * 3 )
+    mAllWeights( ( inputsCount * outputsCount + outputsCount * outputsCount ) * 3 + outputsCount * 3 )
 {
     size_t weightsCountInputs  = mInputsCount  * mOutputsCount;
     size_t weightsCountHistory = mOutputsCount * mOutputsCount;
 
     // set up weights pointers
-    mWeightsX2Z  = mWeights.data( );
+    mWeightsX2Z  = mAllWeights.data( );
     mWeightsH2Z  = mWeightsX2Z + weightsCountInputs;
 
     mWeightsX2R  = mWeightsH2Z + weightsCountHistory;
@@ -47,7 +46,7 @@ XGRULayer::XGRULayer( size_t inputsCount, size_t outputsCount ) :
     mWeightsHR2H = mWeightsX2H + weightsCountInputs;
 
     // set up biases pointers
-    mBiasesZ = mBiases.data( );
+    mBiasesZ = mWeightsHR2H + weightsCountHistory;
     mBiasesR = mBiasesZ + mOutputsCount;
     mBiasesH = mBiasesR + mOutputsCount;
 
@@ -165,7 +164,6 @@ void XGRULayer::BackwardCompute( const vector<fvector_t*>& inputs,
                                  const vector<fvector_t*>& deltas,
                                  vector<fvector_t*>& prevDeltas,
                                  fvector_t& gradWeights,
-                                 fvector_t& gradBiases,
                                  const XNetworkContext& ctx )
 {
     size_t sequenceLen = ctx.TrainingSequenceLength( );
@@ -185,7 +183,7 @@ void XGRULayer::BackwardCompute( const vector<fvector_t*>& inputs,
     float_t* gradWeightsHR2H = gradWeightsX2H + weightsCountInputs;
 
     // set up biases gradient pointers
-    float_t* gradBiasesZ = gradBiases.data( );
+    float_t* gradBiasesZ = gradWeightsHR2H + weightsCountHistory;
     float_t* gradBiasesR = gradBiasesZ + mOutputsCount;
     float_t* gradBiasesH = gradBiasesR + mOutputsCount;
 
@@ -327,22 +325,18 @@ void XGRULayer::BackwardCompute( const vector<fvector_t*>& inputs,
 }
 
 // Applies updates to the layer's weights and biases
-void XGRULayer::UpdateWeights( const fvector_t& weightsUpdate, const fvector_t& biasesUpdate )
+void XGRULayer::UpdateWeights( const fvector_t& updates )
 {
-    for ( size_t i = 0, n = mWeights.size( ); i < n; i++ )
+    for ( size_t i = 0, n = mAllWeights.size( ); i < n; i++ )
     {
-        mWeights[i] += weightsUpdate[i];
-    }
-    for ( size_t i = 0, n = mBiases.size( ); i < n; i++ )
-    {
-        mBiases[i] += biasesUpdate[i];
+        mAllWeights[i] += updates[i];
     }
 }
 
 // Saves layer's learnt parameters/weights
 bool XGRULayer::SaveLearnedParams( FILE* file ) const
 {
-    vector<const fvector_t*> params( { &mWeights, &mBiases } );
+    vector<const fvector_t*> params( { &mAllWeights } );
 
     return SaveLearnedParamsHelper( file, LayerID::RecurrentGRU, params );
 }
@@ -350,7 +344,7 @@ bool XGRULayer::SaveLearnedParams( FILE* file ) const
 // Loads layer's learnt parameters
 bool XGRULayer::LoadLearnedParams( FILE* file )
 {
-    vector<fvector_t*> params( { &mWeights, &mBiases } );
+    vector<fvector_t*> params( { &mAllWeights } );
 
     return LoadLearnedParamsHelper( file, LayerID::RecurrentGRU, params );
 }

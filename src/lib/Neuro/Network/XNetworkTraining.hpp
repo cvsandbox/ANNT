@@ -65,15 +65,12 @@ private:
 
     // weights/biases gradients for all layers
     std::vector<fvector_t>               mGradWeights;
-    std::vector<fvector_t>               mGradBiases;
 
     // vectors with parameter variables for optimizer
-    std::vector<std::vector<fvector_t>>  mWeightsParameterVariables;
-    std::vector<std::vector<fvector_t>>  mBiasesParameterVariables;
+    std::vector<std::vector<fvector_t>>  mOptimizerParameterVariables;
 
     // vectors with layer variables for optimizer
-    std::vector<fvector_t>               mWeightsLayerVariables;
-    std::vector<fvector_t>               mBiasesLayerVariables;
+    std::vector<fvector_t>               mOptimizerLayerVariables;
 
     // layers' working buffers and context for training
     XNetworkContext                      mTrainingContext;

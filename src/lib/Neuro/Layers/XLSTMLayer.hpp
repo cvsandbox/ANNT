@@ -52,9 +52,8 @@ private:
     XSigmoidActivation mSigmoid;
     XTanhActivation    mTanh;
 
-    // All weights and biases are stored together as two vectors.
-    fvector_t mWeights;
-    fvector_t mBiases;
+    // Weights and biases are all kept together
+    fvector_t mAllWeights;
 
     // And here are the pointers to specific weights/biases, which are used to calculate different
     // vectors from current layer's input, X(t), and its previous output/history, H(t-1):
@@ -103,33 +102,17 @@ public:
     // Reports number of weight coefficients the layer has
     size_t WeightsCount( ) const override
     {
-        return mWeights.size( );
-    }
-
-    // Reports number of bias coefficients the layer has
-    virtual size_t BiasesCount( ) const override
-    {
-        return mBiases.size( );
+        return mAllWeights.size( );
     }
 
     // Get/set layer's weights
     fvector_t Weights( ) const override
     {
-        return mWeights;
+        return mAllWeights;
     }
     void SetWeights( const fvector_t& weights ) override
     {
-        mWeights = weights;
-    }
-
-    // Get/set layer's biases
-    fvector_t Biases( ) const override
-    {
-        return mBiases;
-    }
-    void SetBiases( const fvector_t& biases ) override
-    {
-        mBiases = biases;
+        mAllWeights = weights;
     }
 
     // Tells that we may need some extra memory for internal state/calculations
@@ -154,18 +137,15 @@ public:
                           const std::vector<fvector_t*>& deltas,
                           std::vector<fvector_t*>& prevDeltas,
                           fvector_t& gradWeights,
-                          fvector_t& gradBiases,
                           const XNetworkContext& ctx ) override;
 
     // Applies updates to the layer's weights and biases
-    void UpdateWeights( const fvector_t& weightsUpdate,
-                        const fvector_t& biasesUpdate ) override;
+    void UpdateWeights( const fvector_t& updates ) override;
 
     // Saves layer's learnt parameters/weights
     bool SaveLearnedParams( FILE* file ) const override;
     // Loads layer's learnt parameters
     bool LoadLearnedParams( FILE* file ) override;
-
 };
 
 } } // ANNT::Neuro

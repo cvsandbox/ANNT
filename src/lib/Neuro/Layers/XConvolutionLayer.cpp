@@ -82,8 +82,13 @@ XConvolutionLayer::XConvolutionLayer( size_t inputWidth, size_t inputHeight, siz
         }
     }
 
-    mKernelsWeights = fvector_t( mKernelWidth * mKernelHeight * totalConnectionsCount );
-    mKernelsBiases  = fvector_t( mKernelsCount );
+    // allocate vector of weights/biases
+    mWeightCount = mKernelWidth * mKernelHeight * totalConnectionsCount;
+    mAllWeights  = fvector_t( mWeightCount + mKernelsCount );
+
+    // set up weights/biases pointers
+    mKernelsWeights = mAllWeights.data( );
+    mKernelsBiases  = mKernelsWeights + mWeightCount;
 
     Randomize( );
 }
@@ -93,13 +98,13 @@ void XConvolutionLayer::Randomize( )
 {
     float halfRange = sqrt( 3.0f / ( mKernelWidth * mKernelHeight * mInputDepth ) );
 
-    for ( auto& w : mKernelsWeights )
+    for ( size_t i = 0; i < mWeightCount; i++ )
     {
-        w = ( static_cast<float_t>( rand( ) ) / RAND_MAX ) * ( float_t( 2 ) * halfRange ) - halfRange;
+        mKernelsWeights[i] = ( static_cast<float_t>( rand( ) ) / RAND_MAX ) * ( float_t( 2 ) * halfRange ) - halfRange;
     }
-    for ( auto& b : mKernelsBiases )
+    for ( size_t i = 0; i < mKernelsCount; i++ )
     {
-        b = 0;
+        mKernelsBiases[i] = 0;
     }
 }
 
@@ -108,8 +113,6 @@ void XConvolutionLayer::ForwardCompute( const vector<fvector_t*>& inputs,
                                         vector<fvector_t*>& outputs,
                                         const XNetworkContext& ctx )
 {
-    const float_t* kernelsData  = mKernelsWeights.data( );
-
     // will be using either original input width/heigh or padded
     size_t  inputWidth   = mInputWidth;
     size_t  inputHeight  = mInputHeight;
@@ -162,7 +165,7 @@ void XConvolutionLayer::ForwardCompute( const vector<fvector_t*>& inputs,
 
                 const float_t* inputBase  = inputData + inputDepthIndex * inputWidth * inputHeight;
                 // get the 2D kernel for current input/output map combination
-                const float_t* kernelBase = kernelsData + mKernelOffsets[kernelIndex * mInputDepth + inputDepthIndex];
+                const float_t* kernelBase = mKernelsWeights + mKernelOffsets[kernelIndex * mInputDepth + inputDepthIndex];
 
                 // calculate output contributions for the current input map
                 for ( size_t oy = 0; oy < mOutputHeight; oy++ )
@@ -210,15 +213,15 @@ void XConvolutionLayer::BackwardCompute( const vector<fvector_t*>& inputs,
                                          const vector<fvector_t*>& deltas,
                                          vector<fvector_t*>& prevDeltas,
                                          fvector_t& gradWeights,
-                                         fvector_t& gradBiases,
                                          const XNetworkContext& ctx )
 {
-    const float_t* kernelsData     = mKernelsWeights.data( );
-    float_t*       gradWeightsData = gradWeights.data( );
-    size_t         outputSize      = mOutputWidth * mOutputHeight;
+    // set up weights/biases gradients pointers
+    float_t* gradWeightsData = gradWeights.data( );
+    float_t* gradBiasesData  = gradWeightsData + mWeightCount;
+    size_t   outputSize      = mOutputWidth * mOutputHeight;
     // will be using either original input width/heigh or padded
-    size_t        inputWidth       = mInputWidth;
-    size_t        inputHeight      = mInputHeight;
+    size_t   inputWidth      = mInputWidth;
+    size_t   inputHeight     = mInputHeight;
 
     // decide if raw data to be used or padded
     if ( mBorderMode == BorderMode::Same )
@@ -261,7 +264,7 @@ void XConvolutionLayer::BackwardCompute( const vector<fvector_t*>& inputs,
 
                 const float_t* deltaBase  = deltaData + kernelIndex * outputSize;
                 // get the 2D kernel for then current input/output map combination
-                const float_t* kernelBase = kernelsData + mKernelOffsets[kernelIndex * mInputDepth + inputDepthIndex];
+                const float_t* kernelBase = mKernelsWeights + mKernelOffsets[kernelIndex * mInputDepth + inputDepthIndex];
 
                 // go through the current deltas of the output produced by the current kernel
                 for ( size_t oy = 0; oy < mOutputHeight; oy++ )
@@ -381,28 +384,23 @@ void XConvolutionLayer::BackwardCompute( const vector<fvector_t*>& inputs,
             }
         }
 
-        gradBiases[kernelIndex] += sum;
+        gradBiasesData[kernelIndex] += sum;
     } );
 }
 
 // Applies updates to the layer's weights and biases
-void XConvolutionLayer::UpdateWeights( const fvector_t& weightsUpdate,
-                                       const fvector_t& biasesUpdate )
+void XConvolutionLayer::UpdateWeights( const fvector_t& updates )
 {
-    for ( size_t i = 0, n = mKernelsWeights.size( ); i < n; i++ )
+    for ( size_t i = 0, n = mAllWeights.size( ); i < n; i++ )
     {
-        mKernelsWeights[i] += weightsUpdate[i];
-    }
-    for ( size_t i = 0, n = mKernelsBiases.size( ); i < n; i++ )
-    {
-        mKernelsBiases[i] += biasesUpdate[i];
+        mAllWeights[i] += updates[i];
     }
 }
 
 // Saves layer's learnt parameters/weights
 bool XConvolutionLayer::SaveLearnedParams( FILE* file ) const
 {
-    vector<const fvector_t*> params( { &mKernelsWeights, &mKernelsBiases } );
+    vector<const fvector_t*> params( { &mAllWeights } );
 
     return SaveLearnedParamsHelper( file, LayerID::Convolution, params );
 }
@@ -410,7 +408,7 @@ bool XConvolutionLayer::SaveLearnedParams( FILE* file ) const
 // Loads layer's learnt parameters
 bool XConvolutionLayer::LoadLearnedParams( FILE* file )
 {
-    vector<fvector_t*> params( { &mKernelsWeights, &mKernelsBiases } );
+    vector<fvector_t*> params( { &mAllWeights } );
 
     return LoadLearnedParamsHelper( file, LayerID::Convolution, params );
 }

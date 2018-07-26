@@ -57,7 +57,6 @@ public:
                           const std::vector<fvector_t*>& deltas,
                           std::vector<fvector_t*>& prevDeltas,
                           fvector_t& /* gradWeights */,
-                          fvector_t& /* gradBiases  */,
                           const XNetworkContext& ctx ) override
     {
         XParallel::For( inputs.size( ), ctx.IsTraining( ), [&]( size_t i )

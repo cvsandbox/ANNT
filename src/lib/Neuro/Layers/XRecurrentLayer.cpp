@@ -30,20 +30,19 @@ namespace ANNT { namespace Neuro {
 XRecurrentLayer::XRecurrentLayer( size_t inputsCount, size_t outputsCount ) :
     ITrainableLayer( inputsCount, outputsCount ),
     mTanh( ),
-    mWeights( ( inputsCount + outputsCount + outputsCount ) * outputsCount ),
-    mBiases( outputsCount * 2 )
+    mAllWeights( ( inputsCount + outputsCount + outputsCount ) * outputsCount  + outputsCount * 2 )
 {
     size_t weightsCountInputs  = mInputsCount  * mOutputsCount;
     size_t weightsCountHistory = mOutputsCount * mOutputsCount;
 
     // set up weights pointers
-    mWeightsU = mWeights.data( );
+    mWeightsU = mAllWeights.data( );
     mWeightsW = mWeightsU + weightsCountInputs;
     mWeightsV = mWeightsW + weightsCountHistory;
 
     // set up biases pointers
-    mBiasesB = mBiases.data( );
-    mBiasesC = mBiasesB + mOutputsCount;
+    mBiasesB  = mWeightsV + weightsCountHistory;
+    mBiasesC  = mBiasesB + mOutputsCount;
 
     Randomize( );
 }
@@ -68,9 +67,10 @@ void XRecurrentLayer::Randomize( )
         mWeightsV[i] = ( static_cast<float_t>( rand( ) ) / RAND_MAX ) * ( float_t( 2 ) * halfRangeH ) - halfRangeH;
     }
 
-    for ( auto& b : mBiases )
+    for ( size_t i = 0; i < mOutputsCount; i++ )
     {
-        b = 0;
+        mBiasesB[i] = 0;
+        mBiasesC[i] = 0;
     }
 }
 
@@ -133,7 +133,6 @@ void XRecurrentLayer::BackwardCompute( const vector<fvector_t*>& inputs,
                                        const vector<fvector_t*>& deltas,
                                        vector<fvector_t*>& prevDeltas,
                                        fvector_t& gradWeights,
-                                       fvector_t& gradBiases,
                                        const XNetworkContext& ctx )
 {
     size_t sequenceLen = ctx.TrainingSequenceLength( );
@@ -148,7 +147,7 @@ void XRecurrentLayer::BackwardCompute( const vector<fvector_t*>& inputs,
     float_t* gradWeightsV = gradWeightsW + weightsCountHistory;
 
     // set up biases gradient pointers
-    float_t* gradBiasesB = gradBiases.data( );
+    float_t* gradBiasesB = gradWeightsV + weightsCountHistory;
     float_t* gradBiasesC = gradBiasesB + mOutputsCount;
 
     // temporary buffer to calculate state delta for current sample
@@ -269,23 +268,18 @@ void XRecurrentLayer::BackwardCompute( const vector<fvector_t*>& inputs,
 }
 
 // Applies updates to the layer's weights and biases
-void XRecurrentLayer::UpdateWeights( const fvector_t& weightsUpdate,
-                                     const fvector_t& biasesUpdate )
+void XRecurrentLayer::UpdateWeights( const fvector_t& updates )
 {
-    for ( size_t i = 0, n = mWeights.size( ); i < n; i++ )
+    for ( size_t i = 0, n = mAllWeights.size( ); i < n; i++ )
     {
-        mWeights[i] += weightsUpdate[i];
-    }
-    for ( size_t i = 0, n = mBiases.size( ); i < n; i++ )
-    {
-        mBiases[i] += biasesUpdate[i];
+        mAllWeights[i] += updates[i];
     }
 }
 
 // Saves layer's learnt parameters/weights
 bool XRecurrentLayer::SaveLearnedParams( FILE* file ) const
 {
-    vector<const fvector_t*> params( { &mWeights, &mBiases } );
+    vector<const fvector_t*> params( { &mAllWeights } );
 
     return SaveLearnedParamsHelper( file, LayerID::RecurrentBasic, params );
 }
@@ -293,7 +287,7 @@ bool XRecurrentLayer::SaveLearnedParams( FILE* file ) const
 // Loads layer's learnt parameters
 bool XRecurrentLayer::LoadLearnedParams( FILE* file )
 {
-    vector<fvector_t*> params( { &mWeights, &mBiases } );
+    vector<fvector_t*> params( { &mAllWeights } );
 
     return LoadLearnedParamsHelper( file, LayerID::RecurrentBasic, params );
 }
