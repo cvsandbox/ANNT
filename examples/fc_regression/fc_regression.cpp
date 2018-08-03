@@ -42,7 +42,7 @@ typedef struct TrainingParamsStruct
     size_t         BatchSize;
 
     TrainingParamsStruct( ) :
-        InputDataFile( "data/parabola.csv" ), OutputDataFile( "data/parabola.csv" ),
+        InputDataFile( "data/parabola.csv" ), OutputDataFile( "data/parabola-out.csv" ),
         HiddenLayers( { 10 } ), LearningRate( 0.01f ), EpochsCount( 1000 ), BatchSize( 10 )
 
         // Some of the network structures to try with provided training sample data
