@@ -5,6 +5,7 @@ SELF_DIR := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 EXAMPLES = fc_xor \
            fc_iris \
            fc_mnist \
+		   fc_regression \
            cnn_mnist \
            cnn_cifar10 \
            rnn_sequence
