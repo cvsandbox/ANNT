@@ -42,14 +42,14 @@ typedef struct TrainingParamsStruct
     size_t         BatchSize;
 
     TrainingParamsStruct( ) :
-        InputDataFile( "data/sine-inc.csv" ), OutputDataFile( "data/sine-inc-out.csv" ),
+        InputDataFile( "data/parabola.csv" ), OutputDataFile( "data/parabola.csv" ),
         HiddenLayers( { 10 } ), LearningRate( 0.01f ), EpochsCount( 1000 ), BatchSize( 10 )
 
         // Some of the network structures to try with provided training sample data
         // line     : HiddenLayers( { } )
         // parabola : HiddenLayers( { 10 } )
-        // sine     : HiddenLayers( { 20, 30 } )
-        // sine-inc : HiddenLayers( { 20, 40 } )
+        // sine     : HiddenLayers( { 20 } )
+        // sine-inc : HiddenLayers( { 20 } )
     {
     }
 }
@@ -333,9 +333,12 @@ int main( int argc, char** argv )
 
             auto cost = netTraining->TrainEpoch( ptrInputs, ptrTargetOutputs, trainingParams.BatchSize );
 
-            printf( "%0.4f ", static_cast<float>( cost ) );
-
             if ( ( epoch % 10 ) == 0 )
+            {
+                printf( "%0.4f ", static_cast<float>( cost ) );
+            }
+
+            if ( ( epoch % 100 ) == 0 )
             {
                 printf( "\n" );
             }
