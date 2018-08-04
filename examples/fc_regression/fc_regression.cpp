@@ -191,7 +191,7 @@ static void ParseCommandLine( int argc, char** argv, TrainingParams* trainingPar
 }
 
 // Load data from the specified file
-bool LoadData( string fileName, vector<fvector_t>& inputs, vector<fvector_t>& outputs, vector<fvector_t>& noisyOutputs  )
+bool LoadData( const string& fileName, vector<fvector_t>& inputs, vector<fvector_t>& outputs, vector<fvector_t>& noisyOutputs  )
 {
     bool  ret  = false;
     FILE* file = fopen( fileName.c_str( ), "r" );
@@ -224,7 +224,8 @@ bool LoadData( string fileName, vector<fvector_t>& inputs, vector<fvector_t>& ou
 }
 
 // Save data to the specified file - original data plus outputs predicted by the network
-bool SaveData( string fileName, vector<fvector_t>& inputs, vector<fvector_t>& outputs, vector<fvector_t>& noisyOutputs, vector<fvector_t> networkOutputs )
+bool SaveData( const string& fileName, const vector<fvector_t>& inputs, const vector<fvector_t>& outputs,
+                                       const vector<fvector_t>& noisyOutputs, const vector<fvector_t> networkOutputs )
 {
     bool  ret  = false;
     FILE* file = fopen( fileName.c_str( ), "w" );
@@ -283,7 +284,7 @@ int main( int argc, char** argv )
 
         if ( !LoadData( trainingParams.InputDataFile, inputs, outputs, noisyOutputs ) )
         {
-            printf( "Error: failed loading training data \n" );
+            printf( "Error: failed loading training data \n\n" );
             return -1;
         }
 
