@@ -315,10 +315,10 @@ int main( int argc, char** argv )
         // add output layer
         net->AddLayer( make_shared<XFullyConnectedLayer>( inputsCount, 1 ) );
 
-        // create training context with Nesterov optimizer and Cross Entropy cost function
-        shared_ptr<XNetworkTraining> netTraining = make_shared<XNetworkTraining>( net,
-                                                   make_shared<XNesterovMomentumOptimizer>( trainingParams.LearningRate ),
-                                                   make_shared<XMSECost>( ) );
+        // create training context with Nesterov optimizer and MSE cost function
+        XNetworkTraining netTraining( net,
+                                      make_shared<XNesterovMomentumOptimizer>( trainingParams.LearningRate ),
+                                      make_shared<XMSECost>( ) );
 
         for ( size_t epoch = 1; epoch <= trainingParams.EpochsCount; epoch++ )
         {
@@ -332,7 +332,7 @@ int main( int argc, char** argv )
                 std::swap( ptrTargetOutputs[swapIndex1], ptrTargetOutputs[swapIndex2] );
             }
 
-            auto cost = netTraining->TrainEpoch( ptrInputs, ptrTargetOutputs, trainingParams.BatchSize );
+            auto cost = netTraining.TrainEpoch( ptrInputs, ptrTargetOutputs, trainingParams.BatchSize );
 
             if ( ( epoch % 10 ) == 0 )
             {
@@ -352,7 +352,7 @@ int main( int argc, char** argv )
         {
             fvector_t output( 1 );
 
-            netTraining->Compute( inputs[i], output );
+            netTraining.Compute( inputs[i], output );
             networkOutputs[i] = output;
         }
 
