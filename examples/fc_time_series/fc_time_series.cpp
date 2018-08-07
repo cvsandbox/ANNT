@@ -37,11 +37,12 @@ typedef struct TrainingParamsStruct
     size_t         EpochsCount;
     size_t         BatchSize;
     size_t         WindowSize;
+    size_t         PredictionSize;
 
     TrainingParamsStruct( ) :
-        InputDataFile( "data/series3.csv" ), OutputDataFile( "data/series3-out.csv" ),
+        InputDataFile( "data/series1.csv" ), OutputDataFile( "data/series1-out.csv" ),
         HiddenLayers( { 10 } ), LearningRate( 0.01f ), EpochsCount( 1000 ), BatchSize( 10 ),
-        WindowSize( 5 )
+        WindowSize( 5 ), PredictionSize( 5 )
     {
     }
 }
@@ -53,10 +54,160 @@ static void ParseCommandLine( int argc, char** argv, TrainingParams* trainingPar
     bool showUsage           = false;
     bool outputFileSpecified = false;
 
+    if ( argv == nullptr )
+    {
+        return;
+    }
 
+    for ( int i = 1; i < argc; i++ )
+    {
+        bool   parsed = false;
+        size_t paramLen = strlen( argv[i] );
+
+        if ( paramLen >= 2 )
+        {
+            char* paramStart = &( argv[i][1] );
+
+            if ( ( argv[i][0] == '-' ) || ( argv[i][0] == '/' ) )
+            {
+                if ( ( strstr( paramStart, "ec:" ) == paramStart ) && ( paramLen > 4 ) )
+                {
+                    if ( sscanf( &( argv[i][4] ), "%zu", &trainingParams->EpochsCount ) == 1 )
+                    {
+                        parsed = true;
+                    }
+                }
+                else if ( ( strstr( paramStart, "lr:" ) == paramStart ) && ( paramLen > 4 ) )
+                {
+                    if ( sscanf( &( argv[i][4] ), "%f", &trainingParams->LearningRate ) == 1 )
+                    {
+                        parsed = true;
+                    }
+                }
+                else if ( ( strstr( paramStart, "bs:" ) == paramStart ) && ( paramLen > 4 ) )
+                {
+                    if ( sscanf( &( argv[i][4] ), "%zu", &trainingParams->BatchSize ) == 1 )
+                    {
+                        if ( trainingParams->BatchSize == 0 )
+                        {
+                            trainingParams->BatchSize = 1;
+                        }
+                        parsed = true;
+                    }
+                }
+                else if ( ( strstr( paramStart, "ws:" ) == paramStart ) && ( paramLen > 4 ) )
+                {
+                    if ( sscanf( &( argv[i][4] ), "%zu", &trainingParams->WindowSize ) == 1 )
+                    {
+                        if ( trainingParams->WindowSize == 0 )
+                        {
+                            trainingParams->WindowSize = 1;
+                        }
+                        parsed = true;
+                    }
+                }
+                else if ( ( strstr( paramStart, "ps:" ) == paramStart ) && ( paramLen > 4 ) )
+                {
+                    if ( sscanf( &( argv[i][4] ), "%zu", &trainingParams->PredictionSize ) == 1 )
+                    {
+                        if ( trainingParams->PredictionSize == 0 )
+                        {
+                            trainingParams->PredictionSize = 1;
+                        }
+                        parsed = true;
+                    }
+                }
+                else if ( ( strstr( paramStart, "hn:" ) == paramStart ) && ( paramLen > 4 ) )
+                {
+                    parsed = true;
+                    trainingParams->HiddenLayers.clear( );
+
+                    if ( ( paramLen != 5 ) || ( argv[i][4] != '0' ) )
+                    {
+                        size_t neuronsCount;
+                        char*  parsePtr = &( argv[i][4] );
+
+                        for ( ; ; )
+                        {
+                            if ( ( sscanf( parsePtr, "%zu", &neuronsCount ) == 1 ) && ( neuronsCount != 0 ) )
+                            {
+                                trainingParams->HiddenLayers.push_back( neuronsCount );
+
+                                parsePtr = strchr( parsePtr, ':' );
+
+                                if ( parsePtr != nullptr )
+                                {
+                                    parsePtr++;
+                                }
+                                else
+                                {
+                                    break;
+                                }
+                            }
+                            else
+                            {
+                                parsed = false;
+                                break;
+                            }
+                        }
+                    }
+                }
+                else if ( ( strstr( paramStart, "in:" ) == paramStart ) && ( paramLen > 4 ) )
+                {
+                    trainingParams->InputDataFile = string( &( argv[i][4] ) );
+
+                    if ( !outputFileSpecified )
+                    {
+                        size_t dotPos = trainingParams->InputDataFile.rfind( '.' );
+
+                        if ( dotPos == string::npos )
+                        {
+                            trainingParams->OutputDataFile = trainingParams->InputDataFile + "-out";
+                        }
+                        else
+                        {
+                            trainingParams->OutputDataFile = trainingParams->InputDataFile.substr( 0, dotPos ) + "-out" + trainingParams->InputDataFile.substr( dotPos );
+                        }
+                    }
+
+                    parsed = true;
+                }
+                else if ( ( strstr( paramStart, "out:" ) == paramStart ) && ( paramLen > 5 ) )
+                {
+                    trainingParams->OutputDataFile = string( &( argv[i][5] ) );
+                    outputFileSpecified = true;
+                    parsed = true;
+                }
+            }
+        }
+
+        if ( !parsed )
+        {
+            showUsage = true;
+        }
+    }
+
+    if ( showUsage )
+    {
+        printf( "Failed parsing some of the parameters \n\n" );
+
+        printf( "Available parameters are:\n" );
+        printf( "  -ec:<> - epochs count; \n" );
+        printf( "  -bs:<> - batch size; \n" );
+        printf( "  -lr:<> - learning rate; \n" );
+        printf( "  -ws:<> - sliding window size used for training; \n" );
+        printf( "  -ps:<> - prediction size; \n" );
+        printf( "  -hn:<X[:X]> - number of neurons in hidden layers; examples: \n" );
+        printf( "           0 - no hidden layers; \n" );
+        printf( "           10 - single hidden layer with 10 neurons; \n" );
+        printf( "           20:10 - two hidden layers - 20 neurons in the first and 10 in the second; \n" );
+        printf( "  -in:<> - file name to read input training data from; \n" );
+        printf( "  -out:<> - file name to write predicted results to. \n" );
+        printf( "\n" );
+    }
 }
 
-// ?
+// Load time series data points from the specified file
 bool LoadData( const string& fileName, fvector_t& timeSeries )
 {
     bool  ret  = false;
@@ -89,8 +240,8 @@ bool LoadData( const string& fileName, fvector_t& timeSeries )
     return ret;
 }
 
-//
-bool SaveData( const string& fileName, const fvector_t& timeSeries, const fvector_t predictions, size_t windowSize )
+// Save original time series, output of the network produced for the training set and predictions (output of the network for inputs not included into training)
+bool SaveData( const string& fileName, const fvector_t& timeSeries, const fvector_t& networkOutput, const fvector_t& networkPrediction, size_t windowSize )
 {
     bool  ret  = false;
     FILE* file = fopen( fileName.c_str( ), "w" );
@@ -101,11 +252,15 @@ bool SaveData( const string& fileName, const fvector_t& timeSeries, const fvecto
         {
             if ( i < windowSize )
             {
-                fprintf( file, "%f,\n", timeSeries[i] );
+                fprintf( file, "%f,,\n", timeSeries[i] );
+            }
+            else if ( i < timeSeries.size( ) - networkPrediction.size( ) )
+            {
+                fprintf( file, "%f,%f,\n", timeSeries[i], networkOutput[i - windowSize] );
             }
             else
             {
-                fprintf( file, "%f,%f\n", timeSeries[i], predictions[i - windowSize] );
+                fprintf( file, "%f,,%f\n", timeSeries[i], networkPrediction[i + networkPrediction.size( ) - timeSeries.size( ) ] );
             }
         }
 
@@ -132,6 +287,8 @@ int main( int argc, char** argv )
         printf( "Learning rate    : %0.4f \n", trainingParams.LearningRate );
         printf( "Epochs count     : %zu \n", trainingParams.EpochsCount );
         printf( "Batch size       : %zu \n", trainingParams.BatchSize );
+        printf( "Window size:     : %zu \n", trainingParams.WindowSize );
+        printf( "Prediction size  : %zu \n", trainingParams.PredictionSize );
         printf( "Hidden neurons   : " );
 
         if ( trainingParams.HiddenLayers.empty( ) )
@@ -162,14 +319,15 @@ int main( int argc, char** argv )
 
         printf( "Loaded %zu time series data points \n\n", timeSeries.size( ) );
 
-        //
-        if ( trainingParams.WindowSize > timeSeries.size( ) / 2 )
+        // make sure there are enought data points for training the ANN
+        if ( trainingParams.WindowSize + trainingParams.PredictionSize > timeSeries.size( ) / 2 )
         {
-            printf( "Not enough data points in the time series. Must be at least twice of the Window Size. \n\n" );
+            printf( "Not enough data points in the time series. Must be at least twice of the Window Size and Prediction Size. \n\n" );
+            return -1;
         }
 
         // create training inputs/outputs
-        size_t            samplesCount = timeSeries.size( ) - trainingParams.WindowSize;
+        size_t            samplesCount = timeSeries.size( ) - trainingParams.WindowSize - trainingParams.PredictionSize;
         vector<fvector_t> inputs, outputs;
 
         for ( size_t i = 0; i < samplesCount; i++ )
@@ -182,10 +340,10 @@ int main( int argc, char** argv )
             }
 
             inputs.push_back( input );
-            outputs.push_back( { timeSeries[i + trainingParams.WindowSize] /* * 10 */ } );
+            outputs.push_back( { timeSeries[i + trainingParams.WindowSize] } );
         }
 
-        // ??
+        printf( "Created %zu training samples \n\n", samplesCount );
 
         // get pointers to inputs/outputs for shuffling
         vector<fvector_t*> ptrInputs( samplesCount ), ptrTargetOutputs( samplesCount );
@@ -211,10 +369,10 @@ int main( int argc, char** argv )
         // add output layer
         net->AddLayer( make_shared<XFullyConnectedLayer>( inputsCount, 1 ) );
 
-        // create training context with Nesterov optimizer and Cross Entropy cost function
-        shared_ptr<XNetworkTraining> netTraining = make_shared<XNetworkTraining>( net,
-                                                   make_shared<XNesterovMomentumOptimizer>( trainingParams.LearningRate ),
-                                                   make_shared<XMSECost>( ) );
+        // create training context with Nesterov optimizer and MSE cost function
+        XNetworkTraining netTraining( net,
+                                      make_shared<XNesterovMomentumOptimizer>( trainingParams.LearningRate ),
+                                      make_shared<XMSECost>( ) );
 
         for ( size_t epoch = 1; epoch <= trainingParams.EpochsCount; epoch++ )
         {
@@ -228,7 +386,7 @@ int main( int argc, char** argv )
                 std::swap( ptrTargetOutputs[swapIndex1], ptrTargetOutputs[swapIndex2] );
             }
 
-            auto cost = netTraining->TrainEpoch( ptrInputs, ptrTargetOutputs, trainingParams.BatchSize );
+            auto cost = netTraining.TrainEpoch( ptrInputs, ptrTargetOutputs, trainingParams.BatchSize );
 
             if ( ( epoch % 10 ) == 0 )
             {
@@ -241,20 +399,35 @@ int main( int argc, char** argv )
             }
         }
 
-        // get outputs produced by the trained network
-        fvector_t predictions( samplesCount );
+        // get outputs produced by the trained network - predict single point only to see the fit is good in any way
+        fvector_t networkOutput( samplesCount );
 
         for ( size_t i = 0; i < samplesCount; i++ )
         {
             fvector_t output( 1 );
 
-            netTraining->Compute( inputs[i], output );
-            predictions[i] = output[0];// / 10;
+            netTraining.Compute( inputs[i], output );
+            networkOutput[i] = output[0];
         }
 
-        SaveData( trainingParams.OutputDataFile, timeSeries, predictions, trainingParams.WindowSize );
+        // now take the last points (Window Size), predict the next one and then use the predicted point to predict another next one and so on
+        fvector_t networkPrediction( trainingParams.PredictionSize );
+        fvector_t networkInput = inputs.back( );
+
+        for ( size_t i = 0; i < trainingParams.PredictionSize; i++ )
+        {
+            fvector_t output( 1 );
+
+            netTraining.Compute( networkInput, output );
+            networkPrediction[i] = output[0];
+
+            // shift the input and add just predicted point
+            networkInput.erase( networkInput.begin( ) );
+            networkInput.push_back( output[0] );
+        }
+
+        SaveData( trainingParams.OutputDataFile, timeSeries, networkOutput, networkPrediction, trainingParams.WindowSize );
     }
 
     return 0;
 }
-
