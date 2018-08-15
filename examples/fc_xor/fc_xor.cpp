@@ -92,7 +92,7 @@ int main( int /* argc */, char** /* argv */ )
                                   make_shared<XNesterovMomentumOptimizer>( 0.1f ),
                                   make_shared<XBinaryCrossEntropyCost>( ) );
 
-    // don't average weight/bias gradients over batch
+    // average weight/bias gradients over batch
     netTraining.SetAverageWeightGradients( true );
 
     printf( "Network output before training: \n" );
