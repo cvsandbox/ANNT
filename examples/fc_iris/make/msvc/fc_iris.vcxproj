@@ -71,7 +71,7 @@
     </Link>
     <PostBuildEvent>
       <Command>xcopy /Y "$(TargetPath)" "$(ProjectDir)..\..\..\..\build\msvc\debug\bin\"
-xcopy /Y "$(ProjectDir)..\..\..\data\iris.data" "$(ProjectDir)..\..\..\..\build\msvc\debug\bin\data\"</Command>
+xcopy /Y "$(ProjectDir)..\..\..\data\iris\iris.data" "$(ProjectDir)..\..\..\..\build\msvc\debug\bin\data\"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -95,7 +95,7 @@ xcopy /Y "$(ProjectDir)..\..\..\data\iris.data" "$(ProjectDir)..\..\..\..\build\
     </Link>
     <PostBuildEvent>
       <Command>xcopy /Y "$(TargetPath)" "$(ProjectDir)..\..\..\..\build\msvc\release\bin\"
-xcopy /Y "$(ProjectDir)..\..\..\data\iris.data" "$(ProjectDir)..\..\..\..\build\msvc\release\bin\data\"
+xcopy /Y "$(ProjectDir)..\..\..\data\iris\iris.data" "$(ProjectDir)..\..\..\..\build\msvc\release\bin\data\"
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
