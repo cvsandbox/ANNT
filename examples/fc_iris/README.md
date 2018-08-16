@@ -22,7 +22,7 @@ shared_ptr<XNetworkTraining> netTraining = make_shared<XNetworkTraining>( net,
                                            make_shared<XCrossEntropyCost>( ) );
 ```
 
-Unlike with [XOR example](fc_xor), this one does not run training loop by itself. Instead a helper class used, which does all the job – training, validation, testing, etc. and provides a way of customizing some training parameters from command line:
+Unlike with [XOR example](../fc_xor), this one does not run training loop by itself. Instead a helper class used, which does all the job – training, validation, testing, etc. and provides a way of customizing some training parameters from command line:
 
 ```C++
 // using the helper for training ANN to do classification
