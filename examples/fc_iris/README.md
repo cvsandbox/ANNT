@@ -1,6 +1,6 @@
 # Iris flower classification with Fully Connected ANN
 
-This example performs a simple multiclass classification of Iris flowers. First it creates a simple 3 layers network – 10 neurons in each hidden layer and 3 neurons in the output layer (as we have 3 classes):
+This example performs a simple multiclass classification of [Iris flowers](../data/iris/). First it creates a simple 3 layers network – 10 neurons in each hidden layer and 3 neurons in the output layer (as we have 3 classes):
 
 ```C++
 // prepare a 3 layer ANN
