@@ -61,7 +61,7 @@ Test accuracy = 96.67% (29/30), cost = 0.0064, 0.000s
 Total time taken : 0s (0.00min)
 ```
 
-## Command line options:
+## Command line options
 Some of the useful command line options are:
 * -ec:<> - epochs count;
 * -bs:<> - batch size;
