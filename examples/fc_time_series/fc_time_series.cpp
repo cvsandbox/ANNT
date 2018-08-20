@@ -398,6 +398,7 @@ int main( int argc, char** argv )
                 printf( "\n" );
             }
         }
+        printf( "\n" );
 
         // get outputs produced by the trained network - predict single point only to see if the fit is good in any way
         fvector_t networkOutput( samplesCount );
@@ -411,15 +412,16 @@ int main( int argc, char** argv )
         }
 
         // now take the last points (Window Size), predict the next one and then use the predicted point to predict another one and so on
-        fvector_t networkPrediction( trainingParams.PredictionSize );
-        fvector_t networkInput( inputsCount );
+        fvector_t     networkPrediction( trainingParams.PredictionSize );
+        fvector_t     networkInput( inputsCount );
+        ANNT::float_t error, minError = ANNT::float_t( 0.0 ), maxError = ANNT::float_t( 0.0 ), avgError = ANNT::float_t( 0.0 );
 
         for ( size_t i = 0, j = timeSeries.size( ) - trainingParams.WindowSize - trainingParams.PredictionSize; i < inputsCount; i++, j++ )
         {
             networkInput[i] = timeSeries[j];
         }
 
-        for ( size_t i = 0; i < trainingParams.PredictionSize; i++ )
+        for ( size_t i = 0, j = timeSeries.size( ) - trainingParams.PredictionSize; i < trainingParams.PredictionSize; i++, j++ )
         {
             fvector_t output( 1 );
 
@@ -429,8 +431,30 @@ int main( int argc, char** argv )
             // shift the input and add just predicted point
             networkInput.erase( networkInput.begin( ) );
             networkInput.push_back( output[0] );
+
+            // find prediction error
+            error     = fabs( output[0] - timeSeries[j] );
+            avgError += error;
+
+            if ( i == 0 )
+            {
+                minError = maxError = error;
+            }
+            else if ( error < minError )
+            {
+                minError = error;
+            }
+            else if ( error > maxError )
+            {
+                maxError = error;
+            }
         }
 
+        avgError /= trainingParams.PredictionSize;
+        printf( "Prediction error: min = %0.4f, max = %0.4f, avg = %0.4f \n",
+                static_cast< float >( minError ), static_cast< float >( maxError ), static_cast< float >( avgError ) );
+
+        // save training/prediction results into CSV file
         SaveData( trainingParams.OutputDataFile, timeSeries, networkOutput, networkPrediction, trainingParams.WindowSize );
     }
 
