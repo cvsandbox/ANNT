@@ -399,7 +399,7 @@ int main( int argc, char** argv )
             }
         }
 
-        // get outputs produced by the trained network - predict single point only to see the fit is good in any way
+        // get outputs produced by the trained network - predict single point only to see if the fit is good in any way
         fvector_t networkOutput( samplesCount );
 
         for ( size_t i = 0; i < samplesCount; i++ )
@@ -410,9 +410,14 @@ int main( int argc, char** argv )
             networkOutput[i] = output[0];
         }
 
-        // now take the last points (Window Size), predict the next one and then use the predicted point to predict another next one and so on
+        // now take the last points (Window Size), predict the next one and then use the predicted point to predict another one and so on
         fvector_t networkPrediction( trainingParams.PredictionSize );
-        fvector_t networkInput = inputs.back( );
+        fvector_t networkInput( inputsCount );
+
+        for ( size_t i = 0, j = timeSeries.size( ) - trainingParams.WindowSize - trainingParams.PredictionSize; i < inputsCount; i++, j++ )
+        {
+            networkInput[i] = timeSeries[j];
+        }
 
         for ( size_t i = 0; i < trainingParams.PredictionSize; i++ )
         {
