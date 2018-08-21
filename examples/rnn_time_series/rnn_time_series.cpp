@@ -360,7 +360,7 @@ int main( int argc, char** argv )
                 printf( "\n" );
             }
         }
-        printf( "\n\n" );
+        printf( "\n" );
 
         // get outputs produced by the trained network - predict single point only to see the fit is good in any way
         fvector_t networkOutput;
@@ -377,19 +377,42 @@ int main( int argc, char** argv )
 
         // now predict some points, which were excluded from training
         fvector_t networkPrediction( trainingParams.PredictionSize );
+        ANNT::float_t error, minError = ANNT::float_t( 0.0 ), maxError = ANNT::float_t( 0.0 ), avgError = ANNT::float_t( 0.0 );
 
         // don't reset state of the recurrent network, just feed it the next point from the time series
         input[0] = timeSeries[timeSeries.size( ) - trainingParams.PredictionSize - 1];
 
-        for ( size_t i = 0; i < trainingParams.PredictionSize; i++ )
+        for ( size_t i = 0, j = timeSeries.size( ) - trainingParams.PredictionSize; i < trainingParams.PredictionSize; i++, j++ )
         {
             netTraining.Compute( input, output );
             networkPrediction[i] = output[0];
 
             // use just predicted point as the new input
             input[0] = output[0];
+
+            // find prediction error
+            error = fabs( output[0] - timeSeries[j] );
+            avgError += error;
+
+            if ( i == 0 )
+            {
+                minError = maxError = error;
+            }
+            else if ( error < minError )
+            {
+                minError = error;
+            }
+            else if ( error > maxError )
+            {
+                maxError = error;
+            }
         }
 
+        avgError /= trainingParams.PredictionSize;
+        printf( "Prediction error: min = %0.4f, max = %0.4f, avg = %0.4f \n",
+                static_cast< float >( minError ), static_cast< float >( maxError ), static_cast< float >( avgError ) );
+
+        // save training/prediction results into CSV file
         SaveData( trainingParams.OutputDataFile, timeSeries, networkOutput, networkPrediction );
     }
 
