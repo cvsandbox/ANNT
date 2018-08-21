@@ -2,7 +2,9 @@
 
 This example demonstrates usage of fully connected ANN for time series prediction task. Taking [time series data sets](../data/time-series/), it trains neural network on a subset of the specified data and then uses the trained network to predict some of the data points, which were not included into the training.
 
-By default, it starts with 2 layers ANN – 10 neurons in the hidden layer and 1 neuron in the output layer. However, using command line options, it is possible to override default network architecture.
+Suppose a data set with 100 values is provided, window size of 10 is used and 5 values need to be predicted. The last 5 values of the data set will not be used for training at all – those will be used only to compare with the final prediction. The remaining 95 values are then used to generate 85 training samples – 10 past values of time series as input and the next value as desired output. A network is then trained using those training samples. Finally, 10 values are taken from the data set, values 86 to 95 (indexing from 1) and the 96th value is predicted - was not part of training set. The input vector is then shifted and the just predicted value is appended - this is used to predict 97th value. The process is then repeated till the 100th value is predicted.
+
+By default, the example starts with 2 layers ANN – 10 neurons in the hidden layer and 1 neuron in the output layer. However, using command line options, it is possible to override default network architecture.
 
 ## Command line options
 Some of the useful command line options are:
