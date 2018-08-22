@@ -2,7 +2,23 @@
 
 This example demonstrates usage of fully connected ANN for time series prediction task. Taking [time series data sets](../data/time-series/), it trains neural network on a subset of the specified data and then uses the trained network to predict some of the data points, which were not included into the training.
 
-Suppose a data set with 100 values is provided, window size of 10 is used and 5 values need to be predicted. The last 5 values of the data set will not be used for training at all – those will be used only to compare with the final prediction. The remaining 95 values are then used to generate 85 training samples – 10 past values of time series as input and the next value as desired output. A network is then trained using those training samples. Finally, 10 values are taken from the data set, values 86 to 95 (indexing from 1) and the 96th value is predicted - was not part of training set. The input vector is then shifted and the just predicted value is appended - this is used to predict 97th value. The process is then repeated till the 100th value is predicted.
+Suppose a data set with 10 values is provided, window size of 2 is used and 3 values need to be predicted.
+
+| v0 | v1 | v2 | v3 | v4 | v5 | v6 | v7 | v8 | v9 |
+| -- | -- | -- | -- | -- | -- | -- | -- | -- | -- |
+|  0 |  1 |  4 |  9 | 16 | 25 | 16 |  9 |  4 |  1 | 
+
+The last 3 values of the data set (v7-v9) will not be used for training at all – those will be used only to compare with the final prediction. The remaining 7 values are then used to generate 5 training samples – 2 past values of the time series as input and the next value as desired output. So, the 5 training samples are:
+
+| x1 | x2 |  y |
+| -- | -- | -- |
+|  0 |  1 |  4 |
+|  1 |  4 |  9 |
+|  4 |  9 | 16 |
+|  9 | 16 | 25 |
+| 16 | 25 | 16 |
+
+A network is then trained using those training samples. Finally, two value are taken from the data set, v5 and v6, and the next value is predicted - v7' (v7 was not part of the training set, so something new for the network to predict). The input vector is then shifted and the just predicted value is appended (so we have v6 and v7' as input) - this is used to predict v8'. The process in then repeated till all value are predicted.
 
 By default, the example starts with 2 layers ANN – 10 neurons in the hidden layer and 1 neuron in the output layer. However, using command line options, it is possible to override default network architecture.
 
