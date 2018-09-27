@@ -53,9 +53,9 @@ public:
 
         for ( size_t i = 0, n = updates.size( ); i < n; i++ )
         {
-            float_t update = mMomentum * prevUpdates[i] - mLearningRate * updates[i];
+            float_t update = mMomentum * prevUpdates[i] + mLearningRate * updates[i];
 
-            updates[i]     = update;
+            updates[i]     = -update;
             prevUpdates[i] = update;
         }
     }
