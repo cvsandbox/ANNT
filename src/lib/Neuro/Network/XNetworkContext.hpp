@@ -80,7 +80,7 @@ public:
 
 protected:
 
-    // Allocate working buffer for laters of the network
+    // Allocate working buffer for layers of the network
     void AllocateWorkingBuffers( const std::shared_ptr<XNeuralNetwork>& net, size_t batchSize );
 
     // Clear layers' working buffers (memset zero)
