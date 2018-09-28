@@ -1,6 +1,6 @@
 # MNIST classification example with Fully Connected ANN
 
-This example performs classification of MNIST handwritten digits using fully connected 3 layers ANN - 300 neurons in the first hidden layer, 100 neurons in the second and finally 10 neurons in the output layer.
+This example performs classification of [MNIST handwritten digits](http://yann.lecun.com/exdb/mnist/) using fully connected 3 layers ANN - 300 neurons in the first hidden layer, 100 neurons in the second and finally 10 neurons in the output layer.
 
 ```C++
 // prepare a 3 layer ANN
