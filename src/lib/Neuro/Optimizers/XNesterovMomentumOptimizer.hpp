@@ -47,14 +47,14 @@ public:
 
     void CalculateUpdatesFromGradients( fvector_t& updates, std::vector<fvector_t>& paramVariables, fvector_t& /* layerVariables */ ) override
     {
-        fvector_t& prevUpdates = paramVariables[0];
+        fvector_t& vPrev = paramVariables[0];
 
         for ( size_t i = 0, n = updates.size( ); i < n; i++ )
         {
-            float_t update = mMomentum * prevUpdates[i] - mLearningRate * updates[i];
+            float_t vt = mMomentum * vPrev[i] - mLearningRate * updates[i];
 
-            updates[i]     = -mMomentum * prevUpdates[i] + ( float_t( 1.0 ) + mMomentum ) * update;
-            prevUpdates[i] = update;
+            updates[i] = -mMomentum * vPrev[i] + ( float_t( 1.0 ) + mMomentum ) * vt;
+            vPrev[i]   = vt;
         }
     }
 };
