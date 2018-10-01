@@ -27,8 +27,9 @@
 namespace ANNT { namespace Neuro { namespace Training {
 
 // Implementation of SGD with Momentum, which calculates updates as
-//   paramUpdate(t) =  momentum * paramUpdate(t - 1) - learningRate * paramGrad
-// http://cs231n.github.io/neural-networks-3/#sgd
+//   v(t) = momentum * v(t-1) + learningRate * paramGrad
+//   paramUpdate(t) = -v(t)
+// http://ruder.io/optimizing-gradient-descent/index.html#momentum
 //
 class XMomentumOptimizer : public INetworkOptimizer
 {
@@ -49,14 +50,14 @@ public:
 
     void CalculateUpdatesFromGradients( fvector_t& updates, std::vector<fvector_t>& paramVariables, fvector_t& /* layerVariables */ ) override
     {
-        fvector_t& prevUpdates = paramVariables[0];
+        fvector_t& vPrev = paramVariables[0];
 
         for ( size_t i = 0, n = updates.size( ); i < n; i++ )
         {
-            float_t update = mMomentum * prevUpdates[i] + mLearningRate * updates[i];
+            float_t vt = mMomentum * vPrev[i] + mLearningRate * updates[i];
 
-            updates[i]     = -update;
-            prevUpdates[i] = update;
+            updates[i] = -vt;
+            vPrev[i]   = vt;
         }
     }
 };
