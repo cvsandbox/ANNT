@@ -13,6 +13,7 @@ The folder provides number of example applications, which demonstrate usage of t
   - [fc_time_series](fc_time_series/) - times series prediction using past values;
   - [fc_mnist](fc_mnist/) - MNIST handwritten digits classification;
 * Convolutional networks
+  - [cnn_mnist](cnn_mnist/) - MNIST handwritten digits classification;
   - to be described;
 * Recurrent networks
   - to be described;
