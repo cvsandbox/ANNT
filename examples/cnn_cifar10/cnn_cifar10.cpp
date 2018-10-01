@@ -1,7 +1,7 @@
 /*
     ANNT - Artificial Neural Networks C++ library
 
-    CIFAR-10 dataset classification example with Convolution ANN
+    CIFAR-10 dataset classification example with Convolutional ANN
 
     Copyright (C) 2018, cvsandbox, cvsandbox@gmail.com
 
@@ -56,7 +56,7 @@ template <typename T> vector<T> ExtractValidationSamples( vector<T>& allSamples 
 // Example application's entry point
 int main( int argc, char** argv )
 {
-    printf( "CIFAR-10 dataset classification example with Convolution ANN \n\n" );
+    printf( "CIFAR-10 dataset classification example with Convolutional ANN \n\n" );
 
     uvector_t         trainLabels;
     vector<fvector_t> trainImages;

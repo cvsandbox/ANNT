@@ -1,7 +1,7 @@
 /*
     ANNT - Artificial Neural Networks C++ library
 
-    MNIST handwritten digits classification example with Convolution ANN
+    MNIST handwritten digits classification example with Convolutional ANN
 
     Copyright (C) 2018, cvsandbox, cvsandbox@gmail.com
 
@@ -64,7 +64,7 @@ int main( int argc, char** argv )
     _CrtMemCheckpoint( &memState );
 #endif
 
-    printf( "MNIST handwritten digits classification example with Convolution ANN \n\n" );
+    printf( "MNIST handwritten digits classification example with Convolutional ANN \n\n" );
 
     //_CrtSetBreakAlloc( 11021 );
 
