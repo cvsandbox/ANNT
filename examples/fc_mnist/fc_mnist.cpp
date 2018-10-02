@@ -68,7 +68,7 @@ int main( int argc, char** argv )
         return -1;
     }
 
-    if ( !MNISTParser::LoadImages( MNIST_TRAIN_IMAGES_FILE, trainImages, -1, 1, 2, 2 ) )
+    if ( !MNISTParser::LoadImages( MNIST_TRAIN_IMAGES_FILE, trainImages, -1, 1, 0, 0 ) )
     {
         printf( "Failed loading training images database \n\n" );
         return -2;
@@ -81,7 +81,7 @@ int main( int argc, char** argv )
         return -3;
     }
 
-    if ( !MNISTParser::LoadImages( MNIST_TEST_IMAGES_FILE, testImages, -1, 1, 2, 2 ) )
+    if ( !MNISTParser::LoadImages( MNIST_TEST_IMAGES_FILE, testImages, -1, 1, 0, 0 ) )
     {
         printf( "Failed loading test images database \n\n" );
         return -4;
