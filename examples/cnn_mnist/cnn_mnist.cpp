@@ -36,6 +36,10 @@ using namespace ANNT;
 using namespace ANNT::Neuro;
 using namespace ANNT::Neuro::Training;
 
+// Uncomment the line below to add an extra fully connected layer – makes bigger network,
+// but reduces classification error rate 
+// #define MAKE_IT_DEEPER
+
 // Names of MNIST data files.
 // Available at: http://yann.lecun.com/exdb/mnist/
 static const char* MNIST_TRAIN_LABELS_FILE = "data/train-labels.idx1-ubyte";
@@ -162,7 +166,14 @@ int main( int argc, char** argv )
         net->AddLayer( make_shared<XConvolutionLayer>( 5, 5, 16, 5, 5, 120 ) );
         net->AddLayer( make_shared<XReLuActivation>( ) );
 
+#if defined(MAKE_IT_DEEPER)
+        net->AddLayer( make_shared<XFullyConnectedLayer>( 120, 84 ) );
+        net->AddLayer( make_shared<XSigmoidActivation>( ) );
+        net->AddLayer( make_shared<XFullyConnectedLayer>( 84, 10 ) );
+#else
         net->AddLayer( make_shared<XFullyConnectedLayer>( 120, 10 ) );
+#endif
+
         net->AddLayer( make_shared<XLogSoftMaxActivation>( ) );
 
         // create training context with Adam optimizer and Negative Log Likelihood cost function (since we use Log-Softmax)
