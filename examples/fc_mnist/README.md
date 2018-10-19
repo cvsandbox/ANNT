@@ -46,25 +46,25 @@ Samples usage: training = 50000, validation = 10000, test = 10000
 
 Learning rate: 0.0010, Epochs: 20, Batch Size: 50
 
-Before training: accuracy = 15.18% (7591/50000), cost = 2.3780, 2.495s
+Before training: accuracy = 10.17% (5087/50000), cost = 2.4892, 2.377s
 
-Epoch   1 : [==================================================] 44.302s
-Training accuracy = 90.94% (45471/50000), cost = 0.3016, 3.210s
-Validation accuracy = 91.57% (9157/10000), cost = 0.2851, 0.608s
-Epoch   2 : [==================================================] 42.233s
-Training accuracy = 92.39% (46196/50000), cost = 0.2413, 2.754s
-Validation accuracy = 92.78% (9278/10000), cost = 0.2325, 0.548s
+Epoch   1 : [==================================================] 59.215s
+Training accuracy = 92.83% (46414/50000), cost = 0.2349, 3.654s
+Validation accuracy = 93.15% (9315/10000), cost = 0.2283, 0.636s
+Epoch   2 : [==================================================] 61.675s
+Training accuracy = 94.92% (47459/50000), cost = 0.1619, 2.685s
+Validation accuracy = 94.91% (9491/10000), cost = 0.1693, 0.622s
 ...
-Epoch  19 : [==================================================] 69.953s
-Training accuracy = 95.69% (47845/50000), cost = 0.1370, 2.909s
-Validation accuracy = 95.10% (9510/10000), cost = 0.1689, 0.541s
-Epoch  20 : [==================================================] 44.607s
-Training accuracy = 96.51% (48254/50000), cost = 0.1162, 2.768s
-Validation accuracy = 95.81% (9581/10000), cost = 0.1489, 0.541s
+Epoch  19 : [==================================================] 59.822s
+Training accuracy = 96.81% (48404/50000), cost = 0.0978, 2.976s
+Validation accuracy = 95.88% (9588/10000), cost = 0.1491, 0.527s
+Epoch  20 : [==================================================] 87.108s
+Training accuracy = 97.77% (48883/50000), cost = 0.0688, 2.823s
+Validation accuracy = 96.60% (9660/10000), cost = 0.1242, 0.658s
 
-Test accuracy = 95.53% (9553/10000), cost = 0.1501, 0.551s
+Test accuracy = 96.55% (9655/10000), cost = 0.1146, 0.762s
 
-Total time taken : 1111s (18.52min)
+Total time taken : 1067s (17.78min)
 ```
 
 ## Command line options
