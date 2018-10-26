@@ -56,20 +56,14 @@ public:
     void BackwardActivate( const float_t* /* input */, const float_t* output,
                            const float_t* delta, float_t* prevDelta, size_t len ) override
     {
-        fvector_t der( len, float_t( 0 ) );
-
         for ( size_t i = 0; i < len; i++ )
         {
-            for ( size_t j = 0; j < len; j++ )
-            {
-                der[j] = ( j == i ) ? output[i] * ( float_t( 1 ) - output[j] ) : -output[i] * output[j];
-            }
-
             float_t sum = 0;
 
             for ( size_t j = 0; j < len; j++ )
             {
-                sum += delta[j] * der[j];
+                //sum += delta[j] * der[j];
+                sum += delta[j] * ( ( j == i ) ? output[i] * ( float_t( 1 ) - output[j] ) : -output[i] * output[j] );
             }
 
             prevDelta[i] = sum;
