@@ -14,7 +14,7 @@ The folder provides number of example applications, which demonstrate usage of t
   - [fc_mnist](fc_mnist/) - MNIST handwritten digits classification;
 * Convolutional networks
   - [cnn_mnist](cnn_mnist/) - MNIST handwritten digits classification;
-  - to be described;
+  - [cnn_cifar10](cnn_cifar10/) - CIFAR-10 color images classification;
 * Recurrent networks
   - to be described;
 
