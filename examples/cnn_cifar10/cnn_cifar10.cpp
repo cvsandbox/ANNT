@@ -98,6 +98,7 @@ int main( int argc, char** argv )
     // prepare a convolutional ANN
     shared_ptr<XNeuralNetwork> net = make_shared<XNeuralNetwork>( );
 
+    // since ReLU(MaxPool)=MaxPool(ReLU), we use the first - minor optimization though
     net->AddLayer( make_shared<XConvolutionLayer>( 32, 32, 3, 5, 5, 32, BorderMode::Same ) );
     net->AddLayer( make_shared<XMaxPooling>( 32, 32, 32, 2 ) );
     net->AddLayer( make_shared<XReLuActivation>( ) );
@@ -115,8 +116,8 @@ int main( int argc, char** argv )
 
     net->AddLayer( make_shared<XFullyConnectedLayer>( 4 * 4 * 64, 64 ) );
     net->AddLayer( make_shared<XReLuActivation>( ) );
-
     net->AddLayer( make_shared<XBatchNormalization>( 64, 1, 1 ) );
+
     net->AddLayer( make_shared<XFullyConnectedLayer>( 64, 10 ) );
     net->AddLayer( make_shared<XLogSoftMaxActivation>( ) );
 
@@ -124,7 +125,6 @@ int main( int argc, char** argv )
     shared_ptr<XNetworkTraining> netTraining = make_shared<XNetworkTraining>( net,
                                                make_shared<XAdamOptimizer>( 0.001f ),
                                                make_shared<XNegativeLogLikelihoodCost>( ) );
-
 
     // using the helper for training ANN to do classification
     XClassificationTrainingHelper trainingHelper( netTraining, argc, argv );
