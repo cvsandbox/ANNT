@@ -39,6 +39,7 @@ IVectorTools* GetAvailableVectorTools( )
         if ( !vectorTools->IsAvailable( ) )
         {
             delete vectorTools;
+            vectorTools = nullptr;
         }
     }
 #endif
@@ -51,6 +52,7 @@ IVectorTools* GetAvailableVectorTools( )
         if ( !vectorTools->IsAvailable( ) )
         {
             delete vectorTools;
+            vectorTools = nullptr;
         }
     }
 #endif
