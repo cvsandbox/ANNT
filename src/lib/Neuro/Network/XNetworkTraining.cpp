@@ -188,7 +188,7 @@ void XNetworkTraining::UpdateWeights( )
             if ( mAverageWeightGradients )
             {
                 std::transform( mGradWeights[i].begin( ), mGradWeights[i].end( ), mGradWeights[i].begin( ),
-                                std::bind1st( std::multiplies<float_t>( ), batchUpdateFactor ) );
+                                [&]( float_t v ) -> float_t { return v * batchUpdateFactor; } );
             }
 
             mOptimizer->CalculateUpdatesFromGradients( mGradWeights[i], mOptimizerParameterVariables[i], mOptimizerLayerVariables[i] );
