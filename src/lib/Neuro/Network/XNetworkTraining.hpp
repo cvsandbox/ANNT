@@ -119,6 +119,18 @@ public:
         mTrainingContext.SetTrainingSequenceLength( sequenceLength );
     }
 
+    // Get/set depth of training for recurrent networks (in the case if not entire sequence
+    // need to be backpropagated). The SetTrainingSequenceLength() always resets this, so must
+    // be set after it.
+    size_t RecurrentTrainingDepth( ) const
+    {
+        return mTrainingContext.RecurrentTrainingDepth( );
+    }
+    void SetRecurrentTrainingDepth( size_t trainingDepth )
+    {
+        mTrainingContext.SetRecurrentTrainingDepth( trainingDepth );
+    }
+
     // Reset working buffers for all layers
     void ResetState( ) override
     {

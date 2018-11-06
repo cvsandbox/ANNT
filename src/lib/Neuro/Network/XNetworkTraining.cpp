@@ -128,7 +128,9 @@ float_t XNetworkTraining::CalculateError( )
 {
     vector<fvector_t>& lastOutputs = mTrainOutputsStorage.back( );
     vector<fvector_t>& lastDeltas  = mDeltasStorage.back( );
-    float_t            cost        = 0;
+    float_t            sampleCost  = 0;
+    float_t            totalCost   = 0;
+    size_t             costCounter = 0;
 
     for ( size_t i = 0, n = mTrainInputs.size( ); i < n; i++ )
     {
@@ -136,13 +138,23 @@ float_t XNetworkTraining::CalculateError( )
         fvector_t& lastOutput   = lastOutputs[i];
         fvector_t& targetOutput = *mTargetOuputs[i];
 
-        cost     += mCostFunction->Cost( lastOutput, targetOutput );
-        lastDelta = mCostFunction->Gradient( lastOutput, targetOutput );
+        sampleCost = mCostFunction->Cost( lastOutput, targetOutput );
+        lastDelta  = mCostFunction->Gradient( lastOutput, targetOutput );
+
+        // TrainingSequenceLength() and RecurrentTrainingDepth() make sense only for recurrent networks,
+        // where these properties can be set to different values. In this case we calculate average
+        // error only for the samples participating in training. For other ANN architectures these
+        // both are set to 1, so all costs get into average.
+        if ( ( TrainingSequenceLength( ) - ( i % TrainingSequenceLength( ) ) ) <= RecurrentTrainingDepth( ) )
+        {
+            totalCost += sampleCost;
+            costCounter++;
+        }
     }
 
-    cost /= mTrainInputs.size( );
+    totalCost /= costCounter;
 
-    return cost;
+    return totalCost;
 }
 
 // Propagate error through the network starting from last layer

@@ -27,7 +27,7 @@ using namespace std;
 namespace ANNT { namespace Neuro {
 
 XNetworkContext::XNetworkContext( bool trainingMode, size_t sequenceLength ) :
-    mTrainingMode( trainingMode ), mTrainingSequenceLength( sequenceLength ), mCurrentLayer( 0 )
+    mTrainingMode( trainingMode ), mTrainingSequenceLength( sequenceLength ), mRecurrentTrainingDepth( sequenceLength ), mCurrentLayer( 0 )
 {
 }
 
