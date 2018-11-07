@@ -203,33 +203,30 @@ void XLSTMLayer::BackwardCompute( const vector<fvector_t*>& inputs,
     float_t* gradBiasesZ = gradBiasesI + mOutputsCount;
     float_t* gradBiasesO = gradBiasesZ + mOutputsCount;
 
-    // temporary buffers (TODO: better allocate once or delegate allocation as for  other working buffers)
-    float_t* delta          = static_cast<float_t*>( malloc( sizeof( float_t ) * mOutputsCount ) );
-    float_t* dState         = static_cast<float_t*>( malloc( sizeof( float_t ) * mOutputsCount ) );
-    float_t* dCadidateState = static_cast<float_t*>( malloc( sizeof( float_t ) * mOutputsCount ) );
-    float_t* dInputGate     = static_cast<float_t*>( malloc( sizeof( float_t ) * mOutputsCount ) );
-    float_t* dForgetGate    = static_cast<float_t*>( malloc( sizeof( float_t ) * mOutputsCount ) );
-    float_t* dOutputGate    = static_cast<float_t*>( malloc( sizeof( float_t ) * mOutputsCount ) );
-
-    for ( size_t batchIndex = 0; batchIndex < batchSize; batchIndex++ )
+    XParallel::For( batchSize, [&]( size_t batchIndex )
     {
-        float_t* stateGrad     = static_cast<float_t*>( ctx.GetWorkingBuffer( BUFFER_INDEX_STATE_GRAD, batchIndex ) );
-        float_t* historyGrad   = static_cast<float_t*>( ctx.GetWorkingBuffer( BUFFER_INDEX_HISTORY_GRAD, batchIndex ) );
+        float_t* stateGrad   = static_cast<float_t*>( ctx.GetWorkingBuffer( BUFFER_INDEX_STATE_GRAD, batchIndex ) );
+        float_t* historyGrad = static_cast<float_t*>( ctx.GetWorkingBuffer( BUFFER_INDEX_HISTORY_GRAD, batchIndex ) );
+        float_t* delta       = static_cast<float_t*>( ctx.GetWorkingBuffer( BUFFER_INDEX_DELTA, batchIndex ) );
+        float_t* dState      = static_cast<float_t*>( ctx.GetWorkingBuffer( BUFFER_INDEX_STATE_DELTA, batchIndex ) );
 
         for ( int sequenceIndex = (int) sequenceLen - 1, si = 0; ( sequenceIndex >= 0 ) && ( si < trainingDepth ); sequenceIndex--, si++ )
         {
             size_t   sampleIndex    = batchIndex * sequenceLen + sequenceIndex;
-            const float_t* input    = inputs[sampleIndex]->data( );
             float_t* prevDelta      = prevDeltas[sampleIndex]->data( );
 
             float_t* statePrev      = static_cast<float_t*>( ctx.GetWorkingBuffer( BUFFER_INDEX_STATE_PREV, sampleIndex ) );      // C(t-1)
             float_t* stateNext      = static_cast<float_t*>( ctx.GetWorkingBuffer( BUFFER_INDEX_STATE_NEXT, sampleIndex ) );      // C(t)
-            float_t* historyPrev    = static_cast<float_t*>( ctx.GetWorkingBuffer( BUFFER_INDEX_HISTORY_PREV, sampleIndex ) );    // H(t-1)
             float_t* forgetGate     = static_cast<float_t*>( ctx.GetWorkingBuffer( BUFFER_INDEX_FORGET_GATE, sampleIndex ) );     // F(t)
             float_t* inputGate      = static_cast<float_t*>( ctx.GetWorkingBuffer( BUFFER_INDEX_INPUT_GATE, sampleIndex ) );      // I(t)
             float_t* candidateState = static_cast<float_t*>( ctx.GetWorkingBuffer( BUFFER_INDEX_CANDIDATE_STATE, sampleIndex ) ); // Z(t)
             float_t* outputGate     = static_cast<float_t*>( ctx.GetWorkingBuffer( BUFFER_INDEX_OUTPUT_GATE, sampleIndex ) );     // O(t)
             float_t* stateNextTanh  = static_cast<float_t*>( ctx.GetWorkingBuffer( BUFFER_INDEX_STATE_NEXT_TANH, sampleIndex ) ); // tanh(C(t))
+
+            float_t* dCadidateState = static_cast<float_t*>( ctx.GetWorkingBuffer( BUFFER_INDEX_CANDIDATE_STATE_DELTA, sampleIndex ) );
+            float_t* dInputGate     = static_cast<float_t*>( ctx.GetWorkingBuffer( BUFFER_INDEX_INPUT_GATE_DELTA, sampleIndex ) );
+            float_t* dForgetGate    = static_cast<float_t*>( ctx.GetWorkingBuffer( BUFFER_INDEX_FORGET_GATE_DELTA, sampleIndex ) );
+            float_t* dOutputGate    = static_cast<float_t*>( ctx.GetWorkingBuffer( BUFFER_INDEX_OUTPUT_GATE_DELTA, sampleIndex ) );
 
             // add history gradient from the future
             memcpy( delta, deltas[sampleIndex]->data( ), sizeof( float_t ) * mOutputsCount );
@@ -328,11 +325,29 @@ void XLSTMLayer::BackwardCompute( const vector<fvector_t*>& inputs,
 
                 historyGrad[outputIndex2] = sum;
             }
+        }
+    } );
 
-            // accumulate weights' and biases gradients based on the layers inputs
-            for ( size_t outputIndex = 0, weightIndexStart = 0; outputIndex < mOutputsCount; outputIndex++, weightIndexStart += mInputsCount )
+    XParallel::For( mOutputsCount, [&]( size_t outputIndex )
+    {
+        size_t weightIndexStartI = outputIndex * mInputsCount;
+        size_t weightIndexStartH = outputIndex * mOutputsCount;
+
+        for ( size_t batchIndex = 0; batchIndex < batchSize; batchIndex++ )
+        {
+            for ( int sequenceIndex = (int) sequenceLen - 1, si = 0; ( sequenceIndex >= 0 ) && ( si < trainingDepth ); sequenceIndex--, si++ )
             {
-                for ( size_t inputIndex = 0, weightIndex = weightIndexStart; inputIndex < mInputsCount; inputIndex++, weightIndex++ )
+                size_t   sampleIndex    = batchIndex * sequenceLen + sequenceIndex;
+                const float_t* input    = inputs[sampleIndex]->data( );
+                float_t* historyPrev    = static_cast<float_t*>( ctx.GetWorkingBuffer( BUFFER_INDEX_HISTORY_PREV, sampleIndex ) );    // H(t-1)
+
+                float_t* dCadidateState = static_cast<float_t*>( ctx.GetWorkingBuffer( BUFFER_INDEX_CANDIDATE_STATE_DELTA, sampleIndex ) );
+                float_t* dInputGate     = static_cast<float_t*>( ctx.GetWorkingBuffer( BUFFER_INDEX_INPUT_GATE_DELTA, sampleIndex ) );
+                float_t* dForgetGate    = static_cast<float_t*>( ctx.GetWorkingBuffer( BUFFER_INDEX_FORGET_GATE_DELTA, sampleIndex ) );
+                float_t* dOutputGate    = static_cast<float_t*>( ctx.GetWorkingBuffer( BUFFER_INDEX_OUTPUT_GATE_DELTA, sampleIndex ) );
+
+                // accumulate gradients for inputs' weights
+                for ( size_t inputIndex = 0, weightIndex = weightIndexStartI; inputIndex < mInputsCount; inputIndex++, weightIndex++ )
                 {
                     gradWeightsX2F[weightIndex] += dForgetGate[outputIndex]    * input[inputIndex];
                     gradWeightsX2I[weightIndex] += dInputGate[outputIndex]     * input[inputIndex];
@@ -340,35 +355,26 @@ void XLSTMLayer::BackwardCompute( const vector<fvector_t*>& inputs,
                     gradWeightsX2O[weightIndex] += dOutputGate[outputIndex]    * input[inputIndex];
                 }
 
+                // accumulate gradients for history weights
+                if ( sequenceIndex != 0 )
+                {
+                    for ( size_t historyIndex = 0, weightIndex = weightIndexStartH; historyIndex < mOutputsCount; historyIndex++, weightIndex++ )
+                    {
+                        gradWeightsH2F[weightIndex] += dForgetGate[outputIndex]    * historyPrev[historyIndex];
+                        gradWeightsH2I[weightIndex] += dInputGate[outputIndex]     * historyPrev[historyIndex];
+                        gradWeightsH2Z[weightIndex] += dCadidateState[outputIndex] * historyPrev[historyIndex];
+                        gradWeightsH2O[weightIndex] += dOutputGate[outputIndex]    * historyPrev[historyIndex];
+                    }
+                }
+
+                // accumulate gradients for biases
                 gradBiasesF[outputIndex] += dForgetGate[outputIndex];
                 gradBiasesI[outputIndex] += dInputGate[outputIndex];
                 gradBiasesZ[outputIndex] += dCadidateState[outputIndex];
                 gradBiasesO[outputIndex] += dOutputGate[outputIndex];
             }
-
-            // accumulate weights' and biases gradients based on the history
-            if ( sequenceIndex != 0 )
-            {
-                for ( size_t outputIndex = 0, weightIndexStart = 0; outputIndex < mOutputsCount; outputIndex++, weightIndexStart += mOutputsCount )
-                {
-                    for ( size_t outputIndex2 = 0, weightIndex = weightIndexStart; outputIndex2 < mOutputsCount; outputIndex2++, weightIndex++ )
-                    {
-                        gradWeightsH2F[weightIndex] += dForgetGate[outputIndex]    * historyPrev[outputIndex2];
-                        gradWeightsH2I[weightIndex] += dInputGate[outputIndex]     * historyPrev[outputIndex2];
-                        gradWeightsH2Z[weightIndex] += dCadidateState[outputIndex] * historyPrev[outputIndex2];
-                        gradWeightsH2O[weightIndex] += dOutputGate[outputIndex]    * historyPrev[outputIndex2];
-                    }
-                }
-            }
         }
-    }
-
-    free( delta );
-    free( dState );
-    free( dCadidateState );
-    free( dInputGate );
-    free( dForgetGate );
-    free( dOutputGate );
+    } );
 }
 
 // Applies updates to the layer's weights and biases

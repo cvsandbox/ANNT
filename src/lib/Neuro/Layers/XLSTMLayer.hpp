@@ -83,16 +83,24 @@ private:
         BUFFER_INDEX_STATE_GRAD      = 1,
         BUFFER_INDEX_HISTORY         = 2,
         BUFFER_INDEX_HISTORY_GRAD    = 3,
+        BUFFER_INDEX_DELTA           = 4,   // sum of the incoming gradient (from the next layer)
+                                            // and history gradient
+        BUFFER_INDEX_STATE_DELTA     = 5,   // BUFFER_INDEX_DELTA passed backward through output gate 
 
         // per sample
-        BUFFER_INDEX_STATE_PREV      = 4,   // C(t-1)
-        BUFFER_INDEX_STATE_NEXT      = 5,   // C(t)
-        BUFFER_INDEX_HISTORY_PREV    = 6,   // H(t-1)
-        BUFFER_INDEX_FORGET_GATE     = 7,   // F(t)
-        BUFFER_INDEX_INPUT_GATE      = 8,   // I(t)
-        BUFFER_INDEX_OUTPUT_GATE     = 9,   // O(t)
-        BUFFER_INDEX_CANDIDATE_STATE = 10,  // Z(t)
-        BUFFER_INDEX_STATE_NEXT_TANH = 11,  // tanh(C(t))
+        BUFFER_INDEX_STATE_PREV      = 6,   // C(t-1)
+        BUFFER_INDEX_STATE_NEXT      = 7,   // C(t)
+        BUFFER_INDEX_HISTORY_PREV    = 8,   // H(t-1)
+        BUFFER_INDEX_FORGET_GATE     = 9,   // F(t)
+        BUFFER_INDEX_INPUT_GATE      = 10,  // I(t)
+        BUFFER_INDEX_OUTPUT_GATE     = 11,  // O(t)
+        BUFFER_INDEX_CANDIDATE_STATE = 12,  // Z(t)
+        BUFFER_INDEX_STATE_NEXT_TANH = 13,  // tanh(C(t))
+
+        BUFFER_INDEX_CANDIDATE_STATE_DELTA = 14,
+        BUFFER_INDEX_INPUT_GATE_DELTA      = 15,
+        BUFFER_INDEX_FORGET_GATE_DELTA     = 16,
+        BUFFER_INDEX_OUTPUT_GATE_DELTA     = 17,
     };
 
 public:
@@ -118,7 +126,7 @@ public:
     // Tells that we may need some extra memory for internal state/calculations
     uvector_t WorkingMemSize( bool /* trainingMode */ ) const override
     {
-        uvector_t workingMemSize = uvector_t( 12, mOutputsCount * sizeof( float_t ) );
+        uvector_t workingMemSize = uvector_t( 18, mOutputsCount * sizeof( float_t ) );
 
         return workingMemSize;
     }
