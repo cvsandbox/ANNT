@@ -166,8 +166,9 @@ void XGRULayer::BackwardCompute( const vector<fvector_t*>& inputs,
                                  fvector_t& gradWeights,
                                  const XNetworkContext& ctx )
 {
-    size_t sequenceLen = ctx.TrainingSequenceLength( );
-    size_t batchSize   = inputs.size( ) / sequenceLen;
+    size_t sequenceLen   = ctx.TrainingSequenceLength( );
+    size_t batchSize     = inputs.size( ) / sequenceLen;
+    int    trainingDepth = static_cast<int>( ctx.RecurrentTrainingDepth( ) );
 
     size_t weightsCountInputs  = mInputsCount  * mOutputsCount;
     size_t weightsCountHistory = mOutputsCount * mOutputsCount;
@@ -197,7 +198,7 @@ void XGRULayer::BackwardCompute( const vector<fvector_t*>& inputs,
     {
         float_t* historyGrad = static_cast<float_t*>( ctx.GetWorkingBuffer( BUFFER_INDEX_HISTORY_GRAD, batchIndex ) );
 
-        for ( int sequenceIndex = (int) sequenceLen - 1; sequenceIndex >= 0; sequenceIndex-- )
+        for ( int sequenceIndex = (int) sequenceLen - 1, si = 0; ( sequenceIndex >= 0 ) && ( si < trainingDepth ); sequenceIndex--, si++ )
         {
             size_t   sampleIndex      = batchIndex * sequenceLen + sequenceIndex;
             const float_t* input      = inputs[sampleIndex]->data( );
