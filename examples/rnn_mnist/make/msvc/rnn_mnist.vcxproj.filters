@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="MNIST Parser">
+      <UniqueIdentifier>{ebc7fb16-0cc5-47db-9773-af3480603fa1}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\tools\MNISTParser.cpp">
+      <Filter>MNIST Parser</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\rnn_mnist.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\tools\MNISTParser.hpp">
+      <Filter>MNIST Parser</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
