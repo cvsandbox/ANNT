@@ -28,23 +28,10 @@ using namespace std::chrono;
 
 namespace ANNT { namespace Neuro { namespace Training {
 
-// Structure to keep some training parameters. All of those are specified by application's code, but can be overridden
-// from command line to make testing simpler without rebuild.
-typedef struct
-{
-    float   LearningRate;
-    size_t  EpochsCount;
-    size_t  BatchSize;
-    bool    ShowIntermediateBatchCosts;
-    bool    RunPreTrainingTest;
-    bool    RunValidationOnly;
-    string  NetworkOutputFileName;
-    string  NetworkInputFileName;
-    XClassificationTrainingHelper::SaveMode NetworkSaveMode;
-}
-TrainingParams;
+namespace Helpers {
 
-static void ParseCommandLine( int argc, char** argv, TrainingParams* trainingParams )
+// Parse command line extracting common training parameters
+void ParseTrainingParamsCommandLine( int argc, char** argv, TrainingParams* trainingParams )
 {
     bool showUsage = false;
 
@@ -129,7 +116,7 @@ static void ParseCommandLine( int argc, char** argv, TrainingParams* trainingPar
 
                     if ( ( saveMode >= 1 ) && ( saveMode <= 3 ) )
                     {
-                        trainingParams->NetworkSaveMode = static_cast< XClassificationTrainingHelper::SaveMode >( saveMode );
+                        trainingParams->SaveMode= static_cast<NetworkSaveMode>( saveMode );
                         parsed = true;
                     }
                 }
@@ -160,7 +147,60 @@ static void ParseCommandLine( int argc, char** argv, TrainingParams* trainingPar
         printf( "                      3 - at the end of training. \n" );
         printf( "\n" );
     }
+
+    if ( trainingParams->NetworkOutputFileName.empty( ) )
+    {
+        trainingParams->SaveMode = NetworkSaveMode::NoSaving;
+    }
 }
+
+// Log common training parameters to stdout
+void PrintTrainingParams( const TrainingParams* trainingParams )
+{
+    printf( "Learning rate: %0.4f, Epochs: %zu, Batch Size: %zu \n", trainingParams->LearningRate, trainingParams->EpochsCount, trainingParams->BatchSize );
+    if ( !trainingParams->NetworkInputFileName.empty( ) )
+    {
+        printf( "Network input file: %s \n", trainingParams->NetworkInputFileName.c_str( ) );
+    }
+    if ( ( !trainingParams->NetworkOutputFileName.empty( ) ) && ( trainingParams->SaveMode != NetworkSaveMode::NoSaving ) )
+    {
+        printf( "Network output file: %s \n", trainingParams->NetworkOutputFileName.c_str( ) );
+    }
+    printf( "\n" );
+}
+
+// Helper function to show some progress bar on stdout
+void UpdateTrainingPogressBar( size_t lastProgress, size_t currentProgress, size_t totalSteps, size_t barLength, char barChar )
+{
+    size_t barsDone = lastProgress    * barLength / totalSteps;
+    size_t barsNeed = currentProgress * barLength / totalSteps;
+
+    while ( barsDone++ != barsNeed )
+    {
+        putchar( barChar );
+    }
+    fflush( stdout );
+}
+
+// Prints training epoch progress (%) to stdout
+int ShowTrainingProgress( size_t currentProgress, size_t totalSteps )
+{
+    int printed = printf( "<%d%%>", static_cast<int>( currentProgress * 100 / totalSteps ) );
+    fflush( stdout );
+    return printed;
+}
+
+// Erases training progress from stdout (length is provided by previous ShowTrainingProgress() call)
+void EraseTrainingProgress( int stringLength )
+{
+    while ( stringLength > 0 )
+    {
+        printf( "\b \b" );
+        stringLength--;
+    }
+}
+
+} // namespace Helpers
 
 // ========================================================================================================================
 
@@ -170,7 +210,7 @@ XClassificationTrainingHelper::XClassificationTrainingHelper( const shared_ptr<X
     mEpochSelectionMode( EpochSelectionMode::Shuffle ),
     mRunPreTrainingTest( true ), mRunValidationOnly( false ),
     mShowIntermediateBatchCosts( false ),
-    mNetworkSaveMode( SaveMode::OnValidationImprovement ), mNetworkOutputFileName( ), mNetworkInputFileName( ),
+    mNetworkSaveMode( NetworkSaveMode::OnValidationImprovement ), mNetworkOutputFileName( ), mNetworkInputFileName( ),
     mArgc( argc ), mArgv( argv )
 {
 
@@ -212,35 +252,6 @@ void XClassificationTrainingHelper::SetTestSamples( const std::vector<fvector_t>
     }
 }
 
-// Helper function to show some progress bar on stdout
-static void UpdatePogressBar( size_t lastProgress, size_t currentProgress, size_t totalSteps, size_t barLength, char barChar )
-{
-    size_t barsDone = lastProgress    * barLength / totalSteps;
-    size_t barsNeed = currentProgress * barLength / totalSteps;
-
-    while ( barsDone++ != barsNeed )
-    {
-        putchar( barChar );
-    }
-    fflush( stdout );
-}
-
-// Helper function to show/erase training epoch progress (%)
-static void EraseProgress( int stringLength )
-{
-    while ( stringLength > 0 )
-    {
-        printf( "\b \b" );
-        stringLength--;
-    }
-}
-static int ShowProgress( size_t currentProgress, size_t totalSteps )
-{
-    int printed = printf( "<%d%%>", static_cast<int>( currentProgress * 100 / totalSteps ) );
-    fflush( stdout );
-    return printed;
-}
-
 // Runs training loop providing progress to stdout
 void XClassificationTrainingHelper::RunTraining( size_t epochs, size_t batchSize,
                                                  const vector<fvector_t>& trainingInputs,
@@ -248,7 +259,7 @@ void XClassificationTrainingHelper::RunTraining( size_t epochs, size_t batchSize
                                                  const uvector_t& trainingLabels )
 {
     // default training parameters
-    TrainingParams     trainingParams;
+    Helpers::TrainingParams     trainingParams;
 
     trainingParams.EpochsCount  = epochs;
     trainingParams.BatchSize    = batchSize;
@@ -258,32 +269,18 @@ void XClassificationTrainingHelper::RunTraining( size_t epochs, size_t batchSize
     trainingParams.RunPreTrainingTest         = mRunPreTrainingTest;
     trainingParams.RunValidationOnly          = mRunValidationOnly;
 
-    trainingParams.NetworkSaveMode       = mNetworkSaveMode;
+    trainingParams.SaveMode              = mNetworkSaveMode;
     trainingParams.NetworkOutputFileName = mNetworkOutputFileName;
     trainingParams.NetworkInputFileName  = mNetworkInputFileName;
 
     // parse command line for any overrides
-    ParseCommandLine( mArgc, mArgv, &trainingParams );
+    Helpers::ParseTrainingParamsCommandLine( mArgc, mArgv, &trainingParams );
 
     // set some of the new parameters
     mNetworkTraining->Optimizer( )->SetLearningRate( trainingParams.LearningRate );
 
-    if ( trainingParams.NetworkOutputFileName.empty( ) )
-    {
-        trainingParams.NetworkSaveMode = SaveMode::NoSaving;
-    }
-
     // log current settings
-    printf( "Learning rate: %0.4f, Epochs: %zu, Batch Size: %zu \n", trainingParams.LearningRate, trainingParams.EpochsCount, trainingParams.BatchSize );
-    if ( !trainingParams.NetworkInputFileName.empty( ) )
-    {
-        printf( "Network input file: %s \n", trainingParams.NetworkInputFileName.c_str( ) );
-    }
-    if ( ( !trainingParams.NetworkOutputFileName.empty( ) ) && ( trainingParams.NetworkSaveMode != SaveMode::NoSaving ) )
-    {
-        printf( "Network output file: %s \n", trainingParams.NetworkOutputFileName.c_str( ) );
-    }
-    printf( "\n" );
+    Helpers::PrintTrainingParams( &trainingParams );
 
     // load network parameters from the previous save file
     if ( !trainingParams.NetworkInputFileName.empty( ) )
@@ -392,12 +389,12 @@ void XClassificationTrainingHelper::RunTraining( size_t epochs, size_t batchSize
             float_t batchCost = mNetworkTraining->TrainBatch( trainingInputsBatch, trainingOutputsBatch );
 
             // erase previous progress if any 
-            EraseProgress( progressStringLength );
+            Helpers::EraseTrainingProgress( progressStringLength );
 
             // show cost of some batches or progress bar only
             if ( !trainingParams.ShowIntermediateBatchCosts )
             {
-                UpdatePogressBar( iteration, iteration + 1, iterationsPerEpoch, 50, '=' );
+                Helpers::UpdateTrainingPogressBar( iteration, iteration + 1, iterationsPerEpoch, 50, '=' );
             }
             else
             {
@@ -413,10 +410,10 @@ void XClassificationTrainingHelper::RunTraining( size_t epochs, size_t batchSize
             }
 
             // show current progress of the epoch
-            progressStringLength = ShowProgress( iteration + 1, iterationsPerEpoch );
+            progressStringLength = Helpers::ShowTrainingProgress( iteration + 1, iterationsPerEpoch );
         }
 
-        EraseProgress( progressStringLength );
+        Helpers::EraseTrainingProgress( progressStringLength );
         progressStringLength = 0;
 
         // end of epoch timing
@@ -470,11 +467,11 @@ void XClassificationTrainingHelper::RunTraining( size_t epochs, size_t batchSize
         }
 
         // save network at the end of epoch
-        if ( trainingParams.NetworkSaveMode == SaveMode::OnEpochEnd )
+        if ( trainingParams.SaveMode == NetworkSaveMode::OnEpochEnd )
         {
             mNetworkTraining->Network( )->SaveLearnedParams( trainingParams.NetworkOutputFileName );
         }
-        else if ( ( trainingParams.NetworkSaveMode == SaveMode::OnValidationImprovement ) &&
+        else if ( ( trainingParams.SaveMode == NetworkSaveMode::OnValidationImprovement ) &&
                   ( validationAccuracy > lastValidationAccuracy ) )
         {
             mNetworkTraining->Network( )->SaveLearnedParams( trainingParams.NetworkOutputFileName );
@@ -500,7 +497,7 @@ void XClassificationTrainingHelper::RunTraining( size_t epochs, size_t batchSize
     printf( "\nTotal time taken : %ds (%0.2fmin) \n", static_cast<int>( timeTaken ), static_cast<float>( timeTaken ) / 60 );
 
     // save network when training is done
-    if ( trainingParams.NetworkSaveMode == SaveMode::OnTrainingEnd )
+    if ( trainingParams.SaveMode == NetworkSaveMode::OnTrainingEnd )
     {
         mNetworkTraining->Network( )->SaveLearnedParams( trainingParams.NetworkOutputFileName );
     }

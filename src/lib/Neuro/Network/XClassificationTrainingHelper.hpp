@@ -26,18 +26,56 @@
 
 namespace ANNT { namespace Neuro { namespace Training {
 
+// Enumeration values, which tell when to save network's parameters during training
+enum class NetworkSaveMode
+{
+    NoSaving                = 0,
+    OnValidationImprovement = 1,
+    OnEpochEnd              = 2,
+    OnTrainingEnd           = 3
+};
+
+/* Some helpers aimed for internal use mostly, but can be of use to custom training loop inplementations */
+namespace Helpers
+{
+    // Structure to keep some common training parameters. All of those are specified by application's code,
+    // but can be overridden from command line to make testing simpler without rebuild.
+    typedef struct _TrainingParams
+    {
+        float   LearningRate;
+        size_t  EpochsCount;
+        size_t  BatchSize;
+        bool    ShowIntermediateBatchCosts;
+        bool    RunPreTrainingTest;
+        bool    RunValidationOnly;
+        NetworkSaveMode SaveMode;
+        std::string     NetworkOutputFileName;
+        std::string     NetworkInputFileName;
+
+        _TrainingParams( ) :
+            LearningRate( 0.001f ), EpochsCount( 20 ), BatchSize( 48 ),
+            ShowIntermediateBatchCosts( false ), RunPreTrainingTest( true ), RunValidationOnly( false ),
+            SaveMode( NetworkSaveMode::OnValidationImprovement )
+        {
+        }
+    }
+    TrainingParams;
+
+    // Parse command line extracting common training parameters
+    void ParseTrainingParamsCommandLine( int argc, char** argv, TrainingParams* trainingParams );
+    // Log common training parameters to stdout
+    void PrintTrainingParams( const TrainingParams* trainingParams );
+    // Helper function to show some progress bar on stdout
+    void UpdateTrainingPogressBar( size_t lastProgress, size_t currentProgress, size_t totalSteps, size_t barLength, char barChar );
+    // Prints training epoch progress (%) to stdout
+    int ShowTrainingProgress( size_t currentProgress, size_t totalSteps );
+    // Erases training progress from stdout (length is provided by previous ShowTrainingProgress() call)
+    void EraseTrainingProgress( int stringLength );
+}
+
 // A helper class which encapsulates training task of a classification problem
 class XClassificationTrainingHelper
 {
-public:
-    enum class SaveMode
-    {
-        NoSaving                = 0,
-        OnValidationImprovement = 1,
-        OnEpochEnd              = 2,
-        OnTrainingEnd           = 3
-    };
-
 private:
     std::shared_ptr<XNetworkTraining>  mNetworkTraining;
     EpochSelectionMode                 mEpochSelectionMode;
@@ -46,7 +84,7 @@ private:
     bool                               mRunValidationOnly;
     bool                               mShowIntermediateBatchCosts;
 
-    SaveMode                           mNetworkSaveMode;
+    NetworkSaveMode                    mNetworkSaveMode;
     std::string                        mNetworkOutputFileName;
     std::string                        mNetworkInputFileName;
 
@@ -106,11 +144,11 @@ public:
     }
 
     // Mode of saving network's learnt parameters
-    SaveMode NetworkSaveMode( ) const
+    NetworkSaveMode SaveMode( ) const
     {
         return mNetworkSaveMode;
     }
-    void SetNetworkSaveMode( SaveMode saveMode )
+    void SetSaveMode( NetworkSaveMode saveMode )
     {
         mNetworkSaveMode = saveMode;
     }
