@@ -346,13 +346,18 @@ void XLSTMLayer::BackwardCompute( const vector<fvector_t*>& inputs,
                 float_t* dForgetGate    = static_cast<float_t*>( ctx.GetWorkingBuffer( BUFFER_INDEX_FORGET_GATE_DELTA, sampleIndex ) );
                 float_t* dOutputGate    = static_cast<float_t*>( ctx.GetWorkingBuffer( BUFFER_INDEX_OUTPUT_GATE_DELTA, sampleIndex ) );
 
+                float_t dInputGateVal     = dInputGate[outputIndex];
+                float_t dCadidateStateVal = dCadidateState[outputIndex];
+                float_t dForgetGateVal    = dForgetGate[outputIndex];
+                float_t dOutputGateVal    = dOutputGate[outputIndex];
+
                 // accumulate gradients for inputs' weights
                 for ( size_t inputIndex = 0, weightIndex = weightIndexStartI; inputIndex < mInputsCount; inputIndex++, weightIndex++ )
                 {
-                    gradWeightsX2F[weightIndex] += dForgetGate[outputIndex]    * input[inputIndex];
-                    gradWeightsX2I[weightIndex] += dInputGate[outputIndex]     * input[inputIndex];
-                    gradWeightsX2Z[weightIndex] += dCadidateState[outputIndex] * input[inputIndex];
-                    gradWeightsX2O[weightIndex] += dOutputGate[outputIndex]    * input[inputIndex];
+                    gradWeightsX2F[weightIndex] += dForgetGateVal    * input[inputIndex];
+                    gradWeightsX2I[weightIndex] += dInputGateVal     * input[inputIndex];
+                    gradWeightsX2Z[weightIndex] += dCadidateStateVal * input[inputIndex];
+                    gradWeightsX2O[weightIndex] += dOutputGateVal    * input[inputIndex];
                 }
 
                 // accumulate gradients for history weights
@@ -360,18 +365,18 @@ void XLSTMLayer::BackwardCompute( const vector<fvector_t*>& inputs,
                 {
                     for ( size_t historyIndex = 0, weightIndex = weightIndexStartH; historyIndex < mOutputsCount; historyIndex++, weightIndex++ )
                     {
-                        gradWeightsH2F[weightIndex] += dForgetGate[outputIndex]    * historyPrev[historyIndex];
-                        gradWeightsH2I[weightIndex] += dInputGate[outputIndex]     * historyPrev[historyIndex];
-                        gradWeightsH2Z[weightIndex] += dCadidateState[outputIndex] * historyPrev[historyIndex];
-                        gradWeightsH2O[weightIndex] += dOutputGate[outputIndex]    * historyPrev[historyIndex];
+                        gradWeightsH2F[weightIndex] += dForgetGateVal    * historyPrev[historyIndex];
+                        gradWeightsH2I[weightIndex] += dInputGateVal     * historyPrev[historyIndex];
+                        gradWeightsH2Z[weightIndex] += dCadidateStateVal * historyPrev[historyIndex];
+                        gradWeightsH2O[weightIndex] += dOutputGateVal    * historyPrev[historyIndex];
                     }
                 }
 
                 // accumulate gradients for biases
-                gradBiasesF[outputIndex] += dForgetGate[outputIndex];
-                gradBiasesI[outputIndex] += dInputGate[outputIndex];
-                gradBiasesZ[outputIndex] += dCadidateState[outputIndex];
-                gradBiasesO[outputIndex] += dOutputGate[outputIndex];
+                gradBiasesF[outputIndex] += dForgetGateVal;
+                gradBiasesI[outputIndex] += dInputGateVal;
+                gradBiasesZ[outputIndex] += dCadidateStateVal;
+                gradBiasesO[outputIndex] += dOutputGateVal;
             }
         }
     } );
