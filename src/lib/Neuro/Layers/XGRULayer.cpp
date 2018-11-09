@@ -188,27 +188,24 @@ void XGRULayer::BackwardCompute( const vector<fvector_t*>& inputs,
     float_t* gradBiasesR = gradBiasesZ + mOutputsCount;
     float_t* gradBiasesH = gradBiasesR + mOutputsCount;
 
-    // temporary buffers (TODO: better allocate once or delegate allocation as for  other working buffers)
-    float_t* delta       = static_cast<float_t*>( malloc( sizeof( float_t ) * mOutputsCount ) );
-    float_t* dUpdateGate = static_cast<float_t*>( malloc( sizeof( float_t ) * mOutputsCount ) );
-    float_t* dHistoryHat = static_cast<float_t*>( malloc( sizeof( float_t ) * mOutputsCount ) );
-    float_t* dResetGate  = static_cast<float_t*>( malloc( sizeof( float_t ) * mOutputsCount ) );
-
-    for ( size_t batchIndex = 0; batchIndex < batchSize; batchIndex++ )
+    XParallel::For( batchSize, [&]( size_t batchIndex )
     {
         float_t* historyGrad = static_cast<float_t*>( ctx.GetWorkingBuffer( BUFFER_INDEX_HISTORY_GRAD, batchIndex ) );
+        float_t* delta       = static_cast<float_t*>( ctx.GetWorkingBuffer( BUFFER_INDEX_DELTA, batchIndex ) );
 
         for ( int sequenceIndex = (int) sequenceLen - 1, si = 0; ( sequenceIndex >= 0 ) && ( si < trainingDepth ); sequenceIndex--, si++ )
         {
-            size_t   sampleIndex      = batchIndex * sequenceLen + sequenceIndex;
-            const float_t* input      = inputs[sampleIndex]->data( );
-            float_t* prevDelta        = prevDeltas[sampleIndex]->data( );
+            size_t   sampleIndex = batchIndex * sequenceLen + sequenceIndex;
+            float_t* prevDelta   = prevDeltas[sampleIndex]->data( );
 
-            float_t* historyPrev      = static_cast<float_t*>( ctx.GetWorkingBuffer( BUFFER_INDEX_HISTORY_PREV, sampleIndex ) );        // H(t-1)
-            float_t* updateGate       = static_cast<float_t*>( ctx.GetWorkingBuffer( BUFFER_INDEX_UPDATE_GATE, sampleIndex ) );         // Z(t)
-            float_t* resetGate        = static_cast<float_t*>( ctx.GetWorkingBuffer( BUFFER_INDEX_RESET_GATE, sampleIndex ) );          // R(t)
-            float_t* historyPrevReset = static_cast<float_t*>( ctx.GetWorkingBuffer( BUFFER_INDEX_HISTORY_PREV_RESET, sampleIndex ) );  // H(t-1) * R(t)
-            float_t* historyHat       = static_cast<float_t*>( ctx.GetWorkingBuffer( BUFFER_INDEX_HISTORY_HAT, sampleIndex ) );         // H'(t)
+            float_t* historyPrev = static_cast<float_t*>( ctx.GetWorkingBuffer( BUFFER_INDEX_HISTORY_PREV, sampleIndex ) );        // H(t-1)
+            float_t* updateGate  = static_cast<float_t*>( ctx.GetWorkingBuffer( BUFFER_INDEX_UPDATE_GATE, sampleIndex ) );         // Z(t)
+            float_t* resetGate   = static_cast<float_t*>( ctx.GetWorkingBuffer( BUFFER_INDEX_RESET_GATE, sampleIndex ) );          // R(t)
+            float_t* historyHat  = static_cast<float_t*>( ctx.GetWorkingBuffer( BUFFER_INDEX_HISTORY_HAT, sampleIndex ) );         // H'(t)
+
+            float_t* dUpdateGate = static_cast<float_t*>( ctx.GetWorkingBuffer( BUFFER_INDEX_UPDATE_GATE_DELTA, sampleIndex ) );
+            float_t* dResetGate  = static_cast<float_t*>( ctx.GetWorkingBuffer( BUFFER_INDEX_RESET_GATE_DELTA, sampleIndex ) );
+            float_t* dHistoryHat = static_cast<float_t*>( ctx.GetWorkingBuffer( BUFFER_INDEX_HISTORY_HAT_DELTA, sampleIndex ) );
 
             // add history gradient from the future
             memcpy( delta, deltas[sampleIndex]->data( ), sizeof( float_t ) * mOutputsCount );
@@ -288,41 +285,54 @@ void XGRULayer::BackwardCompute( const vector<fvector_t*>& inputs,
 
                 historyGrad[outputIndex2] += sum;
             }
+        }
+    } );
 
-            // calculate weights/biases updates
-            for ( size_t outputIndex = 0, weightIndexStart = 0; outputIndex < mOutputsCount; outputIndex++, weightIndexStart += mInputsCount )
+    XParallel::For( mOutputsCount, [&]( size_t outputIndex )
+    {
+        size_t weightIndexStartI = outputIndex * mInputsCount;
+        size_t weightIndexStartH = outputIndex * mOutputsCount;
+
+        for ( size_t batchIndex = 0; batchIndex < batchSize; batchIndex++ )
+        {
+            for ( int sequenceIndex = (int) sequenceLen - 1, si = 0; ( sequenceIndex >= 0 ) && ( si < trainingDepth ); sequenceIndex--, si++ )
             {
-                for ( size_t inputIndex = 0, weightIndex = weightIndexStart; inputIndex < mInputsCount; inputIndex++, weightIndex++ )
+                size_t   sampleIndex      = batchIndex * sequenceLen + sequenceIndex;
+                const float_t* input      = inputs[sampleIndex]->data( );
+
+                float_t* historyPrev      = static_cast<float_t*>( ctx.GetWorkingBuffer( BUFFER_INDEX_HISTORY_PREV, sampleIndex ) );        // H(t-1)
+                float_t* historyPrevReset = static_cast<float_t*>( ctx.GetWorkingBuffer( BUFFER_INDEX_HISTORY_PREV_RESET, sampleIndex ) );  // H(t-1) * R(t)
+
+                float_t* dUpdateGate      = static_cast<float_t*>( ctx.GetWorkingBuffer( BUFFER_INDEX_UPDATE_GATE_DELTA, sampleIndex ) );
+                float_t* dResetGate       = static_cast<float_t*>( ctx.GetWorkingBuffer( BUFFER_INDEX_RESET_GATE_DELTA, sampleIndex ) );
+                float_t* dHistoryHat      = static_cast<float_t*>( ctx.GetWorkingBuffer( BUFFER_INDEX_HISTORY_HAT_DELTA, sampleIndex ) );
+
+                // accumulate gradients for inputs' weights
+                for ( size_t inputIndex = 0, weightIndex = weightIndexStartI; inputIndex < mInputsCount; inputIndex++, weightIndex++ )
                 {
                     gradWeightsX2Z[weightIndex] += dUpdateGate[outputIndex] * input[inputIndex];
                     gradWeightsX2R[weightIndex] += dResetGate[outputIndex]  * input[inputIndex];
                     gradWeightsX2H[weightIndex] += dHistoryHat[outputIndex] * input[inputIndex];
                 }
 
+                // accumulate gradients for history weights
+                if ( sequenceIndex != 0 )
+                {
+                    for ( size_t historyIndex = 0, weightIndex = weightIndexStartH; historyIndex < mOutputsCount; historyIndex++, weightIndex++ )
+                    {
+                        gradWeightsH2Z[weightIndex]  += dUpdateGate[outputIndex] * historyPrev[historyIndex];
+                        gradWeightsH2R[weightIndex]  += dResetGate[outputIndex]  * historyPrev[historyIndex];
+                        gradWeightsHR2H[weightIndex] += dHistoryHat[outputIndex] * historyPrevReset[historyIndex];
+                    }
+                }
+
+                // accumulate gradients for biases
                 gradBiasesZ[outputIndex] += dUpdateGate[outputIndex];
                 gradBiasesR[outputIndex] += dResetGate[outputIndex];
                 gradBiasesH[outputIndex] += dHistoryHat[outputIndex];
             }
-
-            if ( sequenceIndex != 0 )
-            {
-                for ( size_t outputIndex = 0, weightIndexStart = 0; outputIndex < mOutputsCount; outputIndex++, weightIndexStart += mOutputsCount )
-                {
-                    for ( size_t outputIndex2 = 0, weightIndex = weightIndexStart; outputIndex2 < mOutputsCount; outputIndex2++, weightIndex++ )
-                    {
-                        gradWeightsH2Z[weightIndex]  += dUpdateGate[outputIndex] * historyPrev[outputIndex2];
-                        gradWeightsH2R[weightIndex]  += dResetGate[outputIndex]  * historyPrev[outputIndex2];
-                        gradWeightsHR2H[weightIndex] += dHistoryHat[outputIndex] * historyPrevReset[outputIndex2];
-                    }
-                }
-            }
         }
-    }
-
-    free( delta );
-    free( dUpdateGate );
-    free( dHistoryHat );
-    free( dResetGate );
+    } );
 }
 
 // Applies updates to the layer's weights and biases

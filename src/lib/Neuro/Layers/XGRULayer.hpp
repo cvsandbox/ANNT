@@ -79,13 +79,19 @@ private:
         // per batch
         BUFFER_INDEX_HISTORY            = 0,
         BUFFER_INDEX_HISTORY_GRAD       = 1,
+        BUFFER_INDEX_DELTA              = 2,    // sum of the incoming gradient (from the next layer)
+                                                // and history gradient
 
         // per sample
-        BUFFER_INDEX_HISTORY_PREV       = 2,    // H(t-1)
-        BUFFER_INDEX_UPDATE_GATE        = 3,    // Z(t)
-        BUFFER_INDEX_RESET_GATE         = 4,    // R(t)
-        BUFFER_INDEX_HISTORY_PREV_RESET = 5,    // H(t-1) * R(t)
-        BUFFER_INDEX_HISTORY_HAT        = 6,    // H'(t)
+        BUFFER_INDEX_HISTORY_PREV       = 3,    // H(t-1)
+        BUFFER_INDEX_UPDATE_GATE        = 4,    // Z(t)
+        BUFFER_INDEX_RESET_GATE         = 5,    // R(t)
+        BUFFER_INDEX_HISTORY_PREV_RESET = 6,    // H(t-1) * R(t)
+        BUFFER_INDEX_HISTORY_HAT        = 7,    // H'(t)
+
+        BUFFER_INDEX_UPDATE_GATE_DELTA  = 8,
+        BUFFER_INDEX_RESET_GATE_DELTA   = 9,
+        BUFFER_INDEX_HISTORY_HAT_DELTA  = 10,
     };
 
 public:
@@ -110,7 +116,7 @@ public:
     // Tells that we may need some extra memory for internal state/calculations
     uvector_t WorkingMemSize( bool /* trainingMode */ ) const override
     {
-        uvector_t workingMemSize = uvector_t( 7, mOutputsCount * sizeof( float_t ) );
+        uvector_t workingMemSize = uvector_t( 11, mOutputsCount * sizeof( float_t ) );
 
         return workingMemSize;
     }
