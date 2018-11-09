@@ -270,7 +270,9 @@ int main( int argc, char** argv )
         shared_ptr<XNeuralNetwork> net = make_shared<XNeuralNetwork>( );
         
         // XLSTMLayer vs XGRULayer
-        net->AddLayer( make_shared<XLSTMLayer>( MNIST_IMAGE_WIDTH, 56 ) ); // number of inputs as per image width
+        // number of inputs as per image width
+        // net->AddLayer( make_shared<XLSTMLayer>( MNIST_IMAGE_WIDTH, 56 ) );
+        net->AddLayer( make_shared<XGRULayer>( MNIST_IMAGE_WIDTH, 56 ) );
         net->AddLayer( make_shared<XFullyConnectedLayer>( 56, 10 ) );
         net->AddLayer( make_shared<XSoftMaxActivation>( ) );
 
