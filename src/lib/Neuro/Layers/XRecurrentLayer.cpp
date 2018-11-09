@@ -151,10 +151,7 @@ void XRecurrentLayer::BackwardCompute( const vector<fvector_t*>& inputs,
     float_t* gradBiasesB = gradWeightsV + weightsCountHistory;
     float_t* gradBiasesC = gradBiasesB + mOutputsCount;
 
-    // temporary buffer to calculate state delta for current sample
-    fvector_t  stateDeltaCurrnet( mOutputsCount );
-
-    for ( size_t batchIndex = 0; batchIndex < batchSize; batchIndex++ )
+    XParallel::For( batchSize, [&]( size_t batchIndex )
     {
         // accumulated state delta
         float_t* stateGrad = static_cast<float_t*>( ctx.GetWorkingBuffer( BUFFER_INDEX_STATE_GRAD, batchIndex ) );
@@ -169,6 +166,7 @@ void XRecurrentLayer::BackwardCompute( const vector<fvector_t*>& inputs,
 
             float_t*  statePrev         = static_cast<float_t*>( ctx.GetWorkingBuffer( BUFFER_INDEX_STATE_PREV, sampleIndex ) );    // H(t-1)
             float_t*  stateCurrent      = static_cast<float_t*>( ctx.GetWorkingBuffer( BUFFER_INDEX_STATE_CURRENT, sampleIndex ) ); // H(t)
+            float_t*  stateDeltaCurrnet = static_cast<float_t*>( ctx.GetWorkingBuffer( BUFFER_INDEX_STATE_DELTA_CURRENT, sampleIndex ) );
 
             // initial calculation of state delta for the current sample
             for ( size_t outputIndex2 = 0; outputIndex2 < mOutputsCount; outputIndex2++ )
@@ -191,7 +189,7 @@ void XRecurrentLayer::BackwardCompute( const vector<fvector_t*>& inputs,
             }
 
             // backward pass through Tanh activation to get final state delta for current sample
-            mTanh.BackwardActivate( stateCurrent, stateCurrent, stateDeltaCurrnet.data( ), stateDeltaCurrnet.data( ), mOutputsCount );
+            mTanh.BackwardActivate( stateCurrent, stateCurrent, stateDeltaCurrnet, stateDeltaCurrnet, mOutputsCount );
 
             // input deltas for the previous layer
             for ( size_t inputIndex = 0; inputIndex < mInputsCount; inputIndex++ )
@@ -220,52 +218,57 @@ void XRecurrentLayer::BackwardCompute( const vector<fvector_t*>& inputs,
 
                 stateGrad[outputIndex2] = sum;
             }
+        }
+    } );
 
-            // calculate weights/biases updates
+    XParallel::For( mOutputsCount, [&]( size_t outputIndex )
+    {
+        size_t weightIndexStartI = outputIndex * mInputsCount;
+        size_t weightIndexStartH = outputIndex * mOutputsCount;
 
-            // dU
-            for ( size_t outputIndex = 0, weightIndexStart = 0; outputIndex < mOutputsCount; outputIndex++, weightIndexStart += mInputsCount )
+        for ( size_t batchIndex = 0; batchIndex < batchSize; batchIndex++ )
+        {
+            for ( int sequenceIndex = (int) sequenceLen - 1, si = 0; ( sequenceIndex >= 0 ) && ( si < trainingDepth ); sequenceIndex--, si++ )
             {
-                for ( size_t inputIndex = 0, weightIndex = weightIndexStart; inputIndex < mInputsCount; inputIndex++, weightIndex++ )
+                size_t  sampleIndex         = batchIndex * sequenceLen + sequenceIndex;
+                const fvector_t& input      = *( inputs[sampleIndex] );
+                const fvector_t& delta      = *( deltas[sampleIndex] );
+                float_t*  statePrev         = static_cast<float_t*>( ctx.GetWorkingBuffer( BUFFER_INDEX_STATE_PREV, sampleIndex ) );    // H(t-1)
+                float_t*  stateCurrent      = static_cast<float_t*>( ctx.GetWorkingBuffer( BUFFER_INDEX_STATE_CURRENT, sampleIndex ) ); // H(t)
+                float_t*  stateDeltaCurrnet = static_cast<float_t*>( ctx.GetWorkingBuffer( BUFFER_INDEX_STATE_DELTA_CURRENT, sampleIndex ) );
+
+                // accumulate weights' gradients
+
+                // dU
+                for ( size_t inputIndex = 0, weightIndex = weightIndexStartI; inputIndex < mInputsCount; inputIndex++, weightIndex++ )
                 {
                     gradWeightsU[weightIndex] += stateDeltaCurrnet[outputIndex] * input[inputIndex];
                 }
-            }
 
-            // dW
-            if ( sequenceIndex != 0 )
-            {
-                for ( size_t outputIndex = 0, weightIndexStart = 0; outputIndex < mOutputsCount; outputIndex++, weightIndexStart += mOutputsCount )
+                // dW
+                if ( sequenceIndex != 0 )
                 {
-                    for ( size_t outputIndex2 = 0, weightIndex = weightIndexStart; outputIndex < mOutputsCount; outputIndex++, weightIndex++ )
+                    for ( size_t historyIndex = 0, weightIndex = weightIndexStartH; historyIndex < mOutputsCount; historyIndex++, weightIndex++ )
                     {
-                        gradWeightsW[weightIndex] += stateDeltaCurrnet[outputIndex] * statePrev[outputIndex2];
+                        gradWeightsW[weightIndex] += stateDeltaCurrnet[outputIndex] * statePrev[historyIndex];
                     }
                 }
-            }
 
-            // dV
-            for ( size_t outputIndex = 0, weightIndexStart = 0; outputIndex < mOutputsCount; outputIndex++, weightIndexStart += mOutputsCount )
-            {
-                for ( size_t outputIndex2 = 0, weightIndex = weightIndexStart; outputIndex < mOutputsCount; outputIndex++, weightIndex++ )
+                // dV
+                for ( size_t historyIndex = 0, weightIndex = weightIndexStartH; historyIndex < mOutputsCount; historyIndex++, weightIndex++ )
                 {
-                    gradWeightsV[weightIndex] += delta[outputIndex] * stateCurrent[outputIndex2];
+                    gradWeightsV[weightIndex] += delta[outputIndex] * stateCurrent[historyIndex];
                 }
-            }
 
-            // dB
-            for ( size_t outputIndex = 0; outputIndex < mOutputsCount; outputIndex++ )
-            {
+                // accumulate biases' gradients
+
+                // dB
                 gradBiasesB[outputIndex] += stateDeltaCurrnet[outputIndex];
-            }
-
-            // dC
-            for ( size_t outputIndex = 0; outputIndex < mOutputsCount; outputIndex++ )
-            {
+                // dC
                 gradBiasesC[outputIndex] += delta[outputIndex];
             }
         }
-    }
+    } );
 }
 
 // Applies updates to the layer's weights and biases

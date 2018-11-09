@@ -54,10 +54,14 @@ private:
     // --------------------------------------------------------------------------------------
     enum
     {
-        BUFFER_INDEX_STATE          = 0,            // per batch
-        BUFFER_INDEX_STATE_GRAD     = 1,            // per batch
-        BUFFER_INDEX_STATE_PREV     = 2, // H(t-1)  // per sample
-        BUFFER_INDEX_STATE_CURRENT  = 3, // H(t)    // per sample
+        // per batch
+        BUFFER_INDEX_STATE          = 0,
+        BUFFER_INDEX_STATE_GRAD     = 1,
+
+        // per sample
+        BUFFER_INDEX_STATE_PREV           = 2, // H(t-1)
+        BUFFER_INDEX_STATE_CURRENT        = 3, // H(t)
+        BUFFER_INDEX_STATE_DELTA_CURRENT  = 4, // state delta for the current sample
     };
 
 public:
@@ -83,7 +87,7 @@ public:
     // Tells that we may need some extra memory for internal state/calculations
     uvector_t WorkingMemSize( bool /* trainingMode */ ) const override
     {
-        uvector_t workingMemSize = uvector_t( 4, mOutputsCount * sizeof( float_t ) );
+        uvector_t workingMemSize = uvector_t( 5, mOutputsCount * sizeof( float_t ) );
 
         return workingMemSize;
     }
