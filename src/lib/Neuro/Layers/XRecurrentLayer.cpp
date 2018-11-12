@@ -160,11 +160,9 @@ void XRecurrentLayer::BackwardCompute( const vector<fvector_t*>& inputs,
         {
             size_t  sampleIndex         = batchIndex * sequenceLen + sequenceIndex;
 
-            const fvector_t& input      = *( inputs[sampleIndex] );
             const fvector_t& delta      = *( deltas[sampleIndex] );
             fvector_t&       prevDelta  = *( prevDeltas[sampleIndex] );
 
-            float_t*  statePrev         = static_cast<float_t*>( ctx.GetWorkingBuffer( BUFFER_INDEX_STATE_PREV, sampleIndex ) );    // H(t-1)
             float_t*  stateCurrent      = static_cast<float_t*>( ctx.GetWorkingBuffer( BUFFER_INDEX_STATE_CURRENT, sampleIndex ) ); // H(t)
             float_t*  stateDeltaCurrnet = static_cast<float_t*>( ctx.GetWorkingBuffer( BUFFER_INDEX_STATE_DELTA_CURRENT, sampleIndex ) );
 
