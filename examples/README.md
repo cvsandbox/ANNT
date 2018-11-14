@@ -16,7 +16,10 @@ The folder provides number of example applications, which demonstrate usage of t
   - [cnn_mnist](cnn_mnist/) - MNIST handwritten digits classification;
   - [cnn_cifar10](cnn_cifar10/) - CIFAR-10 color images classification;
 * Recurrent networks
-  - to be described;
+  - [rnn_time_series](rnn_time_series/) - times series prediction;
+  - [rnn_sequence](rnn_sequence/) - sequence prediction (one-hot encoded labels);
+  - [rnn_mnist](rnn_mnist/) - MNIST handwritten digits classification;
+  - [rnn_words](rnn_words/) - generating names of cities.
 
 ## Building and running examples
 
