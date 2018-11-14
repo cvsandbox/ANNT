@@ -11,7 +11,8 @@ EXAMPLES = fc_xor \
            cnn_cifar10 \
            rnn_sequence \
            rnn_time_series \
-           rnn_mnist
+           rnn_mnist \
+		   rnn_words
 
 all:
 	$(foreach ex,$(EXAMPLES), cd "$(SELF_DIR)../../$(ex)/make/gcc"; make ; cd "$(SELF_DIR)" ;)
