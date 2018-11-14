@@ -55,6 +55,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rnn_mnist", "..\..\rnn_mnis
 		{428D26A1-BC29-4CB6-8B9A-8FEF53D1BCAD} = {428D26A1-BC29-4CB6-8B9A-8FEF53D1BCAD}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rnn_words", "..\..\rnn_words\make\msvc\rnn_words.vcxproj", "{6D7063D3-CFDF-4AA7-96B6-B77BD8281114}"
+	ProjectSection(ProjectDependencies) = postProject
+		{428D26A1-BC29-4CB6-8B9A-8FEF53D1BCAD} = {428D26A1-BC29-4CB6-8B9A-8FEF53D1BCAD}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -105,6 +110,10 @@ Global
 		{A3C46DFC-358E-419B-A60F-BB3D1D8DD61B}.Debug|Win32.Build.0 = Debug|Win32
 		{A3C46DFC-358E-419B-A60F-BB3D1D8DD61B}.Release|Win32.ActiveCfg = Release|Win32
 		{A3C46DFC-358E-419B-A60F-BB3D1D8DD61B}.Release|Win32.Build.0 = Release|Win32
+		{6D7063D3-CFDF-4AA7-96B6-B77BD8281114}.Debug|Win32.ActiveCfg = Debug|Win32
+		{6D7063D3-CFDF-4AA7-96B6-B77BD8281114}.Debug|Win32.Build.0 = Debug|Win32
+		{6D7063D3-CFDF-4AA7-96B6-B77BD8281114}.Release|Win32.ActiveCfg = Release|Win32
+		{6D7063D3-CFDF-4AA7-96B6-B77BD8281114}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
