@@ -56,7 +56,7 @@ typedef struct TrainingParamsStruct
     RecurrentLayerType RecurrrentType;
 
     TrainingParamsStruct( ) :
-        LearningRate( 0.05f ), EpochsCount( 100 ), RecurrrentType( RecurrentLayerType::Basic )
+        LearningRate( 0.01f ), EpochsCount( 150 ), RecurrrentType( RecurrentLayerType::Basic )
     {
     }
 }
@@ -246,24 +246,19 @@ int main( int argc, char** argv )
         case RecurrentLayerType::Basic:
         default:
             net->AddLayer( make_shared<XRecurrentLayer>( 10, 20 ) );
-            net->AddLayer( make_shared<XRecurrentLayer>( 20, 30 ) );
-            net->AddLayer( make_shared<XFullyConnectedLayer>( 30, 10 ) );
             break;
 
         case RecurrentLayerType::LSTM:
-            // similar result using LSTM layer - one recurrent layer is enough as it is more complex
             net->AddLayer( make_shared<XLSTMLayer>( 10, 20 ) );
-            net->AddLayer( make_shared<XFullyConnectedLayer>( 20, 10 ) );
             break;
 
         case RecurrentLayerType::GRU:
-            // or same can be done using GRU layer
             net->AddLayer( make_shared<XGRULayer>( 10, 20 ) );
-            net->AddLayer( make_shared<XFullyConnectedLayer>( 20, 10 ) );
             break;
         }
 
-        // add Soft Max layer for all recurrent types
+        // complete the network with fully connecte layer and soft max activation
+        net->AddLayer( make_shared<XFullyConnectedLayer>( 20, 10 ) );
         net->AddLayer( make_shared<XSoftMaxActivation>( ) );
 
         // create training context with Adam optimizer and Cross Entropy cost function
@@ -290,8 +285,7 @@ int main( int argc, char** argv )
             // for this sample)
             netTraining.ResetState( );
             // or reset only recurrent layers
-            // netTraining.ResetLayersState( { 0, 1 } ); // for basic recurrent
-            // netTraining.ResetLayersState( { 0 } );    // for LSTM and GRU
+            // netTraining.ResetLayersState( { 0 } );
 
             if ( ( i % 10 ) == 0 )
             {
