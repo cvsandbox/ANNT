@@ -63,7 +63,7 @@ static const char* FNAME_CITIES = "data/cities.txt";
 #define AFTER_TRAINING_GENERATE_COUNT   (50)
 
 // For example, if the above two #defines are set to 2 and 4 respectively, then
-// generated words will have the next pattern (R - random, N - add by ANN):
+// generated words will have the next pattern (R - random, N - added by ANN):
 // RRNNNRNNNRNNNR ....
 
 // Load collection of words from the specified file
@@ -218,7 +218,7 @@ static void ExtractSamplesAsSequence( const vector<string>& words,
 }
 
 // Generates specified number of words using recurrent neural network
-static void GeneratesWords( shared_ptr<XNeuralNetwork> net, const vector<string>& existingWords, size_t toGenerate )
+static void GenerateWords( shared_ptr<XNeuralNetwork> net, const vector<string>& existingWords, size_t toGenerate )
 {
     XNetworkInference netInference( net );
     fvector_t         input;
@@ -303,7 +303,7 @@ int main( int /* argc */, char** /* argv */ )
             // generate some words using untrained ANN - should produce some garbage
             #if BEFORE_TRAINING_GENERATE_COUNT > 0
                 printf( "Generated words before training: \n" );
-                GeneratesWords( net, trainingWords, BEFORE_TRAINING_GENERATE_COUNT );
+                GenerateWords( net, trainingWords, BEFORE_TRAINING_GENERATE_COUNT );
                 printf( "\n" );
             #endif
 
@@ -357,10 +357,10 @@ int main( int /* argc */, char** /* argv */ )
             }
             printf( "\n" );
 
-            // generate some words starting with random characters
+            // generate some words using trained ANN - should produce something more interesting
             #if AFTER_TRAINING_GENERATE_COUNT > 0
                 printf( "Generated words after training: \n" );
-                GeneratesWords( net, trainingWords, AFTER_TRAINING_GENERATE_COUNT );
+                GenerateWords( net, trainingWords, AFTER_TRAINING_GENERATE_COUNT );
                 printf( "\n" );
             #endif
         }
