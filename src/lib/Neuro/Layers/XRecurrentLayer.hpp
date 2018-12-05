@@ -31,7 +31,7 @@ namespace ANNT { namespace Neuro {
 //
 //  Internal activation:  A(t) = U * X(t) + W * H(t-1) + B
 //  State:                H(t) = tanh(A(t))
-//  Output:               O(t) = V * H(t) + C
+//  Output:               O(t) = H(t)
 //
 // See: http://www.deeplearningbook.org/contents/rnn.html
 //
@@ -46,10 +46,8 @@ private:
     // And here are the pointers to specific weights/biases
     float_t*    mWeightsU;
     float_t*    mWeightsW;
-    float_t*    mWeightsV;
 
     float_t*    mBiasesB;
-    float_t*    mBiasesC;
     
     // --------------------------------------------------------------------------------------
     enum

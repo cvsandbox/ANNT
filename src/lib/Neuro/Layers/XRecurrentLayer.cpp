@@ -30,7 +30,7 @@ namespace ANNT { namespace Neuro {
 XRecurrentLayer::XRecurrentLayer( size_t inputsCount, size_t outputsCount ) :
     ITrainableLayer( inputsCount, outputsCount ),
     mTanh( ),
-    mAllWeights( ( inputsCount + outputsCount + outputsCount ) * outputsCount  + outputsCount * 2 )
+    mAllWeights( ( inputsCount + outputsCount ) * outputsCount  + outputsCount )
 {
     size_t weightsCountInputs  = mInputsCount  * mOutputsCount;
     size_t weightsCountHistory = mOutputsCount * mOutputsCount;
@@ -38,11 +38,9 @@ XRecurrentLayer::XRecurrentLayer( size_t inputsCount, size_t outputsCount ) :
     // set up weights pointers
     mWeightsU = mAllWeights.data( );
     mWeightsW = mWeightsU + weightsCountInputs;
-    mWeightsV = mWeightsW + weightsCountHistory;
 
     // set up biases pointers
-    mBiasesB  = mWeightsV + weightsCountHistory;
-    mBiasesC  = mBiasesB + mOutputsCount;
+    mBiasesB  = mWeightsW + weightsCountHistory;
 
     Randomize( );
 }
@@ -64,13 +62,11 @@ void XRecurrentLayer::Randomize( )
     for ( size_t i = 0; i < weightsCountHistory; i++ )
     {
         mWeightsW[i] = ( static_cast<float_t>( rand( ) ) / RAND_MAX ) * ( float_t( 2 ) * halfRangeH ) - halfRangeH;
-        mWeightsV[i] = ( static_cast<float_t>( rand( ) ) / RAND_MAX ) * ( float_t( 2 ) * halfRangeH ) - halfRangeH;
     }
 
     for ( size_t i = 0; i < mOutputsCount; i++ )
     {
         mBiasesB[i] = 0;
-        mBiasesC[i] = 0;
     }
 }
 
@@ -112,17 +108,11 @@ void XRecurrentLayer::ForwardCompute( const vector<fvector_t*>& inputs,
             // apply tanh() to get the final H(t)
             mTanh.ForwardActivate( state, state, mOutputsCount );
 
+            // copy state to output
+            memcpy( output, state, mOutputsCount * sizeof( float_t ) );
+
             // remember current state for this sample, to use on backward step
             memcpy( stateCurrent, state, mOutputsCount * sizeof( float_t ) );
-
-            for ( size_t outputIndex = 0; outputIndex < mOutputsCount; outputIndex++ )
-            {
-                output[outputIndex] =
-                    // V * H(t)
-                    XVectorize::Dot( state, &( mWeightsV[outputIndex * mOutputsCount] ), mOutputsCount ) +
-                    // C
-                    mBiasesC[outputIndex];
-            }
         }
     } );
 }
@@ -145,12 +135,10 @@ void XRecurrentLayer::BackwardCompute( const vector<fvector_t*>& inputs,
     // set up weights gradient pointers
     float_t* gradWeightsU = gradWeights.data( );
     float_t* gradWeightsW = gradWeightsU + weightsCountInputs;
-    float_t* gradWeightsV = gradWeightsW + weightsCountHistory;
-
+    
     // set up biases gradient pointers
-    float_t* gradBiasesB = gradWeightsV + weightsCountHistory;
-    float_t* gradBiasesC = gradBiasesB + mOutputsCount;
-
+    float_t* gradBiasesB = gradWeightsW + weightsCountHistory;
+    
     XParallel::For( batchSize, [&]( size_t batchIndex )
     {
         // accumulated state delta
@@ -164,30 +152,16 @@ void XRecurrentLayer::BackwardCompute( const vector<fvector_t*>& inputs,
             fvector_t&       prevDelta  = *( prevDeltas[sampleIndex] );
 
             float_t*  stateCurrent      = static_cast<float_t*>( ctx.GetWorkingBuffer( BUFFER_INDEX_STATE_CURRENT, sampleIndex ) ); // H(t)
-            float_t*  stateDeltaCurrnet = static_cast<float_t*>( ctx.GetWorkingBuffer( BUFFER_INDEX_STATE_DELTA_CURRENT, sampleIndex ) );
-
-            // initial calculation of state delta for the current sample
-            for ( size_t outputIndex2 = 0; outputIndex2 < mOutputsCount; outputIndex2++ )
-            {
-                size_t  weightIndex = outputIndex2;
-                float_t sum         = 0;
-
-                for ( size_t otputIndex = 0; otputIndex < mOutputsCount; otputIndex++, weightIndex += mOutputsCount )
-                {
-                    sum += delta[otputIndex] * mWeightsV[weightIndex];
-                }
-
-                stateDeltaCurrnet[outputIndex2] = sum;
-            }
+            float_t*  stateDeltaCurrent = static_cast<float_t*>( ctx.GetWorkingBuffer( BUFFER_INDEX_STATE_DELTA_CURRENT, sampleIndex ) );
 
             // add state gradient from the future
             for ( size_t outputIndex = 0; outputIndex < mOutputsCount; outputIndex++ )
             {
-                stateDeltaCurrnet[outputIndex] += stateGrad[outputIndex];
+                stateDeltaCurrent[outputIndex] = delta[outputIndex] + stateGrad[outputIndex];
             }
 
             // backward pass through Tanh activation to get final state delta for current sample
-            mTanh.BackwardActivate( stateCurrent, stateCurrent, stateDeltaCurrnet, stateDeltaCurrnet, mOutputsCount );
+            mTanh.BackwardActivate( stateCurrent, stateCurrent, stateDeltaCurrent, stateDeltaCurrent, mOutputsCount );
 
             // input deltas for the previous layer
             for ( size_t inputIndex = 0; inputIndex < mInputsCount; inputIndex++ )
@@ -197,7 +171,7 @@ void XRecurrentLayer::BackwardCompute( const vector<fvector_t*>& inputs,
 
                 for ( size_t outputIndex = 0; outputIndex < mOutputsCount; outputIndex++, weightIndex += mInputsCount )
                 {
-                    sum += stateDeltaCurrnet[outputIndex] * mWeightsU[weightIndex];
+                    sum += stateDeltaCurrent[outputIndex] * mWeightsU[weightIndex];
                 }
 
                 prevDelta[inputIndex] = sum;
@@ -211,7 +185,7 @@ void XRecurrentLayer::BackwardCompute( const vector<fvector_t*>& inputs,
 
                 for ( size_t outputIndex = 0; outputIndex < mOutputsCount; outputIndex++, weightIndex += mOutputsCount )
                 {
-                    sum += stateDeltaCurrnet[outputIndex] * mWeightsW[weightIndex];
+                    sum += stateDeltaCurrent[outputIndex] * mWeightsW[weightIndex];
                 }
 
                 stateGrad[outputIndex2] = sum;
@@ -230,13 +204,10 @@ void XRecurrentLayer::BackwardCompute( const vector<fvector_t*>& inputs,
             {
                 size_t  sampleIndex         = batchIndex * sequenceLen + sequenceIndex;
                 const fvector_t& input      = *( inputs[sampleIndex] );
-                const fvector_t& delta      = *( deltas[sampleIndex] );
                 float_t*  statePrev         = static_cast<float_t*>( ctx.GetWorkingBuffer( BUFFER_INDEX_STATE_PREV, sampleIndex ) );    // H(t-1)
-                float_t*  stateCurrent      = static_cast<float_t*>( ctx.GetWorkingBuffer( BUFFER_INDEX_STATE_CURRENT, sampleIndex ) ); // H(t)
                 float_t*  stateDeltaCurrnet = static_cast<float_t*>( ctx.GetWorkingBuffer( BUFFER_INDEX_STATE_DELTA_CURRENT, sampleIndex ) );
 
                 // accumulate weights' gradients
-
                 // dU
                 for ( size_t inputIndex = 0, weightIndex = weightIndexStartI; inputIndex < mInputsCount; inputIndex++, weightIndex++ )
                 {
@@ -252,18 +223,9 @@ void XRecurrentLayer::BackwardCompute( const vector<fvector_t*>& inputs,
                     }
                 }
 
-                // dV
-                for ( size_t historyIndex = 0, weightIndex = weightIndexStartH; historyIndex < mOutputsCount; historyIndex++, weightIndex++ )
-                {
-                    gradWeightsV[weightIndex] += delta[outputIndex] * stateCurrent[historyIndex];
-                }
-
                 // accumulate biases' gradients
-
                 // dB
                 gradBiasesB[outputIndex] += stateDeltaCurrnet[outputIndex];
-                // dC
-                gradBiasesC[outputIndex] += delta[outputIndex];
             }
         }
     } );
