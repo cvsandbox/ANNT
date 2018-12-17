@@ -30,8 +30,7 @@ namespace ANNT { namespace Neuro {
 // Implementation of simple recurent layer, which perform calculations as:
 //
 //  Internal activation:  A(t) = U * X(t) + W * H(t-1) + B
-//  State:                H(t) = tanh(A(t))
-//  Output:               O(t) = H(t)
+//  Output/History:       H(t) = tanh(A(t))
 //
 // See: http://www.deeplearningbook.org/contents/rnn.html
 //
