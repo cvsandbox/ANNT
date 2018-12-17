@@ -179,7 +179,6 @@ void XLSTMLayer::BackwardCompute( const vector<fvector_t*>& inputs,
 {
     size_t sequenceLen   = ctx.TrainingSequenceLength( );
     size_t batchSize     = inputs.size( ) / sequenceLen;
-    int    trainingDepth = static_cast<int>( ctx.RecurrentTrainingDepth( ) );
 
     size_t weightsCountInputs  = mInputsCount  * mOutputsCount;
     size_t weightsCountHistory = mOutputsCount * mOutputsCount;
@@ -210,7 +209,7 @@ void XLSTMLayer::BackwardCompute( const vector<fvector_t*>& inputs,
         float_t* delta       = static_cast<float_t*>( ctx.GetWorkingBuffer( BUFFER_INDEX_DELTA, batchIndex ) );
         float_t* dState      = static_cast<float_t*>( ctx.GetWorkingBuffer( BUFFER_INDEX_STATE_DELTA, batchIndex ) );
 
-        for ( int sequenceIndex = (int) sequenceLen - 1, si = 0; ( sequenceIndex >= 0 ) && ( si < trainingDepth ); sequenceIndex--, si++ )
+        for ( int sequenceIndex = (int) sequenceLen - 1; sequenceIndex >= 0; sequenceIndex-- )
         {
             size_t   sampleIndex    = batchIndex * sequenceLen + sequenceIndex;
             float_t* prevDelta      = prevDeltas[sampleIndex]->data( );
@@ -335,7 +334,7 @@ void XLSTMLayer::BackwardCompute( const vector<fvector_t*>& inputs,
 
         for ( size_t batchIndex = 0; batchIndex < batchSize; batchIndex++ )
         {
-            for ( int sequenceIndex = (int) sequenceLen - 1, si = 0; ( sequenceIndex >= 0 ) && ( si < trainingDepth ); sequenceIndex--, si++ )
+            for ( int sequenceIndex = (int) sequenceLen - 1; sequenceIndex >= 0; sequenceIndex-- )
             {
                 size_t   sampleIndex    = batchIndex * sequenceLen + sequenceIndex;
                 const float_t* input    = inputs[sampleIndex]->data( );

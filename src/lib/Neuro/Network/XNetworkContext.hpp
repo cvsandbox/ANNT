@@ -44,7 +44,6 @@ private:
 
     bool    mTrainingMode;
     size_t  mTrainingSequenceLength;   // length of sequences used to train recurrent networks
-    size_t  mRecurrentTrainingDepth;
     size_t  mCurrentLayer;
 
 
@@ -71,19 +70,6 @@ public:
     void SetTrainingSequenceLength( size_t sequenceLength )
     {
         mTrainingSequenceLength = sequenceLength;
-        mRecurrentTrainingDepth = sequenceLength;
-    }
-
-    // Get/set depth of training for recurrent networks (in the case if not entire sequence
-    // need to be backpropagated). The SetTrainingSequenceLength() always resets this, so must
-    // be set after it.
-    size_t RecurrentTrainingDepth( ) const
-    {
-        return mRecurrentTrainingDepth;
-    }
-    void SetRecurrentTrainingDepth( size_t trainingDepth )
-    {
-        mRecurrentTrainingDepth = trainingDepth;
     }
 
     // Provides specified working buffer for the sample index

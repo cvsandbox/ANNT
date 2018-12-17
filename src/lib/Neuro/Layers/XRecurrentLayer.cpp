@@ -127,7 +127,6 @@ void XRecurrentLayer::BackwardCompute( const vector<fvector_t*>& inputs,
 {
     size_t sequenceLen   = ctx.TrainingSequenceLength( );
     size_t batchSize     = inputs.size( ) / sequenceLen;
-    int    trainingDepth = static_cast<int>( ctx.RecurrentTrainingDepth( ) );
 
     size_t weightsCountInputs  = mInputsCount  * mOutputsCount;
     size_t weightsCountHistory = mOutputsCount * mOutputsCount;
@@ -144,7 +143,7 @@ void XRecurrentLayer::BackwardCompute( const vector<fvector_t*>& inputs,
         // accumulated state delta
         float_t* stateGrad = static_cast<float_t*>( ctx.GetWorkingBuffer( BUFFER_INDEX_STATE_GRAD, batchIndex ) );
 
-        for ( int sequenceIndex = (int) sequenceLen - 1, si = 0; ( sequenceIndex >= 0 ) && ( si < trainingDepth ); sequenceIndex--, si++ )
+        for ( int sequenceIndex = (int) sequenceLen - 1; sequenceIndex >= 0; sequenceIndex-- )
         {
             size_t  sampleIndex         = batchIndex * sequenceLen + sequenceIndex;
 
@@ -200,7 +199,7 @@ void XRecurrentLayer::BackwardCompute( const vector<fvector_t*>& inputs,
 
         for ( size_t batchIndex = 0; batchIndex < batchSize; batchIndex++ )
         {
-            for ( int sequenceIndex = (int) sequenceLen - 1, si = 0; ( sequenceIndex >= 0 ) && ( si < trainingDepth ); sequenceIndex--, si++ )
+            for ( int sequenceIndex = (int) sequenceLen - 1; sequenceIndex >= 0; sequenceIndex-- )
             {
                 size_t  sampleIndex         = batchIndex * sequenceLen + sequenceIndex;
                 const fvector_t& input      = *( inputs[sampleIndex] );
