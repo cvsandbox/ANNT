@@ -4,7 +4,7 @@ This example demonstrates usage of recurrent ANN for time series prediction task
 
 Unlike with fully connected network, which has multiple inputs (depending on the number of past values used to predict the next one), the recurrent neural network has only one input. It does not mean that single value is enough to make good quality prediction though. Recurrent networks also require reasonable amount of history data. However, those are fed to network sequentially one by one and the network maintains its own history state.
 
-Training of recurrent network is a bit different however.  Since we feed values one by one and network maintains its own state, training dataset needs to be split into sequences, which are then used for training the network using back propagation through time algorithm.
+Training of recurrent network is a bit different however. Since we feed values one by one and network maintains its own state, training dataset needs to be split into sequences, which are then used for training the network using back propagation through time algorithm.
 
 Suppose a dataset with 10 values is provided.
 
@@ -12,7 +12,7 @@ Suppose a dataset with 10 values is provided.
 | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- |
 |  0 |  1 |  4 |  9 | 16 | 25 | 16 |  9 |  4 |  1 |
 
-Let's assume we would like to predict 2 value and then compare prediction accuracy. This means we need to exclude 2 last values from the provided dataset (not use those for training). Finally, let's assume we want to generate sequences of 4 steps in length. This will create the next 4 training sequences:
+Let's assume we would like to predict 2 values and then compare prediction accuracy. This means we need to exclude 2 last values from the provided dataset (not use those for training). Finally, let's assume we want to generate sequences of 4 steps in length. This will create the next 4 training sequences:
 
 ```
 0 -> 1 -> 4 -> 9 -> 16
