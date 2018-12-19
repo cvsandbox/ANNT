@@ -21,7 +21,7 @@ Let's assume we would like to predict 2 values and then compare prediction accur
 9 -> 16 -> 25 -> 16 -> 9
 ```
 
-Each of the above 4 sequences is then generates 4 training samples. For the first sequence those sample are (x – input, t – target output):
+Each of the above 4 sequences is then generates 4 training samples. For the first sequence those samples are (x – input, t – target output):
 
 | x |  t |
 | - | -- |
@@ -36,7 +36,7 @@ Once one sequence is done, network's state is reset back to zero and then anothe
 
 ## Neural network
 
-By default, the sample application creates a 2-layer neural network – first layer is Gated Recurrent Unit (GRU) with 30 neurons and the output layer fully connected with single neuron. The number of recurrent layers and their size can be overridden by using command line option, however.
+By default, the sample application creates a 2-layer neural network – first layer is Gated Recurrent Unit (GRU) with 30 neurons and the output layer fully connected with single neuron. The number of recurrent layers and their size can be overridden by using command line options, however.
 
 ```C++
 // prepare recurrent ANN to train
@@ -56,7 +56,7 @@ net->AddLayer( make_shared<XFullyConnectedLayer>( inputsCount, 1 ) );
 
 ## Training the network
 
-Assuming training data samples are presented in the correct order (all training samples of one sequence, then all samples of another sequence, etc) and the training context is configured with the right sequence length, the training loop becomes trivial. Note: to keep it simple, this example does not shuffle data before starting each epoch. When training recurrent networks, it is required to shuffle sequences, but not the individual training sample (which would ruin everything).
+Assuming training data samples are presented in the correct order (all training samples of one sequence, then all samples of another sequence, etc) and the training context is configured with the right sequence length, the training loop becomes trivial. Note: to keep it simple, this example does not shuffle data before starting each epoch. When training recurrent networks, it is required to shuffle sequences, but not the individual training samples (which would ruin everything).
 
 ```C++
 // create training context with Nesterov optimizer and MSE cost function
