@@ -135,6 +135,7 @@ static void ParseCommandLine( int argc, char** argv, TrainingParams* trainingPar
 static void ShowPredictedSequences( shared_ptr<XNeuralNetwork>& net, const vector<fvector_t>& inputs, const vector<fvector_t>& outputs, size_t sequenceCount )
 {
     XNetworkInference netInference( net );
+    fvector_t         input( 10 );
     fvector_t         output( 10 );
 
     for ( size_t i = 0; i < sequenceCount; i++ )
@@ -150,12 +151,18 @@ static void ShowPredictedSequences( shared_ptr<XNeuralNetwork>& net, const vecto
             {
                 targetSequence   += static_cast<char>( XDataEncodingTools::MaxIndex( inputs[sampleIndex] ) + '0' );
                 producedSequence += targetSequence[0];
+
+                // get the first sample of the sequence
+                input = inputs[sampleIndex];
             }
 
-            netInference.Compute( inputs[sampleIndex], output );
+            netInference.Compute( input, output );
 
             targetSequence   += static_cast<char>( XDataEncodingTools::MaxIndex( outputs[sampleIndex] ) + '0' );
             producedSequence += static_cast<char>( XDataEncodingTools::MaxIndex( output ) + '0' );
+
+            // use network's output as the next input
+            input = output;
         }
 
         netInference.ResetState( );
