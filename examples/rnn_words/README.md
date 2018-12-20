@@ -1,6 +1,6 @@
 # Names generation example with Recurrent ANN
 
-This example attempts to generate some names of cities – random, yet sounding more or less naturally. For this, a recurrent artificial neural network is trained using a [dataset of US cities](../data/words). Each city name is represented as a sequence of characters and the network is trained to predict next character based on provided current character and the history of previous characters (internal state of the network). Since many of the cities' names in the dataset have contradicting sequences of characters (like "Bo" can be followed by 's' as in "Boston" or by 'u' as in "Boulder", etc), it is unlikely the network will memorize any of the names. Instead it should pick common most frequent patterns of characters' transitions. Once the network is trained (certain number of epochs) it is used to generate new names. The network is presented with one ore more random characters to start with and then its output is used to complete the new generated city name.
+This example attempts to generate some names of cities – random, yet sounding more or less naturally. For this, a recurrent artificial neural network is trained using a [dataset of US cities](../data/words). Each city name is represented as a sequence of characters and the network is trained to predict next character based on provided current character and the history of previous characters (internal state of the network). Since many of the cities' names in the dataset have contradicting sequences of characters (like "Bo" can be followed by 's' as in "Boston" or by 'u' as in "Boulder", etc), it is unlikely the network will memorize any of the names. Instead it should pick common most frequent patterns of characters' transitions. Once the network is trained (certain number of epochs) it is used to generate new names. The network is presented with one or more random characters to start with and then its output is used to complete the new generated city name.
 
 Each character of a word sequence is one-hot encoded - 30 characters/labels are used: 26 for 'A' to 'Z', 3 for '.', '-' and space, 1 for string terminator. As the result, the neural network has 30 inputs and 30 outputs. The first layer is GRU (gated recurrent unit) and the second layer is fully connected.
 
@@ -59,7 +59,7 @@ for ( size_t epoch = 0; epoch < EPOCHS_COUNT; epoch++ )
 
 # Examples of generated names
 
-To demonstrate that trained network can generate something interesting, lets first have a look at some words generate by untrained networks:
+To demonstrate that trained network can generate something interesting, lets first have a look at some words generate by untrained network:
 * Uei-Dkpcwfiffssiafssvss
 * Ajp
 * Vss
