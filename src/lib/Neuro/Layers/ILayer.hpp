@@ -22,6 +22,7 @@
 #ifndef ANNT_ILAYER_HPP
 #define ANNT_ILAYER_HPP
 
+#include <stdio.h>
 #include "../../Types/Types.hpp"
 #include "../Network/XNetworkContext.hpp"
 #include "LayerIDs.hpp"
